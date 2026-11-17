@@ -1,0 +1,136 @@
+# Builds the portable Windows .exe on GitHub's Windows machines and checks that it starts.
+#
+# - A version tag (v3.1.0, ...) also publishes it as a GitHub Release. Publish a release on
+#   GitHub with a new tag, or push the tag with git. The tag must match __version__.
+# - Pull requests that change the app or its packaging get the same build and check; the
+#   exe is attached to the run so it can be tried before merging.
+name: Windows build & release
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - skyblock_config_manager.py
+      - packaging/**
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and test the .exe
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Check the tag matches __version__
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: python
+        run: |
+          import os, re, sys
+          source = open("skyblock_config_manager.py", encoding="utf-8").read()
+          version = re.search(r'^__version__ = "(.+?)"', source, re.M).group(1)
+          tag = os.environ["GITHUB_REF_NAME"]
+          if tag != "v" + version:
+              print(f'::error::Tag {tag} does not match __version__ = "{version}" in skyblock_config_manager.py')
+              sys.exit(1)
+
+      - name: Install PyInstaller
+        run: python -m pip install "pyinstaller==6.22.3"
+
+      - name: Build the .exe
+        run: python -m PyInstaller --noconfirm --clean packaging/SkyBlockConfigManager.spec
+
+      - name: Check the .exe starts and loads a config folder
+        shell: pwsh
+        run: |
+          # A folder laid out like .minecraft: the exe next to a config folder with one mod config.
+          $dir = Join-Path $env:RUNNER_TEMP "smoke"
+          New-Item -ItemType Directory -Force -Path (Join-Path $dir "config") | Out-Null
+          Copy-Item dist/SkyBlockConfigManager.exe $dir
+          Set-Content -Path (Join-Path $dir "config/skyblocker.json") -Value '{"quickNav": {"enableQuickNav": true}}'
+          $exe = Start-Process -FilePath (Join-Path $dir "SkyBlockConfigManager.exe") -WorkingDirectory $dir -PassThru
+          $null = $exe.Handle                      # keeps the exit code readable later
+
+          # Once it has loaded a folder, the app saves its own settings (config_dir) beside the exe.
+          $settings = Join-Path $dir "skyblock_config_manager.settings.json"
+          $deadline = (Get-Date).AddSeconds(120)
+          while (-not (Test-Path $settings) -and -not $exe.HasExited -and (Get-Date) -lt $deadline) {
+            Start-Sleep -Seconds 1
+          }
+          Start-Sleep -Seconds 3                   # it must still be running a moment later
+          try {
+            if ($exe.HasExited) { throw "The exe closed by itself (exit code $($exe.ExitCode))." }
+            if (-not (Test-Path $settings)) { throw "The exe didn't load the test config folder within 2 minutes." }
+            $loaded = (Get-Content $settings -Raw | ConvertFrom-Json).config_dir
+            if ($loaded -ne (Join-Path $dir "config")) { throw "The exe loaded '$loaded' instead of the test config folder." }
+            $window = Get-Process -Name SkyBlockConfigManager -ErrorAction SilentlyContinue |
+              Where-Object MainWindowTitle | Select-Object -First 1 -ExpandProperty MainWindowTitle
+            Write-Host "OK: the exe started and loaded $loaded (window title: '$window')."
+          } finally {
+            # The one-file exe runs as two processes; stop both.
+            Get-Process -Name SkyBlockConfigManager -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Zip it and write the release notes
+        shell: python
+        run: |
+          import hashlib, platform, zipfile
+          import PyInstaller
+          exe = "dist/SkyBlockConfigManager.exe"
+          with zipfile.ZipFile("dist/SkyBlockConfigManager.zip", "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+              z.write(exe, "SkyBlockConfigManager.exe")
+          sha256 = hashlib.sha256(open(exe, "rb").read()).hexdigest()
+          notes = open("packaging/release_notes.md", encoding="utf-8").read()
+          notes = (notes.replace("{sha256}", sha256).replace("{python}", platform.python_version())
+                        .replace("{pyinstaller}", PyInstaller.__version__))
+          open("dist/release_notes.md", "w", encoding="utf-8").write(notes)
+          print("SHA-256 of SkyBlockConfigManager.exe:", sha256)
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: SkyBlockConfigManager
+          path: |
+            dist/SkyBlockConfigManager.exe
+            dist/SkyBlockConfigManager.zip
+            dist/release_notes.md
+          if-no-files-found: error
+
+  release:
+    name: Publish the GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: SkyBlockConfigManager
+          path: dist
+
+      - name: Create the release, or add the files to one published by hand
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          files=(dist/SkyBlockConfigManager.exe dist/SkyBlockConfigManager.zip)
+          if body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
+            # Published by hand on GitHub: attach the files, and fill in the notes if it has none.
+            gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+            if [ -z "$body" ]; then
+              gh release edit "$TAG" --notes-file dist/release_notes.md --repo "$GITHUB_REPOSITORY"
+            fi
+          else
+            gh release create "$TAG" "${files[@]}" --verify-tag --repo "$GITHUB_REPOSITORY" \
+              --title "SkyBlock Config Manager ${TAG#v}" --notes-file dist/release_notes.md
+          fi
