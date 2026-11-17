@@ -1,0 +1,5 @@
+# PyInstaller output (packaging/build_exe.bat)
+build/
+dist/
+__pycache__/
+*.pyc
