@@ -409,6 +409,14 @@ PORTABLE_PREFS = "skyblock_config_manager.settings.json"
 OLD_AREA_NAMES = {"Garden": "Farming", "Diana": "Events", "Etherwarp": "Misc"}
 
 
+def renamed_area_key(key):
+    """'Garden/Pest finder' -> 'Farming/Pest finder' for overrides saved by older versions."""
+    for old, new in OLD_AREA_NAMES.items():
+        if key.startswith(old + "/"):
+            return new + key[len(old):]
+    return key
+
+
 _NON_ALNUM = re.compile(r"[^a-z0-9]")
 
 
@@ -417,14 +425,27 @@ def norm(text):
     return _NON_ALNUM.sub("", str(text).lower())
 
 
+_PREVIEW = json.JSONEncoder(ensure_ascii=False, separators=(",", ":"))
+
+
 def fmt(value, limit=80):
     """How a value is shown in the tables."""
     if value is None:
         return "—"
     if isinstance(value, bool):
         return "true" if value else "false"
-    text = (json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-            if isinstance(value, (dict, list)) else str(value))
+    if isinstance(value, (dict, list)):
+        # Encode lazily and stop once the cell is full, instead of turning a list of thousands
+        # of waypoints into JSON in full for every row on every refresh.
+        parts, size = [], 0
+        for chunk in _PREVIEW.iterencode(value):
+            parts.append(chunk)
+            size += len(chunk)
+            if size > limit:
+                break
+        text = "".join(parts)
+    else:
+        text = str(value)
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
@@ -527,7 +548,7 @@ def leaves(root):
     can't raise RecursionError and there's no per-level generator overhead.
     """
     stack = [(root, (), ())]
-    pop, push, extend = stack.pop, stack.append, stack.extend
+    pop, extend = stack.pop, stack.extend
     while stack:
         node, path, shown = pop()
         if isinstance(node, dict):
@@ -591,6 +612,10 @@ def atomic_write(path, text):
         os.replace(tmp, path)
     except BaseException:
         try:
+            os.chmod(tmp, 0o600)        # copymode may have made it read-only, and Windows
+        except OSError:                 # won't delete a read-only file
+            pass
+        try:
             os.unlink(tmp)
         except OSError:
             pass
@@ -622,8 +647,12 @@ _INDENT = re.compile(r"^[{\[][ \t]*(?:/\*.*?\*/)?[ \t]*\r?\n([ \t]+)\S", re.S)
 
 
 def detect_indent(text):
-    """The file's own indent ("\\t", 2, 4 ...) so saving doesn't reformat the whole file."""
-    m = _INDENT.match(text.lstrip())
+    """The file's own layout, so saving doesn't reformat the whole file: its indent ("\\t",
+    2, 4 ...), or None for a file written on a single line."""
+    body = text.strip()
+    if "\n" not in body:
+        return None
+    m = _INDENT.match(body)
     if not m:
         return 2
     ws = m.group(1)
@@ -637,7 +666,7 @@ def exe_dir():
 
 def detect_config_dir(hints=()):
     home = Path.home()
-    cands = [Path(h) for h in hints if h]
+    cands = [Path(h) for h in hints if isinstance(h, str) and h]
     bases = []
     try:
         bases.append(Path.cwd())
@@ -782,7 +811,7 @@ def modrinth_status(jars):
 
     First asks Modrinth which project each exact jar file belongs to (by SHA-1), which avoids
     every naming difference. Jars Modrinth doesn't know fall back to the project slug.
-    state: "ok" (up to date), "new" (update available), "info", "missing".
+    state: "ok" (up to date), "new" (update available), "info", "missing", "failed".
     """
     names = list(jars)
     if not names:
@@ -814,13 +843,15 @@ def modrinth_status(jars):
         slug = urllib.parse.quote(MODS[name]["slug"], safe="")
         try:
             versions = http_json(f"{API}/project/{slug}/version?{q}")
+            if not isinstance(versions, list) or not versions:
+                return f"no {GAME_VERSION} build", "missing"
+            return _compare(jars[name][0], versions[0]["version_number"])
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 return "not on Modrinth", "missing"
-            raise
-        if not isinstance(versions, list) or not versions:
-            return f"no {GAME_VERSION} build", "missing"
-        return _compare(jars[name][0], versions[0]["version_number"])
+            return f"check failed (HTTP {e.code})", "failed"
+        except (OSError, ValueError, KeyError, TypeError):    # this mod only; keep the others
+            return "check failed", "failed"
 
     if fallback:                                   # independent requests: run them side by side
         with ThreadPoolExecutor(max_workers=min(6, len(fallback))) as pool:
@@ -861,6 +892,10 @@ def load_prefs():
         if isinstance(pr, dict):                     # areas were renamed in this version
             data["priority"] = {OLD_AREA_NAMES.get(k, k): v for k, v in pr.items()
                                 if isinstance(k, str) and isinstance(v, str)}
+        ov = data.get("overrides")
+        if isinstance(ov, dict):                     # keys are "Area/Feature"
+            data["overrides"] = {renamed_area_key(k): v for k, v in ov.items()
+                                 if isinstance(k, str) and isinstance(v, str)}
         return data
     return {}
 
@@ -1153,12 +1188,22 @@ class Workspace:
                                      "Reload, then make the change again")
                 if cf.backup is None:
                     bak = cf.path.with_name(f"{cf.path.name}.bak_{stamp}")
+                    # Never overwrite an earlier backup (saving again within the same second,
+                    # after a Reload, used to replace the original file's backup).
+                    n = 1
+                    while bak.exists():
+                        bak = cf.path.with_name(f"{cf.path.name}.bak_{stamp}_{n}")
+                        n += 1
                     # copyfile + copystat = copy2, minus its use of the CopyFile2 API (Python
                     # 3.12+ on Windows), which some Wine/Proton/CrossOver versions lack.
                     shutil.copyfile(cf.path, bak)
                     shutil.copystat(cf.path, bak)
                     cf.backup = bak
-                atomic_write(cf.path, json.dumps(cf.raw, indent=cf.indent, ensure_ascii=False) + "\n")
+                if cf.indent is None:                 # written on one line: keep it that way
+                    text = json.dumps(cf.raw, ensure_ascii=False, separators=(",", ":"))
+                else:
+                    text = json.dumps(cf.raw, indent=cf.indent, ensure_ascii=False)
+                atomic_write(cf.path, text + "\n")
                 try:
                     cf.stamp = _stamp(cf.path)
                 except OSError:
@@ -1268,6 +1313,11 @@ class ScrollFrame(ttk.Frame):
         self.inner.bind("<Configure>", lambda _e: self._sync())
         self.canvas.bind("<Configure>", lambda e: (self.canvas.itemconfigure(self._win, width=e.width),
                                                    self._sync()))
+        # The wheel handler is registered with Tcl once and then bound by name. Binding Python
+        # functions on every <Enter> created three Tcl commands each time, never freed.
+        wheel = self.register(self._on_delta)
+        self._wheel_scripts = {"<MouseWheel>": f"{wheel} %D", "<Button-4>": f"{wheel} 120",
+                               "<Button-5>": f"{wheel} -120"}
         for w in (self, self.canvas, self.inner):
             w.bind("<Enter>", lambda _e: self._wheel(True), add="+")
             w.bind("<Leave>", lambda _e: self._wheel(False), add="+")
@@ -1283,9 +1333,8 @@ class ScrollFrame(ttk.Frame):
 
     def passthrough(self, widget):
         """Make the wheel scroll this frame instead of changing a combobox's value."""
-        widget.bind("<MouseWheel>", lambda e: (self._on_wheel(e), "break")[1])
-        widget.bind("<Button-4>", lambda _e: (self._scroll(-1), "break")[1])
-        widget.bind("<Button-5>", lambda _e: (self._scroll(1), "break")[1])
+        for seq, script in self._wheel_scripts.items():
+            widget.bind(seq, script + "\nbreak")
 
     def _sync(self):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -1300,16 +1349,19 @@ class ScrollFrame(ttk.Frame):
         # <Leave> also fires when the pointer moves onto a child (a label, a combobox), which
         # used to switch scrolling off while over the rows; only unbind once it really left.
         if on:
-            self.bind_all("<MouseWheel>", self._on_wheel)
-            self.bind_all("<Button-4>", lambda _e: self._scroll(-1))
-            self.bind_all("<Button-5>", lambda _e: self._scroll(1))
+            for seq, script in self._wheel_scripts.items():
+                self.bind_all(seq, script)
         elif not self._contains_pointer():
-            for seq in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
+            for seq in self._wheel_scripts:
                 self.unbind_all(seq)
 
-    def _on_wheel(self, e):
-        if e.delta:
-            self._scroll(-1 if e.delta > 0 else 1)
+    def _on_delta(self, delta):
+        try:
+            d = float(delta)
+        except ValueError:
+            return
+        if d:
+            self._scroll(-1 if d > 0 else 1)
 
     def _scroll(self, step):
         if self.bar.winfo_ismapped():
@@ -1619,6 +1671,7 @@ class PrioritiesView(ttk.Frame):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        self._errors_shown, self._error_open = set(), False
         self.title("SkyBlock Config Manager")
         icon = app_icon() if sys.platform == "win32" else None
         if icon:
@@ -1637,7 +1690,8 @@ class App(tk.Tk):
         self._build()
         dark_title_bar(self)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
-        self.bind("<Control-s>", lambda _e: self.save())
+        for seq in ("<Control-s>", "<Control-S>"):         # also with Caps Lock on
+            self.bind(seq, lambda _e: self.save())
         folder = detect_config_dir([self.prefs.get("config_dir", "")])
         if folder:
             self.after(50, lambda: self.load(folder))
@@ -1656,9 +1710,17 @@ class App(tk.Tk):
             self.log("Unexpected error:\n" + detail)
         except Exception:                              # the Activity log isn't built yet
             pass
-        messagebox.showerror("Unexpected error",
-                             f"{exc.__name__}: {val}\n\nThe full details are in the Activity log "
-                             "on the Overview tab.", parent=self)
+        key = (exc, str(val))
+        if self._error_open or key in self._errors_shown:
+            return                       # e.g. failing in a redraw: logged, but only one dialog
+        self._errors_shown.add(key)
+        self._error_open = True
+        try:
+            messagebox.showerror("Unexpected error",
+                                 f"{exc.__name__}: {val}\n\nThe full details are in the Activity "
+                                 "log on the Overview tab.", parent=self)
+        finally:
+            self._error_open = False
 
     # ── look ──
     def _style(self):
@@ -1926,7 +1988,8 @@ class App(tk.Tk):
     def set_override(self, feature_key, mod):
         self.ws.set_override(feature_key, mod)
         self._remember_priorities()
-        name = feature_key.split("/", 1)[1]
+        # Look the name up: area names can contain "/" themselves ("GUI/HUD").
+        name = next((f.name for f in self.ws.features if f.key == feature_key), feature_key)
         self.note(f"{name}: " + ("follows the area choice." if mod is None else
                                  "off in every mod." if mod == OFF else f"uses {mod}."))
 
@@ -2020,8 +2083,11 @@ class App(tk.Tk):
                 self.ws.mods[name].latest = result
         self.update_overview()
         new = [n for n, (_t, state) in payload.items() if state == "new"]
-        self.note(f"Updates available for {', '.join(new)}." if new else
-                  f"Everything installed is up to date for Fabric {GAME_VERSION}.")
+        failed = [n for n, (_t, state) in payload.items() if state == "failed"]
+        parts = [f"Updates available for {', '.join(new)}."] if new else []
+        if failed:
+            parts.append(f"Couldn't check {', '.join(failed)}; try again later.")
+        self.note(" ".join(parts) or f"Everything installed is up to date for Fabric {GAME_VERSION}.")
 
 
 def main():
