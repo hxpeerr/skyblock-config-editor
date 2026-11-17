@@ -110,15 +110,6 @@ Everything the app compares is defined in tables at the top of `skyblock_config_
 
 On Windows, double-click `packaging\build_exe.bat`. It installs PyInstaller and builds `dist\SkyBlockConfigManager.exe` from `packaging\SkyBlockConfigManager.spec`. Building needs Python 3.8 or newer; the finished exe doesn't.
 
-## Publishing a release
-
-GitHub Actions builds release copies on Windows (`.github/workflows/release.yml`):
-
-1. Set `__version__` in `skyblock_config_manager.py` (for example `3.2.0`) and merge the change into `main`.
-2. On GitHub, open **Releases → Draft a new release**, create the tag `v3.2.0` on `main` and publish it. Pushing the tag with git works too.
-
-Within a few minutes the workflow builds the exe, checks that it starts and loads a config folder, and attaches the `.exe` and `.zip` to the release. If you left the release description empty, it fills that in as well. If the tag doesn't match `__version__`, nothing is published. Pull requests that change the app get the same build and check.
-
 ## Troubleshooting
 
 - **A mod shows "not found" on the Overview tab:** its config isn't where `MODS` expects it. Check that you opened the right `config` folder, or add the file's location to `MODS`.
