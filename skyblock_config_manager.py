@@ -13,7 +13,7 @@ Python installed: run packaging/build_exe.bat (recipe in packaging/SkyBlockConfi
 """
 from __future__ import annotations
 
-__version__ = "3.3.0"
+__version__ = "3.4.0"
 
 import hashlib
 import json
@@ -487,6 +487,8 @@ def is_conflict(s):
 
 
 def status_text(s):
+    if s.locked:
+        return "locked (debug)"
     return f"conflict; expect {fmt(s.rec)}" if is_conflict(s) else "OK"
 
 
@@ -531,6 +533,30 @@ def make_label(mod, key, segments):
             return f"{words(str(segments[-3]))} › {words(parent)} › {words(leaf)}"
         return f"{words(parent)} › {words(leaf)}"
     return words(leaf)
+
+
+# Debug and developer settings are shown but locked: they can't be edited, and nothing is
+# recommended for them. A setting is one if any part of its path is only about debugging: a "dev"
+# or "debug" section, a "debugMode", "DEVELOPER_MODE" or "Debug Only Messages" switch. Names that
+# also say something else, like "hideGuiInDebugMenu" or "debugHud" (features for Minecraft's F3
+# debug screen), are ordinary settings.
+_DEBUG_WORDS = frozenset("debug debugs debugging debugger dev devs developer developers devmode "
+                         "devtool devtools".split())
+_DEBUG_FILLER = frozenset("mode modes enabled enable toggle toggled on active value show info log logs "
+                          "logging logger message messages output print verbose tool tools option "
+                          "options setting settings config feature features only".split())
+
+
+@lru_cache(maxsize=None)
+def is_debug_segment(segment):
+    found = {w.lower() for w in _SPLIT.split(segment) if w}
+    return not found.isdisjoint(_DEBUG_WORDS) and found <= _DEBUG_WORDS | _DEBUG_FILLER
+
+
+def is_debug(segments):
+    """Is the setting at this config path (as shown, file name first for one-file-per-feature mods)
+    a debug or developer setting?"""
+    return any(is_debug_segment(str(s)) for s in segments)
 
 
 _STRING = r'"[^"\\]*(?:\\.[^"\\]*)*"'
@@ -1098,11 +1124,12 @@ class ConfigFile:
 
 class Setting:
     __slots__ = ("uid", "mod", "cf", "path", "key", "label", "value", "orig", "hay",
-                 "shared", "domain", "feature", "rec", "order")
+                 "shared", "domain", "feature", "rec", "order", "locked")
 
-    def __init__(self, uid, mod, cf, path, key, label, value):
+    def __init__(self, uid, mod, cf, path, key, label, value, locked=False):
         self.uid, self.mod, self.cf, self.path, self.key, self.label = uid, mod, cf, path, key, label
         self.value = self.orig = value
+        self.locked = locked                           # a debug setting: shown, never changed
         self.hay = f"{mod} {label} {key}".lower()      # built once, so searching is just `in`
         self.shared, self.domain, self.feature, self.rec, self.order = False, "", None, None, ()
 
@@ -1189,7 +1216,7 @@ class Workspace:
                     shown = prefix + shown
                     key = ".".join(map(str, shown))
                     s = Setting(len(settings), name, cf, real, key,
-                                make_label(name, key, shown), value)
+                                make_label(name, key, shown), value, is_debug(shown))
                     settings.append(s)
                     info.settings.append(s)
                     index.setdefault((name, key), s)       # duplicate names: first one wins
@@ -1249,7 +1276,7 @@ class Workspace:
                     for key in ([names] if isinstance(names, str) else names):
                         leaf = by_leaf(mod) if key.startswith("*") else None
                         for s in self._match(mod, key, leaf):
-                            if isinstance(s.value, bool) and s.uid not in seen:
+                            if isinstance(s.value, bool) and not s.locked and s.uid not in seen:
                                 seen.add(s.uid)
                                 found.append(s)
                     if found:
@@ -1300,7 +1327,8 @@ class Workspace:
                     ruled.append(s)
         for mod, key, want in PREFERRED:
             s = self.index.get((mod, key))
-            if s is not None and not s.shared and isinstance(s.value, bool) == isinstance(want, bool):
+            if (s is not None and not s.shared and not s.locked
+                    and isinstance(s.value, bool) == isinstance(want, bool)):
                 s.rec = want
                 ruled.append(s)
         self._ruled = ruled
@@ -1332,6 +1360,8 @@ class Workspace:
 
     # ── editing ──
     def set_value(self, s, value):
+        if s.locked:
+            raise ValueError(f"{s.mod} › {s.key} is a debug setting, which can't be edited")
         node = s.cf.raw
         for step in s.path[:-1]:
             node = node[step]
@@ -1592,7 +1622,8 @@ class SettingsView(ttk.Frame):
         self.only_bad = tk.BooleanVar(value=False)
         ttk.Checkbutton(bar, text="Conflicts only", variable=self.only_bad,
                         command=self.refresh).pack(side="left")
-        ttk.Button(bar, text="Edit…", command=self.edit).pack(side="right")
+        self.btn_edit = ttk.Button(bar, text="Edit…", command=self.edit)
+        self.btn_edit.pack(side="right")
         self.btn_rec = ttk.Button(bar, text="Use recommended", command=self.use_recommended,
                                   state="disabled")
         self.btn_rec.pack(side="right", padx=(0, px(8)))
@@ -1609,6 +1640,7 @@ class SettingsView(ttk.Frame):
             self.tree.heading(key, text=title, anchor="w")
             self.tree.column(key, width=px(width), minwidth=px(70), stretch=stretch, anchor="w")
         self.tree.tag_configure("bad", foreground=BAD, background=BAD_BG)
+        self.tree.tag_configure("locked", foreground=DIM)
         self.tree.bind("<Double-1>", self._on_double)
         self.tree.bind("<Return>", lambda _e: self.edit())
         self.tree.bind("<<TreeviewSelect>>", self._on_select)
@@ -1637,7 +1669,7 @@ class SettingsView(ttk.Frame):
 
     @staticmethod
     def _tags(s):
-        return ("bad",) if is_conflict(s) else ()
+        return ("locked",) if s.locked else ("bad",) if is_conflict(s) else ()
 
     def _debounce(self):
         if self._timer:
@@ -1704,8 +1736,11 @@ class SettingsView(ttk.Frame):
             where = f"{s.mod} › {s.key}"
             if s.shared:
                 where = f"{s.domain} › {s.feature.name}   ·   {where}"
+            if s.locked:
+                where += "   ·   debug setting, can't be edited"
         self.where.configure(text=where)
         self.btn_rec.state(["!disabled"] if s and is_conflict(s) else ["disabled"])
+        self.btn_edit.state(["disabled"] if s and s.locked else ["!disabled"])
 
     def _on_double(self, e):
         if self.tree.identify_region(e.x, e.y) == "cell":
@@ -2172,6 +2207,9 @@ class App(tk.Tk):
         if auto:
             self.log(f"Found {plural(len(auto), 'more Hypixel SkyBlock mod')} on its own: {', '.join(auto)}. "
                      "Their settings are on the Unique tab; they aren't compared with other mods.")
+        locked = sum(s.locked for s in self.ws.settings)
+        if locked:
+            self.log(f"Locked {plural(locked, 'debug setting')}: they're shown in gray and can't be edited.")
         self.shared.set_groups(list(self.ws.choices))
         self.unique.set_groups([m.name for m in found])
         self.shared.reset()
@@ -2219,6 +2257,8 @@ class App(tk.Tk):
         return dlg.result
 
     def edit_setting(self, s):
+        if s.locked:
+            return self.say(f"{s.mod} › {s.label} is a debug setting, so it can't be edited.")
         if isinstance(s.value, bool):
             return self.apply(s, not s.value)
         value = self.ask_value(s)
