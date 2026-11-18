@@ -77,7 +77,7 @@ If the main mod you picked for an area doesn't have a certain feature, the app k
 ## Planned Features
 
 * **Version-specific setting names:** Uses the right setting names for your chosen Minecraft version, so shared features still match even if a mod renamed them between updates.
-* **Automatic mod detection:** Automatically finds any installed SkyBlock mods, their config files, and their settings—even if they aren’t on the supported list yet.
+* **Automatic mod detection:** Automatically finds any installed SkyBlock mods, their config files, and their settings regardless if it's supported or not.
 
 ## Keeping Your Configs Safe
 
