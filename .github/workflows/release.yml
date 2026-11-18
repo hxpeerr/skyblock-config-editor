@@ -43,8 +43,34 @@ jobs:
               print(f'::error::Tag {tag} does not match __version__ = "{version}" in skyblock_config_manager.py')
               sys.exit(1)
 
-      - name: Install PyInstaller
-        run: python -m pip install "pyinstaller==6.22.3"
+      # PyInstaller's ready-made bootloader (the small program at the front of the .exe that unpacks
+      # and starts the app) is the same in every program built with it, malware included, so
+      # antivirus engines often flag it on sight. Building PyInstaller from source with
+      # PYINSTALLER_COMPILE_BOOTLOADER compiles a bootloader of our own here (with the runner's
+      # Visual Studio C compiler) instead.
+      - name: Install PyInstaller, compiling its bootloader from source
+        env:
+          PYINSTALLER_COMPILE_BOOTLOADER: "1"
+        run: python -m pip install --no-binary pyinstaller "pyinstaller==6.22.3"
+
+      - name: Check the bootloader was compiled here, not the ready-made one
+        shell: python
+        run: |
+          import hashlib, pathlib, subprocess, sys, tarfile, tempfile
+          import PyInstaller
+          ours = (pathlib.Path(PyInstaller.__file__).parent / "bootloader" / "Windows-64bit-intel" / "runw.exe").read_bytes()
+          with tempfile.TemporaryDirectory() as tmp:     # the ready-made one ships in the source package
+              subprocess.run([sys.executable, "-m", "pip", "download", "--quiet", "--no-binary", ":all:",
+                              "--no-deps", "pyinstaller==" + PyInstaller.__version__, "-d", tmp], check=True)
+              with tarfile.open(next(pathlib.Path(tmp).glob("pyinstaller-*.tar.gz"))) as t:
+                  member = next(m for m in t.getmembers()
+                                if m.name.endswith("/bootloader/Windows-64bit-intel/runw.exe"))
+                  stock = t.extractfile(member).read()
+          print("bootloader compiled here:", hashlib.sha256(ours).hexdigest())
+          print("ready-made bootloader:   ", hashlib.sha256(stock).hexdigest())
+          if ours == stock:
+              print("::error::PyInstaller still has its ready-made bootloader; compiling it from source didn't happen.")
+              sys.exit(1)
 
       - name: Build the .exe
         run: python -m PyInstaller --noconfirm --clean packaging/SkyBlockConfigManager.spec
