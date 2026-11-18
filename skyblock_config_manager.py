@@ -14,7 +14,7 @@ built from the Rust version in rust/, which works the same way and reads the sam
 """
 from __future__ import annotations
 
-__version__ = "4.0.0"
+__version__ = "4.0.1"
 
 import hashlib
 import json

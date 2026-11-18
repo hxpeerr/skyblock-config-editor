@@ -1,6 +1,6 @@
 [package]
 name = "skyblock-config-manager"
-version = "4.0.0"
+version = "4.0.1"
 edition = "2024"
 rust-version = "1.85"
 description = "Keeps each Hypixel SkyBlock feature switched on in only one of your Fabric mods."
@@ -38,10 +38,17 @@ tempfile = "3.27.0"
 ureq = "3.5.2"
 zip = { version = "9.7.0", default-features = false, features = ["deflate"] }
 
-eframe = { version = "0.37.0", optional = true, default-features = false, features = ["accesskit", "clipboard", "default_fonts", "glow", "system_fonts", "wayland", "x11"] }
 egui_extras = { version = "0.37.0", optional = true }
 ico = { version = "0.6.0", optional = true }
 rfd = { version = "0.18.0", optional = true }
+
+# The window is drawn with wgpu on Windows (Direct3D 12, which has a software fallback for machines
+# without a graphics card or with basic drivers) and macOS (Metal), and with OpenGL on Linux.
+[target.'cfg(any(windows, target_os = "macos"))'.dependencies]
+eframe = { version = "0.37.0", optional = true, default-features = false, features = ["accesskit", "clipboard", "default_fonts", "system_fonts", "wgpu"] }
+
+[target.'cfg(not(any(windows, target_os = "macos")))'.dependencies]
+eframe = { version = "0.37.0", optional = true, default-features = false, features = ["accesskit", "clipboard", "default_fonts", "glow", "system_fonts", "wayland", "x11"] }
 
 [build-dependencies]
 winresource = "0.1.34"

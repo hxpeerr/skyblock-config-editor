@@ -218,7 +218,7 @@ def dump(ws):
 def rs_dump(exe, folder, gv, priority, overrides, resolve, save):
     args = [exe, str(folder), "--game-version", gv, "--priority", json.dumps(priority), "--overrides", json.dumps(overrides)]
     args += ["--resolve"] * resolve + ["--save"] * save
-    return json.loads(subprocess.run(args, check=True, capture_output=True, text=True).stdout)
+    return json.loads(subprocess.run(args, check=True, capture_output=True, encoding="utf-8").stdout)
 
 
 def first_difference(a, b, path="$"):
@@ -290,7 +290,7 @@ def check_text(exe):
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
         json.dump(TEXT_CASES, f, ensure_ascii=False)
     try:
-        rs = json.loads(subprocess.run([exe, "--text-cases", f.name], check=True, capture_output=True, text=True).stdout)
+        rs = json.loads(subprocess.run([exe, "--text-cases", f.name], check=True, capture_output=True, encoding="utf-8").stdout)
     finally:
         os.unlink(f.name)
     enc = lambda v: json.dumps(v, ensure_ascii=False, separators=(",", ":"))
@@ -389,7 +389,7 @@ def check_updates(exe):
             jars = {m.name: (m.installed, m.jar) for m in ws.mods.values() if m.jar}
             py = {k: list(v) for k, v in app.update_status(jars, gv).items()}
             rs = json.loads(subprocess.run([exe, str(root / "config"), "--game-version", gv, "--updates"], check=True,
-                                           capture_output=True, text=True, env=env).stdout)["updates"]
+                                           capture_output=True, encoding="utf-8", env=env).stdout)["updates"]
         finally:
             os.environ.clear()
             os.environ.update(saved_env)
@@ -403,6 +403,7 @@ def check_updates(exe):
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows consoles default to cp1252
     exe = sys.argv[1]
     failures = check_text(exe) + check_updates(exe)
     for name, seed, names_version, gv, priority, overrides, skip in SCENARIOS:
