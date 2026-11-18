@@ -75,9 +75,46 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update -q && sudo apt-get install -y -q libx11-dev libxkbcommon-dev libwayland-dev
 
+      - uses: actions/setup-python@v7
+        if: runner.os == 'Linux'
+        with:
+          python-version: "3.13"
+
+      - name: Install zig, to build for older Linux versions
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/zig"
+          "$RUNNER_TEMP/zig/bin/pip" install -q ziglang==0.17.1 cargo-zigbuild==0.24.1
+          echo "$RUNNER_TEMP/zig/bin" >> "$GITHUB_PATH"
+
       - name: Build
         working-directory: rust
-        run: cargo build --release --bin SkyblockConfigManager
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            cargo zigbuild --release --bin SkyblockConfigManager --target x86_64-unknown-linux-gnu.2.28
+            mkdir -p target/release
+            cp target/x86_64-unknown-linux-gnu/release/SkyblockConfigManager target/release/
+          else
+            cargo build --release --bin SkyblockConfigManager
+          fi
+
+      - name: Check the app reports its version
+        shell: bash
+        run: |
+          exe=rust/target/release/SkyblockConfigManager
+          if [ "$RUNNER_OS" = Windows ]; then exe=$exe.exe; fi
+          want=$(sed -n 's/^version = "\(.*\)"/\1/p' rust/Cargo.toml | head -1)
+          got=$("$exe" --version)
+          echo "The app says it's version $got"
+          [ "$got" = "$want" ] || { echo "::error::The app says it's version '$got' instead of $want"; exit 1; }
+
+      - name: Check the Linux app runs on older Linux versions
+        if: runner.os == 'Linux'
+        run: |
+          newest=$(objdump -T rust/target/release/SkyblockConfigManager | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
+          echo "The app needs $newest or newer"
+          [ "$(printf '%s\n' "$newest" GLIBC_2.28 | sort -V | tail -1)" = GLIBC_2.28 ] || { echo "::error::The Linux app needs $newest, which is newer than GLIBC_2.28"; exit 1; }
 
       - name: Check the .exe starts and loads a config folder
         if: runner.os == 'Windows'
@@ -152,6 +189,16 @@ jobs:
           mkdir -p target/release
           lipo -create -output target/release/SkyblockConfigManager \
             target/aarch64-apple-darwin/release/SkyblockConfigManager target/x86_64-apple-darwin/release/SkyblockConfigManager
+
+      - name: Check the app reports its version
+        shell: bash
+        run: |
+          exe=rust/target/release/SkyblockConfigManager
+          if [ "$RUNNER_OS" = Windows ]; then exe=$exe.exe; fi
+          want=$(sed -n 's/^version = "\(.*\)"/\1/p' rust/Cargo.toml | head -1)
+          got=$("$exe" --version)
+          echo "The app says it's version $got"
+          [ "$got" = "$want" ] || { echo "::error::The app says it's version '$got' instead of $want"; exit 1; }
 
       - name: Package
         run: |

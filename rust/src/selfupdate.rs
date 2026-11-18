@@ -2,11 +2,12 @@ use std::fs;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::Duration;
+use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 
 use serde_json::Value;
 
-use crate::updates::{base, from_ureq, get_json, HttpError};
+use crate::updates::{agent_with, base, from_ureq, get_json, HttpError};
 use crate::versions::newer;
 
 pub const REPO: &str = "hxpeerr/skyblock-config-manager";
@@ -214,12 +215,7 @@ pub fn latest_release() -> Result<Release, String> {
 pub fn download(asset: &Asset, dest: &Path, progress: &Progress) -> Result<(), String> {
     progress.total.store(asset.size, Ordering::Relaxed);
     progress.done.store(0, Ordering::Relaxed);
-    let agent: ureq::Agent = ureq::Agent::config_builder()
-        .timeout_global(Some(Duration::from_secs(900)))
-        .user_agent(format!("skyblock-config-manager/{}", crate::VERSION))
-        .build()
-        .into();
-    let mut resp = agent.get(&asset.url).call().map_err(|e| from_ureq(e).to_string())?;
+    let mut resp = agent_with(Duration::from_secs(900)).get(&asset.url).call().map_err(|e| from_ureq(e).to_string())?;
     let mut reader = resp.body_mut().with_config().limit(MAX_DOWNLOAD).reader();
     let mut file = fs::File::create(dest).map_err(|e| e.to_string())?;
     let mut buf = vec![0u8; 1 << 16];
@@ -251,13 +247,47 @@ pub fn bundle_of(exe: &Path) -> Option<PathBuf> {
     is_bundle.then(|| bundle.to_path_buf())
 }
 
-pub fn install(downloaded: &Path, exe: &Path) -> Result<PathBuf, String> {
+pub fn check_runs(binary: &Path, version: &str) -> Result<(), String> {
+    let fail = |why: String| format!("the new version doesn't run on this system ({why})");
+    let mut child = Command::new(binary)
+        .arg("--version")
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| fail(e.to_string()))?;
+    let deadline = Instant::now() + Duration::from_secs(20);
+    while child.try_wait().map_err(|e| fail(e.to_string()))?.is_none() {
+        if Instant::now() > deadline {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(fail("it didn't answer".into()));
+        }
+        std::thread::sleep(Duration::from_millis(50));
+    }
+    let out = child.wait_with_output().map_err(|e| fail(e.to_string()))?;
+    let printed = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    if out.status.success() && printed == version {
+        return Ok(());
+    }
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    let why = match stderr.lines().map(str::trim).find(|l| !l.is_empty()) {
+        Some(line) => line.to_string(),
+        None if out.status.success() => format!("it says it's version {printed}"),
+        None => out.status.to_string(),
+    };
+    Err(fail(why))
+}
+
+pub fn install(downloaded: &Path, exe: &Path, version: &str) -> Result<PathBuf, String> {
+    let check = |binary: &Path| check_runs(binary, version);
     if cfg!(windows) {
+        check(downloaded)?;
         replace_exe(downloaded, exe)
     } else if let Some(bundle) = bundle_of(exe).filter(|_| cfg!(target_os = "macos")) {
-        replace_bundle_contents(downloaded, &bundle)
+        replace_bundle_contents(downloaded, &bundle, check)
     } else {
-        replace_binary_from_zip(downloaded, exe)
+        replace_binary_from_zip(downloaded, exe, check)
     }
 }
 
@@ -305,7 +335,7 @@ fn set_mode(path: &Path, mode: u32) {
 #[cfg(not(unix))]
 fn set_mode(_path: &Path, _mode: u32) {}
 
-pub fn replace_binary_from_zip(zip_path: &Path, exe: &Path) -> Result<PathBuf, String> {
+pub fn replace_binary_from_zip(zip_path: &Path, exe: &Path, check: impl Fn(&Path) -> Result<(), String>) -> Result<PathBuf, String> {
     let entries = zip_entry_bytes(zip_path, |n| n.rsplit('/').next() == Some(APP))?;
     let (_, data, mode) = entries.into_iter().next().ok_or("the download doesn't contain the app")?;
     let mut name = exe.file_name().unwrap_or_default().to_os_string();
@@ -313,6 +343,10 @@ pub fn replace_binary_from_zip(zip_path: &Path, exe: &Path) -> Result<PathBuf, S
     let new = exe.with_file_name(name);
     fs::write(&new, &data).map_err(|e| e.to_string())?;
     set_mode(&new, mode.unwrap_or(0o755) | 0o755);
+    if let Err(e) = check(&new) {
+        let _ = fs::remove_file(&new);
+        return Err(e);
+    }
     fs::rename(&new, exe).map_err(|e| {
         let _ = fs::remove_file(&new);
         format!("couldn't put the new version in place: {e}")
@@ -321,7 +355,7 @@ pub fn replace_binary_from_zip(zip_path: &Path, exe: &Path) -> Result<PathBuf, S
     Ok(exe.to_path_buf())
 }
 
-pub fn replace_bundle_contents(zip_path: &Path, bundle: &Path) -> Result<PathBuf, String> {
+pub fn replace_bundle_contents(zip_path: &Path, bundle: &Path, check: impl Fn(&Path) -> Result<(), String>) -> Result<PathBuf, String> {
     let entries = zip_entry_bytes(zip_path, |n| n.split('/').nth(1) == Some("Contents") && n.split('/').next().is_some_and(|b| b.ends_with(".app")))?;
     if !entries.iter().any(|(n, _, _)| n.ends_with(&format!("/Contents/MacOS/{APP}"))) {
         return Err("the download doesn't contain the app".into());
@@ -342,6 +376,10 @@ pub fn replace_bundle_contents(zip_path: &Path, bundle: &Path) -> Result<PathBuf
             set_mode(&path, *m);
         }
     }
+    if let Err(e) = check(&staged.join("MacOS").join(APP)) {
+        let _ = fs::remove_dir_all(&staged);
+        return Err(e);
+    }
     fs::rename(&contents, &old).map_err(|e| format!("couldn't move the running app aside: {e}"))?;
     if let Err(e) = fs::rename(&staged, &contents) {
         let _ = fs::rename(&old, &contents);
@@ -353,7 +391,11 @@ pub fn replace_bundle_contents(zip_path: &Path, bundle: &Path) -> Result<PathBuf
 }
 
 pub fn download_path(exe: &Path) -> PathBuf {
-    exe.with_file_name(format!("{}.download", asset_name()))
+    if cfg!(windows) {
+        exe.with_file_name(format!("{APP}.new.exe"))
+    } else {
+        exe.with_file_name(format!("{}.download", asset_name()))
+    }
 }
 
 pub fn cleanup(exe: &Path) {
@@ -461,7 +503,7 @@ mod tests {
         let zip_path = dir.path().join("download.zip");
         fs::write(&exe, b"old").unwrap();
         zip_with(&zip_path, &[("SkyblockConfigManager", b"new", 0o755)]);
-        replace_binary_from_zip(&zip_path, &exe).unwrap();
+        replace_binary_from_zip(&zip_path, &exe, |_| Ok(())).unwrap();
         assert_eq!(fs::read(&exe).unwrap(), b"new");
         #[cfg(unix)]
         {
@@ -470,8 +512,14 @@ mod tests {
         }
         let bad = dir.path().join("bad.zip");
         zip_with(&bad, &[("readme.txt", b"x", 0o644)]);
-        assert!(replace_binary_from_zip(&bad, &exe).is_err());
+        assert!(replace_binary_from_zip(&bad, &exe, |_| Ok(())).is_err());
         assert_eq!(fs::read(&exe).unwrap(), b"new");
+        let newer = dir.path().join("newer.zip");
+        zip_with(&newer, &[("SkyblockConfigManager", b"newer", 0o755)]);
+        let err = replace_binary_from_zip(&newer, &exe, |_| Err("it doesn't start".into())).unwrap_err();
+        assert_eq!(err, "it doesn't start");
+        assert_eq!(fs::read(&exe).unwrap(), b"new");
+        assert!(!dir.path().join("SkyblockConfigManager.new").exists());
     }
 
     #[test]
@@ -487,10 +535,37 @@ mod tests {
         zip_with(&zip_path, &[("SkyblockConfigManager.app/Contents/Info.plist", b"new plist", 0o644),
                               ("SkyblockConfigManager.app/Contents/MacOS/SkyblockConfigManager", b"new", 0o755),
                               ("SkyblockConfigManager.app/Contents/Resources/icon.icns", b"icon", 0o644)]);
-        replace_bundle_contents(&zip_path, &bundle).unwrap();
+        let checked = std::cell::RefCell::new(None);
+        let refuse = |p: &Path| {
+            *checked.borrow_mut() = Some(fs::read(p).unwrap());
+            Err("it doesn't start".to_string())
+        };
+        assert!(replace_bundle_contents(&zip_path, &bundle, refuse).is_err());
+        assert_eq!(checked.borrow().as_deref(), Some(&b"new"[..]));
+        assert_eq!(fs::read(&exe).unwrap(), b"old");
+        assert!(!bundle.join("Contents.new").exists());
+        replace_bundle_contents(&zip_path, &bundle, |_| Ok(())).unwrap();
         assert_eq!(fs::read(&exe).unwrap(), b"new");
         assert_eq!(fs::read(bundle.join("Contents/Info.plist")).unwrap(), b"new plist");
         assert!(bundle.join("Contents/Resources/icon.icns").exists());
         assert!(!bundle.join("Contents.old").exists());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn runs_the_new_version_before_using_it() {
+        let dir = tempfile::tempdir().unwrap();
+        let script = |name: &str, body: &str| {
+            let path = dir.path().join(name);
+            fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
+            set_mode(&path, 0o755);
+            path
+        };
+        assert_eq!(check_runs(&script("good", "echo 9.9.9"), "9.9.9"), Ok(()));
+        let wrong = check_runs(&script("wrong", "echo 1.0.0"), "9.9.9").unwrap_err();
+        assert!(wrong.contains("it says it's version 1.0.0"), "{wrong}");
+        let broken = check_runs(&script("broken", "echo \"version GLIBC_2.43 not found\" >&2; exit 1"), "9.9.9").unwrap_err();
+        assert!(broken.starts_with("the new version doesn't run on this system") && broken.contains("GLIBC_2.43"), "{broken}");
+        assert!(check_runs(&dir.path().join("missing"), "9.9.9").is_err());
     }
 }

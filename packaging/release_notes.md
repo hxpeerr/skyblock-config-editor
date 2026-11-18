@@ -1,5 +1,6 @@
-## 4.1.0
+## 4.1.1
 
-- New **App updates** tab: checks GitHub for a newer version of the app and updates it for you.
-- **Check for updates** on the Overview tab is now **Check for mod updates**.
-- The Python version no longer shows "(found)" twice.
+- The Linux app now works on older Linux versions, like Ubuntu 20.04 and Debian 10.
+- Update checks now work when antivirus or a company network inspects HTTPS.
+- The app makes sure a new version runs on your system before updating to it.
+- The Python version is no longer released.
