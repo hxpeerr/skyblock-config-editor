@@ -61,8 +61,6 @@ Here are the 13 areas of the game and examples of the shared features they inclu
 Using a Fabric SkyBlock mod that isn't on the list? [Open an issue](../../issues/new) to ask for it to be added. To help get it set up quickly, include:
 
 * **Mod name and link:** A link to the mod's Modrinth, CurseForge, or GitHub page.
-* **Config file:** Where the mod saves its settings inside your `config` folder (like `examplemod/config.json`).
-* **Shared features:** Any features it has in common with the supported mods (like a dungeon map or a Diana burrow guesser), if you know them.
 
 ## How to Use It
 
