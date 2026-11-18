@@ -46,6 +46,9 @@ jobs:
           tag = os.environ.get("GITHUB_REF_NAME", "")
           if os.environ.get("GITHUB_REF", "").startswith("refs/tags/") and tag != "v" + rs:
               errors.append(f"Tag {tag} doesn't match version {rs}: tag the release v{rs}")
+          notes = open("packaging/release_notes.md", encoding="utf-8").readline().strip()
+          if notes != f"## {rs}":
+              errors.append(f"packaging/release_notes.md starts with '{notes}': write the {rs} notes there, under '## {rs}'")
           for e in errors:
               print(f"::error::{e}")
           sys.exit(1 if errors else 0)
@@ -197,16 +200,9 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          file=dist/SkyblockConfigManager-macOS.zip
           for i in $(seq 1 40); do
             if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-              gh release upload "$TAG" "$file" --clobber --repo "$GITHUB_REPOSITORY"
-              sha=$(shasum -a 256 "$file" | cut -c1-64)
-              gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > notes.md
-              if grep -q "SkyblockConfigManager-macOS.zip\`: added when the macOS build finishes" notes.md; then
-                sed -i '' "s|SkyblockConfigManager-macOS.zip\`: added when the macOS build finishes|SkyblockConfigManager-macOS.zip\`: \`$sha\`|" notes.md
-                gh release edit "$TAG" --notes-file notes.md --repo "$GITHUB_REPOSITORY"
-              fi
+              gh release upload "$TAG" dist/SkyblockConfigManager-macOS.zip --clobber --repo "$GITHUB_REPOSITORY"
               exit 0
             fi
             sleep 15
@@ -232,31 +228,21 @@ jobs:
 
       - name: Write the release notes
         run: |
-          rustup update stable --no-self-update > /dev/null
-          python3 - <<'PY'
-          import hashlib, subprocess
-          files = ["SkyblockConfigManager.exe", "SkyblockConfigManager.zip", "SkyblockConfigManager-Linux.zip"]
-          sums = "\n".join(f"- `{f}`: `{hashlib.sha256(open('dist/' + f, 'rb').read()).hexdigest()}`" for f in files)
-          sums += "\n- `SkyblockConfigManager-macOS.zip`: added when the macOS build finishes"
-          rust = " ".join(subprocess.run(["rustc", "--version"], capture_output=True, text=True).stdout.split()[:2])
-          notes = open("packaging/release_notes.md", encoding="utf-8").read()
-          notes = notes.replace("{checksums}", sums).replace("{rust}", rust.replace("rustc", "Rust"))
-          open("dist/release_notes.md", "w", encoding="utf-8").write(notes)
-          print(sums)
-          PY
+          tail -n +2 packaging/release_notes.md | sed '/./,$!d' > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
 
       - name: Create the release, or add the files to one published by hand
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-Linux.zip)
+          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-Linux.zip skyblock_config_manager.py)
           if body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
             gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
             if [ -z "$body" ]; then
-              gh release edit "$TAG" --notes-file dist/release_notes.md --repo "$GITHUB_REPOSITORY"
+              gh release edit "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --repo "$GITHUB_REPOSITORY"
             fi
           else
             gh release create "$TAG" "${files[@]}" --verify-tag --repo "$GITHUB_REPOSITORY" \
-              --title "SkyBlock Config Manager ${TAG#v}" --notes-file dist/release_notes.md
+              --title "SkyBlock Config Manager ${TAG#v}" --notes-file "$RUNNER_TEMP/notes.md"
           fi

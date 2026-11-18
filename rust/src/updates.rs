@@ -22,7 +22,7 @@ pub const FEATURES_URL: &str = "https://raw.githubusercontent.com/hxpeerr/skyblo
 const MAX_BODY: u64 = 16 * 1024 * 1024;
 const MAX_FEATURES: u64 = 2 * 1024 * 1024;
 
-fn base(var: &str, default: &str) -> String {
+pub(crate) fn base(var: &str, default: &str) -> String {
     std::env::var(var).ok().filter(|v| !v.is_empty()).unwrap_or_else(|| default.to_string())
 }
 
@@ -30,7 +30,7 @@ pub fn features_url() -> String {
     base("SCM_FEATURES_URL", FEATURES_URL)
 }
 
-fn agent() -> ureq::Agent {
+pub(crate) fn agent() -> ureq::Agent {
     ureq::Agent::config_builder()
         .timeout_global(Some(Duration::from_secs(15)))
         .user_agent(format!("skyblock-config-manager/{}", crate::VERSION))
@@ -53,7 +53,7 @@ impl std::fmt::Display for HttpError {
     }
 }
 
-fn from_ureq(e: ureq::Error) -> HttpError {
+pub(crate) fn from_ureq(e: ureq::Error) -> HttpError {
     match e {
         ureq::Error::StatusCode(c) => HttpError::Status(c),
         other => HttpError::Other(other.to_string()),
@@ -65,7 +65,7 @@ fn get_text(url: &str, limit: u64) -> Result<String, HttpError> {
     resp.body_mut().with_config().limit(limit).read_to_string().map_err(from_ureq)
 }
 
-fn get_json(url: &str) -> Result<Value, HttpError> {
+pub(crate) fn get_json(url: &str) -> Result<Value, HttpError> {
     serde_json::from_str(&get_text(url, MAX_BODY)?).map_err(|e| HttpError::Other(e.to_string()))
 }
 

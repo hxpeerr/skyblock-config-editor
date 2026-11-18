@@ -1,4 +1,5 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::Ordering;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
@@ -10,6 +11,7 @@ use serde_json::{Map, Value};
 
 use scm::features::{self, FeatureSet, Source};
 use scm::prefs;
+use scm::selfupdate::{self, Block, Progress, Release, Span};
 use scm::text::{fmt, plural};
 use scm::updates;
 use scm::value::{parse_value, py_str, type_name};
@@ -134,6 +136,7 @@ enum Tab {
     Priorities,
     Shared,
     Unique,
+    AppUpdates,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -163,6 +166,7 @@ enum Then {
     Load(String),
     Quit,
     Save,
+    Restart(PathBuf),
 }
 
 enum Dialog {
@@ -173,6 +177,8 @@ enum Dialog {
 enum Msg {
     Updates { version: String, result: Result<IndexMap<String, (String, State)>, String> },
     Features { manual: bool, result: Result<(String, FeatureSet), String> },
+    Release(Result<Release, String>),
+    Installed(Result<PathBuf, String>),
 }
 
 enum Action {
@@ -189,6 +195,10 @@ enum Action {
     Select(Kind, usize),
     Edit(usize),
     UseRecommended(usize),
+    CheckApp,
+    InstallApp,
+    RestartApp,
+    OpenReleasePage,
 }
 
 pub struct App {
@@ -213,11 +223,21 @@ pub struct App {
     counts: Counts,
     allow_close: bool,
     ctx: egui::Context,
+    release: Option<Release>,
+    release_error: Option<String>,
+    checking_app: bool,
+    checked_app: bool,
+    download: Option<Arc<Progress>>,
+    installed: Option<PathBuf>,
+    install_error: Option<String>,
 }
 
 impl App {
     fn new(ctx: &egui::Context) -> App {
         style(ctx);
+        if let Ok(exe) = std::env::current_exe() {
+            std::thread::spawn(move || selfupdate::cleanup(&exe));
+        }
         let prefs = prefs::load_prefs();
         let (set, notes) = features::choose(prefs::user_features_file().as_deref(), prefs::feature_cache_file().as_deref());
         let gv = prefs
@@ -234,7 +254,8 @@ impl App {
             shared: ListView { group: ALL.into(), ..Default::default() },
             unique: ListView { group: ALL.into(), ..Default::default() }, area, edit: None, dialog: None,
             actions: Vec::new(), tx, rx, checking: false, fetching_features: false, pending_set: None, generation: 0,
-            counts: Default::default(), allow_close: false, ctx: ctx.clone(),
+            counts: Default::default(), allow_close: false, ctx: ctx.clone(), release: None, release_error: None,
+            checking_app: false, checked_app: false, download: None, installed: None, install_error: None,
         };
         for n in notes {
             app.log(&n);
@@ -432,7 +453,7 @@ impl App {
             }
         }
         self.changed();
-        self.note(&format!("Minecraft {version} selected: setting names and Check for updates now follow it."));
+        self.note(&format!("Minecraft {version} selected: setting names and Check for mod updates now follow it."));
     }
 
     fn check_updates(&mut self) {
@@ -479,6 +500,8 @@ impl App {
             match msg {
                 Msg::Updates { version, result } => self.got_updates(version, result),
                 Msg::Features { manual, result } => self.got_features(manual, result),
+                Msg::Release(result) => self.got_release(result),
+                Msg::Installed(result) => self.got_installed(result),
             }
         }
     }
@@ -486,7 +509,7 @@ impl App {
     fn got_updates(&mut self, version: String, result: Result<IndexMap<String, (String, State)>, String>) {
         self.checking = false;
         if version != self.ws.game_version {
-            let msg = format!("That check was for Minecraft {version}. Click Check for updates again for {}.", self.ws.game_version);
+            let msg = format!("That check was for Minecraft {version}. Click Check for mod updates again for {}.", self.ws.game_version);
             return self.say(&msg);
         }
         let results = match result {
@@ -553,6 +576,107 @@ impl App {
         }
     }
 
+    fn check_app(&mut self) {
+        if self.checking_app {
+            return;
+        }
+        self.checking_app = true;
+        self.checked_app = true;
+        self.release_error = None;
+        let (tx, ctx) = (self.tx.clone(), self.ctx.clone());
+        std::thread::spawn(move || {
+            let _ = tx.send(Msg::Release(selfupdate::latest_release()));
+            ctx.request_repaint();
+        });
+    }
+
+    fn got_release(&mut self, result: Result<Release, String>) {
+        self.checking_app = false;
+        match result {
+            Ok(r) => {
+                let msg = if r.is_newer_than(scm::VERSION) {
+                    format!("Version {} of the app is available on the App updates tab.", r.version())
+                } else {
+                    format!("You have the latest version of the app ({}).", scm::VERSION)
+                };
+                self.say(&msg);
+                self.release = Some(r);
+            }
+            Err(e) => {
+                self.log(&format!("Couldn't check for app updates: {e}"));
+                self.release_error = Some(e);
+                self.say("Couldn't check for app updates; see the App updates tab.");
+            }
+        }
+    }
+
+    fn install_app(&mut self) {
+        let Some(release) = self.release.clone() else { return };
+        let Some(asset) = release.asset(selfupdate::asset_name()).cloned() else { return };
+        let Ok(exe) = std::env::current_exe() else {
+            self.install_error = Some("couldn't find where the app is".into());
+            return;
+        };
+        let progress = Arc::new(Progress::default());
+        self.download = Some(Arc::clone(&progress));
+        self.install_error = None;
+        let tmp = selfupdate::download_path(&exe);
+        let (tx, ctx) = (self.tx.clone(), self.ctx.clone());
+        std::thread::spawn(move || {
+            let result = selfupdate::download(&asset, &tmp, &progress).and_then(|()| selfupdate::install(&tmp, &exe));
+            if result.is_err() {
+                let _ = std::fs::remove_file(&tmp);
+            }
+            let _ = tx.send(Msg::Installed(result));
+            ctx.request_repaint();
+        });
+        self.say(&format!("Downloading version {}…", release.version()));
+    }
+
+    fn got_installed(&mut self, result: Result<PathBuf, String>) {
+        self.download = None;
+        match result {
+            Ok(target) => {
+                let v = self.release.as_ref().map(|r| r.version().to_string()).unwrap_or_default();
+                self.installed = Some(target);
+                self.note(&format!("Updated to version {v}. Restart the app to use it."));
+            }
+            Err(e) => {
+                self.log(&format!("Couldn't update the app: {e}"));
+                self.install_error = Some(e);
+                self.say("Couldn't update the app; see the App updates tab.");
+            }
+        }
+    }
+
+    fn restart_app(&mut self) {
+        let Some(target) = self.installed.clone() else { return };
+        if !self.ws.changed.is_empty() {
+            self.dialog = Some(Dialog::Confirm {
+                title: "Unsaved changes".into(),
+                text: format!("Restart and discard {}?", plural(self.ws.changed.len(), "unsaved change")),
+                then: Then::Restart(target),
+            });
+            return;
+        }
+        self.restart_now(&target);
+    }
+
+    fn restart_now(&mut self, target: &Path) {
+        match selfupdate::restart(target) {
+            Ok(()) => {
+                self.allow_close = true;
+                self.ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            Err(e) => {
+                self.dialog = Some(Dialog::Error {
+                    title: "Couldn't restart".into(),
+                    text: format!("{e}. Close the app and open it again to use the new version."),
+                });
+            }
+        }
+    }
+
     fn run_actions(&mut self) {
         for action in std::mem::take(&mut self.actions) {
             match action {
@@ -596,6 +720,13 @@ impl App {
                 Action::Area(a) => self.area = a,
                 Action::Select(kind, uid) => self.view(kind).selected = Some(uid),
                 Action::Edit(uid) => self.edit_setting(uid),
+                Action::CheckApp => self.check_app(),
+                Action::InstallApp => self.install_app(),
+                Action::RestartApp => self.restart_app(),
+                Action::OpenReleasePage => {
+                    let page = self.release.as_ref().map_or_else(selfupdate::release_page, |r| r.page.clone());
+                    selfupdate::open_in_browser(&page);
+                }
                 Action::UseRecommended(uid) => {
                     if let Some(rec) = self.ws.settings[uid].rec.clone().filter(|_| self.ws.settings[uid].is_conflict()) {
                         self.apply(uid, rec);
@@ -639,11 +770,14 @@ impl App {
 
     fn tab_bar(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
-            for (tab, name) in [(Tab::Overview, "Overview"), (Tab::Priorities, "Priorities"), (Tab::Shared, "Shared"), (Tab::Unique, "Unique")] {
+            for (tab, name) in [(Tab::Overview, "Overview"), (Tab::Priorities, "Priorities"), (Tab::Shared, "Shared"), (Tab::Unique, "Unique"), (Tab::AppUpdates, "App updates")] {
                 let selected = self.tab == tab;
                 let text = RichText::new(name).size(15.0).color(if selected { ACCENT } else { MUTED });
                 if ui.add(egui::Button::new(text).frame(false)).clicked() {
                     self.tab = tab;
+                    if tab == Tab::AppUpdates && !self.checked_app {
+                        self.actions.push(Action::CheckApp);
+                    }
                 }
                 ui.add_space(10.0);
             }
@@ -681,7 +815,7 @@ impl App {
                 self.actions.push(Action::AutoFeatures(auto));
             }
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if ui.add_enabled(!self.checking, egui::Button::new("Check for updates")).clicked() {
+                if ui.add_enabled(!self.checking, egui::Button::new("Check for mod updates")).clicked() {
                     self.actions.push(Action::CheckUpdates);
                 }
             });
@@ -1121,6 +1255,7 @@ impl App {
                 match then {
                     Then::Load(folder) => self.load_now(&folder),
                     Then::Save => self.save_now(),
+                    Then::Restart(target) => self.restart_now(&target),
                     Then::Quit => {
                         self.allow_close = true;
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
@@ -1132,6 +1267,81 @@ impl App {
         }
     }
 
+    fn app_updates(&mut self, ui: &mut egui::Ui) {
+        ui.label(RichText::new("App updates").size(20.0).strong());
+        ui.add_space(6.0);
+        ui.label(format!("You have version {}.", scm::VERSION));
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            if ui.add_enabled(!self.checking_app && self.download.is_none(), egui::Button::new("Check for app updates")).clicked() {
+                self.actions.push(Action::CheckApp);
+            }
+            if self.checking_app {
+                ui.spinner();
+                ui.label(RichText::new("Checking GitHub…").color(MUTED));
+            }
+        });
+        if let Some(e) = &self.release_error {
+            ui.add_space(8.0);
+            ui.label(RichText::new(format!("Couldn't check for app updates: {e}")).color(BAD));
+        }
+        let Some(release) = self.release.clone() else { return };
+        let newer = release.is_newer_than(scm::VERSION);
+        ui.add_space(12.0);
+        ui.horizontal(|ui| {
+            if self.installed.is_some() {
+                ui.label(RichText::new(format!("Updated to version {}.", release.version())).color(GOOD).strong());
+            } else if newer {
+                ui.label(RichText::new(format!("Version {} is available.", release.version())).color(NEW).strong());
+            } else {
+                ui.label(RichText::new("You have the latest version.").color(GOOD).strong());
+            }
+            if !release.published.is_empty() {
+                ui.label(RichText::new(format!("Released {}", release.published)).color(MUTED));
+            }
+        });
+        ui.add_space(8.0);
+        if newer {
+            let asset = release.asset(selfupdate::asset_name()).cloned();
+            if self.installed.is_some() {
+                ui.horizontal(|ui| {
+                    if ui.add(egui::Button::new(RichText::new("Restart now").color(ON_ACCENT)).fill(ACCENT)).clicked() {
+                        self.actions.push(Action::RestartApp);
+                    }
+                    ui.label(RichText::new("Restart the app to use the new version.").color(MUTED));
+                });
+            } else if let Some(progress) = &self.download {
+                let mb = |b: u64| b as f64 / 1_048_576.0;
+                let text = format!("Downloading… {:.1} of {:.1} MB", mb(progress.done.load(Ordering::Relaxed)), mb(progress.total.load(Ordering::Relaxed)));
+                ui.add(egui::ProgressBar::new(progress.fraction()).desired_width(380.0).text(text));
+            } else if let Some(asset) = asset {
+                ui.horizontal(|ui| {
+                    let button = egui::Button::new(RichText::new(format!("Update to {}", release.version())).color(ON_ACCENT)).fill(ACCENT);
+                    if ui.add(button).clicked() {
+                        self.actions.push(Action::InstallApp);
+                    }
+                    ui.label(RichText::new(format!("Downloads {} ({:.1} MB) from GitHub and replaces this copy of the app.",
+                                                   asset.name, asset.size as f64 / 1_048_576.0)).color(MUTED));
+                });
+            } else {
+                ui.label(RichText::new("This release doesn't have a download for your system yet.").color(MUTED));
+            }
+            if let Some(e) = &self.install_error {
+                ui.label(RichText::new(format!("Couldn't update the app: {e}")).color(BAD));
+            }
+        }
+        ui.add_space(4.0);
+        if ui.link("Open the release page").clicked() {
+            self.actions.push(Action::OpenReleasePage);
+        }
+        ui.add_space(12.0);
+        ui.label(RichText::new("Release notes").color(MUTED));
+        egui::Frame::new().fill(PANEL).stroke(Stroke::new(1.0, LINE)).inner_margin(10.0).show(ui, |ui| {
+            ui.set_min_size(ui.available_size());
+            egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| release_notes(ui, &release.notes));
+        });
+    }
+
     fn handle_close(&mut self, ctx: &egui::Context) {
         if ctx.input(|i| i.viewport().close_requested()) && !self.allow_close && !self.ws.changed.is_empty() {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
@@ -1141,6 +1351,46 @@ impl App {
                     text: format!("Quit and discard {}?", plural(self.ws.changed.len(), "unsaved change")),
                     then: Then::Quit,
                 });
+            }
+        }
+    }
+}
+
+fn release_notes(ui: &mut egui::Ui, notes: &str) {
+    let lines = selfupdate::note_lines(notes);
+    if lines.is_empty() {
+        ui.label(RichText::new("No release notes.").color(MUTED));
+        return;
+    }
+    for line in lines {
+        let mut job = egui::text::LayoutJob::default();
+        for (span, text) in &line.spans {
+            let mut piece = RichText::new(text);
+            if line.block == Block::Heading {
+                piece = piece.size(16.0).strong();
+            }
+            piece = match span {
+                Span::Plain => piece,
+                Span::Strong => piece.strong(),
+                Span::Code => piece.code(),
+            };
+            piece.append_to(&mut job, ui.style(), egui::FontSelection::Default, Align::Center);
+        }
+        match line.block {
+            Block::Gap => ui.add_space(8.0),
+            Block::Heading => {
+                ui.add_space(2.0);
+                ui.add(egui::Label::new(job).wrap());
+                ui.add_space(2.0);
+            }
+            Block::Bullet => {
+                ui.horizontal_top(|ui| {
+                    ui.label("•");
+                    ui.add(egui::Label::new(job).wrap());
+                });
+            }
+            Block::Text => {
+                ui.add(egui::Label::new(job).wrap());
             }
         }
     }
@@ -1164,8 +1414,12 @@ impl eframe::App for App {
                 Tab::Priorities => self.priorities(ui),
                 Tab::Shared => self.settings_tab(ui, Kind::Shared),
                 Tab::Unique => self.settings_tab(ui, Kind::Unique),
+                Tab::AppUpdates => self.app_updates(ui),
             }
         });
+        if self.download.is_some() {
+            ctx.request_repaint_after(std::time::Duration::from_millis(100));
+        }
         self.edit_dialog(&ctx);
         self.dialogs(&ctx);
         self.run_actions();

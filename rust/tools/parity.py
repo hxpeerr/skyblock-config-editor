@@ -262,6 +262,17 @@ TEXT_CASES = {
     "label": [["M", "a", ["enabled"]], ["M", "a.b", ["dungeonMap", "enableMap"]], ["M", "x", ["map", "position", "x"]],
               ["M", "x", ["Map", "Pos", "Y"]], ["M", "x", ["a", "A"]], ["M", "x", ["Some Feature", "value"]],
               ["M", "x", ["gui", "TPS"]], ["M", "x", ["one", "two", "three", "color", "r"]], ["M", "x", ["Waypoints"]]],
+    "notes": [open(Path(__file__).resolve().parents[2] / "packaging" / "release_notes.md", encoding="utf-8").read(),
+              "- **`SkyblockConfigManager.exe`**: Windows 10 or 11. **`SkyblockConfigManager.zip`** is the same file.",
+              "<!-- Release notes generated using configuration in .github/release.yml -->\r\n## What's Changed\r\n"
+              "* Fix the macOS build by @someone in https://github.com/o/r/pull/19\r\n\r\n\r\n"
+              "**Full Changelog**: https://github.com/o/r/compare/v4.0.1...v4.0.2",
+              "", "\n \n\t\n", "# Title\n\n\n\nText", "##no space", "####### seven", "#", "- ", "-", "---", "***", "___",
+              "--", "* * *", "a ** b", "**open", "`unclosed", "``", "`a``b`", "[not a link", "[a](b", "[label](url) and [x](y)z",
+              "[**bold label**](u)", "**[link](u) in bold**", "`code **not bold**`", "  - indented\n    * deeper", "+ plus",
+              "1. numbered", "é ✓ **ßtraße** `ünï`", "Line one\nLine two\n\n---\n\nAfter a rule", "<!--x-->", " <!-- y"],
+    "newer": [["v4.1.0", "4.0.2"], ["v4.0.2", "4.0.2"], ["4.0.2", "v4.1.0"], ["v4.0.10", "4.0.9"], ["v4.1.0-beta", "4.0.2"],
+              ["v4.1.0", "4.1.0-beta"], ["v4.1.0-beta.2", "4.1.0-beta.10"], ["release", "4.0.2"], ["v5", "4.9.9"], ["", ""]],
 }
 
 
@@ -287,6 +298,8 @@ def check_text(exe):
         "debug": [app.is_debug_segment(s) for s in TEXT_CASES["debug"]],
         "label": [app.make_label(m, k, tuple(s)) for m, k, s in TEXT_CASES["label"]],
         "type": [type(o).__name__ for _t, o in TEXT_CASES["parse"]],
+        "notes": [json.loads(json.dumps(app.note_lines(s))) for s in TEXT_CASES["notes"]],
+        "newer": [app._newer(a, b) for a, b in TEXT_CASES["newer"]],
     }
     rs["parse"] = [norm_err(r) for r in rs["parse"]]
     diff = first_difference(py, rs)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-__version__ = "4.0.2"
+__version__ = "4.1.0"
 
 import hashlib
 import json
@@ -10,6 +10,7 @@ import os
 import queue
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
@@ -19,6 +20,7 @@ import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
+import webbrowser
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
@@ -922,6 +924,139 @@ def update_status(jars, game_version=GAME_VERSION):
     return out
 
 
+REPO = "hxpeerr/skyblock-config-manager"
+RELEASE_PAGE = f"https://github.com/{REPO}/releases/latest"
+APP_FILE = "skyblock_config_manager.py"
+
+
+def reason(e):
+    if isinstance(e, urllib.error.HTTPError):
+        return f"HTTP {e.code}"
+    if isinstance(e, urllib.error.URLError):
+        return str(e.reason)
+    return str(e) or type(e).__name__
+
+
+def latest_release():
+    base = os.environ.get("SCM_RELEASES_API") or "https://api.github.com"
+    try:
+        data = http_json(f"{base}/repos/{REPO}/releases/latest")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            raise RuntimeError("there's no release yet") from None
+        raise
+    text = lambda k: data.get(k) if isinstance(data.get(k), str) else ""
+    tag = text("tag_name")
+    if not tag:
+        raise RuntimeError("the release has no version tag")
+    assets = {}
+    for a in data.get("assets") or []:
+        if isinstance(a, dict) and isinstance(a.get("name"), str) and isinstance(a.get("browser_download_url"), str):
+            size = a.get("size")
+            assets[a["name"]] = (size if isinstance(size, int) and size > 0 else 0, a["browser_download_url"])
+    return {"tag": tag, "version": tag[1:] if tag.startswith("v") else tag, "name": text("name"),
+            "notes": text("body").replace("\r\n", "\n"), "page": text("html_url") or RELEASE_PAGE,
+            "published": text("published_at")[:10], "assets": assets}
+
+
+def download_file(url, size, dest, progress):
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    done = 0
+    with urllib.request.urlopen(req, timeout=60) as r, open(dest, "wb") as f:
+        while True:
+            chunk = r.read(1 << 16)
+            if not chunk:
+                break
+            f.write(chunk)
+            done += len(chunk)
+            progress[0] = done
+    if size and done != size:
+        raise RuntimeError(f"the download stopped early ({done} of {size} bytes)")
+
+
+def install_script(downloaded, target):
+    try:
+        source = Path(downloaded).read_text(encoding="utf-8")
+        compile(source, str(target), "exec")
+    except (UnicodeDecodeError, SyntaxError, ValueError) as e:
+        v = sys.version_info
+        raise RuntimeError(f"the new version doesn't run on Python {v.major}.{v.minor} ({e})") from None
+    if not re.search(r'^__version__ = "', source, re.M):
+        raise RuntimeError("the download isn't SkyBlock Config Manager")
+    try:
+        os.chmod(downloaded, os.stat(target).st_mode)
+    except OSError:
+        pass
+    os.replace(downloaded, target)
+
+
+def restart_script(target):
+    subprocess.Popen([sys.executable, str(target)] + sys.argv[1:], cwd=os.getcwd())
+
+
+def _link(text, at):
+    if not text.startswith("[", at):
+        return None
+    close = text.find("](", at)
+    end = text.find(")", close + 2) if close != -1 else -1
+    return None if end == -1 else (text[at + 1:close], end + 1)
+
+
+def inline_spans(text):
+    out, strong, i = [], False, 0
+
+    def add(kind, s):
+        if not s:
+            return
+        if out and out[-1][0] == kind:
+            out[-1] = (kind, out[-1][1] + s)
+        else:
+            out.append((kind, s))
+    while i < len(text):
+        plain = "strong" if strong else "plain"
+        if text.startswith("**", i):
+            strong, i = not strong, i + 2
+            continue
+        if text[i] == "`":
+            end = text.find("`", i + 1)
+            if end != -1:
+                add("code", text[i + 1:end])
+                i = end + 1
+                continue
+        found = _link(text, i)
+        if found:
+            add(plain, found[0])
+            i = found[1]
+            continue
+        j = next((k for k in range(i + 1, len(text)) if text[k] in "*`["), len(text))
+        add(plain, text[i:j])
+        i = j
+    return out
+
+
+def note_lines(notes):
+    out = []
+    for raw in notes.split("\n"):
+        line = raw.strip()
+        if line.startswith("<!--"):
+            continue
+        rule = len(line) >= 3 and len(set(line)) == 1 and line[0] in "-*_"
+        if not line or rule:
+            if out and out[-1][0] != "gap":
+                out.append(("gap", []))
+            continue
+        hashes = len(line) - len(line.lstrip("#"))
+        if 1 <= hashes <= 6 and line[hashes:hashes + 1] == " ":
+            out.append(("heading", inline_spans(line[hashes:].strip())))
+        elif line[:2] in ("- ", "* ", "+ "):
+            out.append(("bullet", inline_spans(line[2:].strip())))
+        else:
+            out.append(("text", inline_spans(line)))
+    while out and out[-1][0] == "gap":
+        out.pop()
+    return out
+
+
 def prefs_files():
     if FROZEN:
         return [exe_dir() / PORTABLE_PREFS, HOME_PREFS]
@@ -1727,7 +1862,9 @@ class App(tk.Tk):
         saved = self.prefs.get("game_version")
         self.game_version = saved if saved in GAME_VERSIONS else GAME_VERSION
         self.ws = Workspace(self.prefs.get("priority"), self.prefs.get("overrides"), self.game_version)
-        self._queue = queue.Queue()
+        self._queue, self._app_queue = queue.Queue(), queue.Queue()
+        self.release = self.release_error = self.installed = self.install_error = self.app_progress = None
+        self.checking_app = self.checked_app = self._app_polling = False
         self._style()
         self._build()
         dark_title_bar(self)
@@ -1775,7 +1912,11 @@ class App(tk.Tk):
         title.configure(size=base.actual("size") + 4, weight="bold")
         strong = base.copy()
         strong.configure(weight="bold")
-        self._fonts = (title, strong)
+        heading = base.copy()
+        heading.configure(size=base.actual("size") + 2, weight="bold")
+        link = base.copy()
+        link.configure(underline=True)
+        self._fonts = (title, strong, heading, link)
         px = self.px
 
         self.option_add("*TCombobox*Listbox.font", base)
@@ -1801,6 +1942,9 @@ class App(tk.Tk):
         s.configure("Good.TLabel", foreground=GOOD)
         s.configure("Title.TLabel", font=title)
         s.configure("Head.TLabel", foreground=MUTED, font=strong)
+        s.configure("NewHead.TLabel", foreground=NEW, font=strong)
+        s.configure("GoodHead.TLabel", foreground=GOOD, font=strong)
+        s.configure("Link.TLabel", foreground=ACCENT, font=link)
 
         s.configure("TNotebook", background=BG, borderwidth=0, tabmargins=(0, 0, 0, 0),
                     bordercolor=BG, lightcolor=BG, darkcolor=BG)
@@ -1836,6 +1980,9 @@ class App(tk.Tk):
                     indicatorforeground=ACCENT, indicatormargin=(0, 0, px(6), 0))
         s.map("TCheckbutton", background=[("active", BG)],
               indicatorbackground=[("selected", PANEL), ("active", RAISED)])
+
+        s.configure("Horizontal.TProgressbar", background=ACCENT, troughcolor=PANEL, bordercolor=LINE,
+                    lightcolor=ACCENT, darkcolor=ACCENT)
 
         s.layout("Vertical.TScrollbar", [("Vertical.Scrollbar.trough", {"sticky": "ns", "children": [
             ("Vertical.Scrollbar.thumb", {"expand": "1", "sticky": "nswe"})]})])
@@ -1881,10 +2028,13 @@ class App(tk.Tk):
         self.priorities = PrioritiesView(self)
         self.shared = SettingsView(self, lambda: self.ws.shared, "Area", lambda s: s.domain)
         self.unique = SettingsView(self, lambda: self.ws.unique, "Mod", lambda s: s.mod)
+        self.app_tab = ttk.Frame(self.notebook, padding=(0, px(14), 0, 0))
         for tab, name in ((self.overview, "Overview"), (self.priorities, "Priorities"),
-                          (self.shared, "Shared"), (self.unique, "Unique")):
+                          (self.shared, "Shared"), (self.unique, "Unique"), (self.app_tab, "App updates")):
             self.notebook.add(tab, text=name)
         self._build_overview()
+        self._build_app_updates()
+        self.notebook.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.priorities.rebuild()
 
         bar = ttk.Frame(self, padding=(px(16), px(6), px(16), px(10)))
@@ -1905,7 +2055,7 @@ class App(tk.Tk):
         box.bind("<<ComboboxSelected>>", lambda _e: self.set_game_version(self.version_var.get()))
         for seq in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
             box.bind(seq, "break")
-        self.btn_updates = ttk.Button(bar, text="Check for updates", command=self.check_updates)
+        self.btn_updates = ttk.Button(bar, text="Check for mod updates", command=self.check_updates)
         self.btn_updates.pack(side="right")
 
         cols = (("mod", "Mod", 175, "w", False), ("config", "Config file", 260, "w", True),
@@ -1934,6 +2084,220 @@ class App(tk.Tk):
                                 selectbackground=SELECT, selectforeground=FG,
                                 font=tkfont.nametofont("TkFixedFont"))
         self.activity.pack(fill="both", expand=True)
+
+    def _build_app_updates(self):
+        px, tab = self.px, self.app_tab
+        ttk.Label(tab, text="App updates", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(tab, text=f"You have version {__version__}.").pack(anchor="w", pady=(px(6), px(8)))
+        row = ttk.Frame(tab)
+        row.pack(fill="x")
+        self.btn_app = ttk.Button(row, text="Check for app updates", command=self.check_app)
+        self.btn_app.pack(side="left")
+        self.app_busy = ttk.Label(row, style="Muted.TLabel")
+        self.app_busy.pack(side="left", padx=px(10))
+        self.app_body = ttk.Frame(tab)
+        self.app_body.pack(fill="both", expand=True)
+        self.app_bar = self.app_bar_text = None
+
+    def _tab_changed(self, _e=None):
+        if self.notebook.select() == str(self.app_tab) and not self.checked_app:
+            self.check_app()
+
+    def _render_app(self):
+        px, body, r = self.px, self.app_body, self.release
+        for w in body.winfo_children():
+            w.destroy()
+        self.app_bar = self.app_bar_text = None
+        self.btn_app.state(["disabled"] if self.checking_app or self.app_progress else ["!disabled"])
+        self.app_busy.configure(text="Checking GitHub…" if self.checking_app else "")
+        if self.release_error:
+            ttk.Label(body, text=f"Couldn't check for app updates: {self.release_error}", style="Bad.TLabel",
+                      wraplength=px(900), justify="left").pack(anchor="w", pady=(px(8), 0))
+        if not r:
+            return
+        newer = _newer(r["tag"], __version__)
+        head = ttk.Frame(body)
+        head.pack(fill="x", pady=(px(12), px(8)))
+        if self.installed:
+            text, style = f"Updated to version {r['version']}.", "GoodHead.TLabel"
+        elif newer:
+            text, style = f"Version {r['version']} is available.", "NewHead.TLabel"
+        else:
+            text, style = "You have the latest version.", "GoodHead.TLabel"
+        ttk.Label(head, text=text, style=style).pack(side="left")
+        if r["published"]:
+            ttk.Label(head, text=f"Released {r['published']}", style="Muted.TLabel").pack(side="left", padx=px(10))
+        if newer:
+            row = ttk.Frame(body)
+            row.pack(fill="x")
+            asset = r["assets"].get(APP_FILE)
+            hint = None
+            if self.installed:
+                ttk.Button(row, text="Restart now", style="Accent.TButton", command=self.restart_app).pack(side="left")
+                hint = "Restart the app to use the new version."
+            elif self.app_progress:
+                self.app_bar = ttk.Progressbar(row, length=px(380), maximum=max(1, self.app_progress[1]))
+                self.app_bar.pack(side="left")
+                self.app_bar_text = ttk.Label(row, style="Muted.TLabel")
+                self.app_bar_text.pack(side="left", padx=px(10))
+                self._tick_download()
+            elif FROZEN:
+                hint = "Download the new version from the release page."
+            elif asset:
+                ttk.Button(row, text=f"Update to {r['version']}", style="Accent.TButton",
+                           command=self.install_app).pack(side="left")
+                hint = (f"Downloads {APP_FILE} ({max(1, round(asset[0] / 1024))} KB) from GitHub "
+                        f"and replaces {Path(__file__).name}.")
+            else:
+                hint = "This release doesn't have the Python version."
+            if hint:
+                pad = px(10) if row.winfo_children() else 0
+                ttk.Label(row, text=hint, style="Muted.TLabel").pack(side="left", padx=pad)
+            if self.install_error:
+                ttk.Label(body, text=f"Couldn't update the app: {self.install_error}", style="Bad.TLabel",
+                          wraplength=px(900), justify="left").pack(anchor="w", pady=(px(6), 0))
+        link = ttk.Label(body, text="Open the release page", style="Link.TLabel", cursor="hand2")
+        link.pack(anchor="w", pady=(px(10), 0))
+        link.bind("<Button-1>", lambda _e: webbrowser.open(r["page"]))
+        ttk.Label(body, text="Release notes", style="Muted.TLabel").pack(anchor="w", pady=(px(14), px(6)))
+        card = ttk.Frame(body, style="Card.TFrame", padding=1)
+        card.pack(fill="both", expand=True, pady=(0, px(4)))
+        notes = tk.Text(card, wrap="word", relief="flat", background=PANEL, foreground=FG, padx=px(12),
+                        pady=px(10), highlightthickness=0, borderwidth=0, insertbackground=FG,
+                        selectbackground=SELECT, selectforeground=FG, cursor="arrow", height=8,
+                        font=tkfont.nametofont("TkDefaultFont"))
+        bar = ttk.Scrollbar(card, orient="vertical", command=notes.yview)
+        notes.configure(yscrollcommand=bar.set)
+        bar.pack(side="right", fill="y")
+        notes.pack(side="left", fill="both", expand=True)
+        self._fill_notes(notes, r["notes"])
+
+    def _fill_notes(self, notes, text):
+        px, strong, heading = self.px, self._fonts[1], self._fonts[2]
+        indent = tkfont.nametofont("TkDefaultFont").measure("•  ")
+        notes.tag_configure("muted", foreground=MUTED)
+        notes.tag_configure("heading", font=heading, spacing1=px(2), spacing3=px(4))
+        notes.tag_configure("strong", font=strong)
+        notes.tag_configure("code", font=tkfont.nametofont("TkFixedFont"), background=RAISED)
+        notes.tag_configure("bullet", lmargin2=indent, spacing3=px(2))
+        lines = note_lines(text)
+        if not lines:
+            notes.insert("end", "No release notes.", ("muted",))
+        for block, spans in lines:
+            if block == "gap":
+                notes.insert("end", "\n")
+                continue
+            tags = (block,) if block in ("heading", "bullet") else ()
+            if block == "bullet":
+                notes.insert("end", "•  ", tags)
+            for kind, part in spans:
+                extra = () if kind == "plain" or (kind == "strong" and block == "heading") else (kind,)
+                notes.insert("end", part, tags + extra)
+            notes.insert("end", "\n", tags)
+        notes.configure(state="disabled")
+
+    def _watch_app(self):
+        if not self._app_polling:
+            self._app_polling = True
+            self.after(100, self._poll_app)
+
+    def _poll_app(self):
+        while True:
+            try:
+                kind, payload = self._app_queue.get_nowait()
+            except queue.Empty:
+                break
+            self._app_message(kind, payload)
+        if self.app_progress:
+            self._tick_download()
+        if self.checking_app or self.app_progress:
+            self.after(100, self._poll_app)
+        else:
+            self._app_polling = False
+
+    def _tick_download(self):
+        if self.app_bar is None or not self.app_progress:
+            return
+        done, total = self.app_progress
+        self.app_bar.configure(value=done)
+        kb = lambda n: max(0, round(n / 1024))
+        self.app_bar_text.configure(text=f"Downloading… {kb(done)} of {kb(total)} KB")
+
+    def check_app(self):
+        if self.checking_app:
+            return
+        self.checking_app = self.checked_app = True
+        self.release_error = None
+        threading.Thread(target=self._release_worker, daemon=True).start()
+        self._render_app()
+        self._watch_app()
+
+    def _release_worker(self):
+        try:
+            self._app_queue.put(("release", latest_release()))
+        except Exception as e:
+            self._app_queue.put(("release_error", reason(e)))
+
+    def install_app(self):
+        r = self.release
+        if not r or APP_FILE not in r["assets"] or self.app_progress:
+            return
+        size, url = r["assets"][APP_FILE]
+        target = Path(__file__).resolve()
+        self.install_error = None
+        self.app_progress = [0, size]
+        threading.Thread(target=self._install_worker, args=(url, size, target, self.app_progress),
+                         daemon=True).start()
+        self.say(f"Downloading version {r['version']}…")
+        self._render_app()
+        self._watch_app()
+
+    def _install_worker(self, url, size, target, progress):
+        tmp = target.with_name(target.name + ".download")
+        try:
+            download_file(url, size, tmp, progress)
+            install_script(tmp, target)
+            self._app_queue.put(("installed", target))
+        except Exception as e:
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+            self._app_queue.put(("install_error", reason(e)))
+
+    def _app_message(self, kind, payload):
+        if kind == "release":
+            self.checking_app, self.release = False, payload
+            if _newer(payload["tag"], __version__):
+                self.say(f"Version {payload['version']} of the app is available on the App updates tab.")
+            else:
+                self.say(f"You have the latest version of the app ({__version__}).")
+        elif kind == "release_error":
+            self.checking_app, self.release_error = False, payload
+            self.log(f"Couldn't check for app updates: {payload}")
+            self.say("Couldn't check for app updates; see the App updates tab.")
+        elif kind == "installed":
+            self.app_progress, self.installed = None, payload
+            self.note(f"Updated to version {self.release['version']}. Restart the app to use it.")
+        elif kind == "install_error":
+            self.app_progress, self.install_error = None, payload
+            self.log(f"Couldn't update the app: {payload}")
+            self.say("Couldn't update the app; see the App updates tab.")
+        self._render_app()
+
+    def restart_app(self):
+        if not self.installed:
+            return
+        if self.ws.changed and not messagebox.askyesno(
+                "Unsaved changes", f"Restart and discard {plural(len(self.ws.changed), 'unsaved change')}?",
+                parent=self):
+            return
+        try:
+            restart_script(self.installed)
+        except OSError as e:
+            return messagebox.showerror("Couldn't restart",
+                                        f"{e}. Close the app and open it again to use the new version.", parent=self)
+        self.destroy()
 
     def say(self, msg):
         self.status.set(msg)
@@ -1975,7 +2339,7 @@ class App(tk.Tk):
             m = self.ws.mods.get(name) or ModInfo(name)
             latest = m.latest[0] if m.latest else "—"
             tag = ("new",) if m.latest and m.latest[1] == "new" else (() if m.loaded else ("dim",))
-            values = (name + ("  (found)" if m.auto else ""), self._config_text(m),
+            values = (name + ("  (found)" if m.auto and not name.endswith("(found)") else ""), self._config_text(m),
                       f"{len(m.settings):,}" if m.loaded else "—",
                       "—" if m.auto or not m.loaded else m.shared,
                       by_mod.get(name, 0) if m.loaded else "—", m.installed or "not installed", latest)
@@ -2129,7 +2493,7 @@ class App(tk.Tk):
             self.priorities.area = next(iter(self.ws.choices))
         self.priorities.rebuild()
         self.after_change()
-        self.note(f"Minecraft {version} selected: setting names and Check for updates now follow it.")
+        self.note(f"Minecraft {version} selected: setting names and Check for mod updates now follow it.")
 
     def check_updates(self):
         jars = {m.name: (m.installed, m.jar) for m in self.ws.mods.values() if m.jar}
@@ -2155,7 +2519,7 @@ class App(tk.Tk):
         self.btn_updates.state(["!disabled"])
         if version != self.game_version:
             return self.say(f"That check was for Minecraft {version}. "
-                            f"Click Check for updates again for {self.game_version}.")
+                            f"Click Check for mod updates again for {self.game_version}.")
         if kind == "error":
             self.log(f"Update check failed: {payload}")
             return self.say("Update check failed; see Activity.")
