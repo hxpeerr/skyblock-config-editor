@@ -10,4 +10,4 @@ The exe isn't code-signed, so the first time you run it Windows may show "Window
 
 SHA-256 of `SkyBlockConfigManager.exe`: `{sha256}`
 
-Built from this tag on GitHub's Windows runners with Python {python} and PyInstaller {pyinstaller}. To build it yourself, run `packaging\build_exe.bat`.
+Built from this tag on GitHub's Windows runners with Python {python} and PyInstaller {pyinstaller}, with PyInstaller's bootloader compiled from source. To build it yourself, run `packaging\build_exe.bat`.
