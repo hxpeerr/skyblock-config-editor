@@ -59,5 +59,5 @@ The first time a file is saved, the original is copied next to it as `<name>.bak
 * **A mod says "not found":** Make sure you opened the right `config` folder.
 * **Every mod says "not installed":** The app reads mod versions from the `mods` folder next to your `config` folder.
 * **A file wasn't saved:** Minecraft was probably still open. Close it, click **Reload**, and make your changes again.
-* **Your antivirus flags the .exe:** This is a false alarm that's common for Python apps packaged with PyInstaller. Since 3.4.0, Microsoft Defender and most antivirus programs don't flag it. You can also use the `.py` file instead.
+* **Your antivirus flags the .exe:** This is a false positive that's common for Python apps packaged with PyInstaller. Since 3.4.0, Microsoft Defender and most antivirus programs don't flag it. You can also use the `.py` file instead.
 * **Something else went wrong:** The **Activity** log on the Overview tab has the details. Include them when you [open an issue](../../issues/new).
