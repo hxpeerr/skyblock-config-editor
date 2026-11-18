@@ -4,10 +4,11 @@ use std::sync::Arc;
 
 use indexmap::IndexMap;
 use scm::features::{FeatureSet, Source};
+use scm::selfupdate::note_lines;
 use scm::text::{fmt, is_debug_segment, make_label, words};
 use scm::updates::update_status;
 use scm::value::{parse_value, type_name};
-use scm::versions::State;
+use scm::versions::{newer, State};
 use scm::workspace::Workspace;
 use serde_json::{json, Map, Value};
 
@@ -90,6 +91,8 @@ fn text_cases(path: &str) -> Value {
         "debug": list("debug").iter().map(|s| is_debug_segment(s.as_str().unwrap())).collect::<Vec<_>>(),
         "words": list("words").iter().map(|s| words(s.as_str().unwrap())).collect::<Vec<_>>(),
         "type": list("parse").iter().map(|c| type_name(&c[1])).collect::<Vec<_>>(),
+        "notes": list("notes").iter().map(|s| json!(note_lines(s.as_str().unwrap()).iter().map(|l| (l.block, &l.spans)).collect::<Vec<_>>())).collect::<Vec<_>>(),
+        "newer": list("newer").iter().map(|c| newer(c[0].as_str().unwrap(), c[1].as_str().unwrap())).collect::<Vec<_>>(),
     })
 }
 

@@ -3,6 +3,7 @@ pub mod fsutil;
 pub mod jars;
 pub mod jsonc;
 pub mod prefs;
+pub mod selfupdate;
 pub mod text;
 pub mod updates;
 pub mod value;

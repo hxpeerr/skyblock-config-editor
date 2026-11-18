@@ -8,7 +8,7 @@ Running several Hypixel Skyblock mods at once usually crowds your screen with du
 * **Edit any setting** from your SkyBlock mods, not just the shared ones. Debug settings are locked.
 * **Works with your game version:** pick your Minecraft version and the app uses the setting names your mods have in it.
 * **Finds other SkyBlock mods** and their settings on its own, even if they aren't supported yet.
-* **Stays up to date:** checks Modrinth and CurseForge for newer versions of your mods, and downloads new mods and renamed settings without a new release.
+* **Stays up to date:** checks Modrinth and CurseForge for newer versions of your mods, downloads new mods and renamed settings without a new release, and updates itself from the **App updates** tab.
 
 ## Download
 
@@ -27,10 +27,12 @@ Get these from the [latest release](../../releases/latest):
 
 1. **Close Minecraft:** the game saves its settings when it closes, which would undo your changes.
 2. **Open the app:** it finds your `config` folder on its own. If it doesn't, click **Browse…** and pick it.
-3. **Overview tab:** pick your **Minecraft version**. **Check for updates** shows newer versions of your mods.
+3. **Overview tab:** pick your **Minecraft version**. **Check for mod updates** shows newer versions of your mods.
 4. **Priorities tab:** for each area, pick a **Prioritized mod**. Its features stay on, and the same features in your other mods are turned off. To change a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
 5. **Shared and Unique tabs:** look over your settings, and double-click one to change it.
 6. **Save:** click **Resolve conflicts** to apply your choices, then **Save changes** (or press `Ctrl+S`).
+
+To update the app, open the **App updates** tab. It shows the latest release on GitHub: click **Update to …**, then **Restart now**.
 
 ## Supported Mods
 
