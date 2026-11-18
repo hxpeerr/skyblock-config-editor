@@ -59,6 +59,14 @@ Here are the 13 areas of the game and examples of the shared features they inclu
 | Inventory | 6 | Inventory buttons, keep cursor position, anvil helper, experiment solvers, … |
 | Misc | 8 | Etherwarp overlay, auto sprint, wardrobe keybinds, loadout keybinds, … |
 
+## Requesting a Mod
+
+Using a Fabric SkyBlock mod that isn't listed above? [Open an issue](../../issues/new) to ask for it to be added. To help get it supported quickly, include:
+
+* **Mod name and link:** The mod's Modrinth, CurseForge, or GitHub page.
+* **Config file:** Where the mod saves its settings inside your `config` folder, like `examplemod/config.json`.
+* **Shared features:** Any features it has in common with the supported mods, like a dungeon map or a Diana burrow guesser, if you know them.
+
 ## How to Use It
 
 1. **Close Minecraft:** The game saves its settings when it closes, which would undo any changes you make here.
