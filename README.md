@@ -1,6 +1,6 @@
 # SkyBlock Config Manager
 
-Running several Fabric SkyBlock mods at once usually means duplicate features crowding your screen: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
+Running several Hypixel Skyblock mods at once usually means duplicate features crowding your screen: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
 
 * **83 shared features:** Covers 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
 * **You pick which mod does what:** Choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
@@ -58,7 +58,7 @@ Here are the 13 parts of the game and examples of the shared features they inclu
 
 ## Requesting a Mod
 
-Using a Fabric SkyBlock mod that isn't on the list? [Open an issue](../../issues/new) to ask for it to be added. To help get it set up quickly, include:
+Using a mod that isn't on the list? [Open an issue](../../issues/new) to ask for it to be added. Make sure to include:
 
 * **Mod name and link:** A link to the mod's Modrinth, CurseForge, or GitHub page.
 
@@ -77,7 +77,7 @@ If the main mod you picked for an area doesn't have a certain feature, the app k
 ## Planned Features
 
 * **Setting names that adjust to your game version:** Uses the right setting names for whichever Minecraft version you pick, so shared features still populate even if a mod renamed them in an update.
-* **Automatic support for new mods:** Finds all of your installed SkyBlock mods, their config files, and their settings on its own, even if it isn't supported yet.
+* **Automatic support for new mods:** Finds all of your installed  mods, their config files, and their settings on its own, even if it isn't supported yet.
 
 ## Keeping Your Configs Safe
 
