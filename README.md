@@ -6,7 +6,7 @@ Running several Hypixel Skyblock mods at once usually means duplicate features c
 * **You pick which mod does what:** Choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
 * **Preview every change:** Nothing is written to your files until you click **Save changes**, so you can look over every current and recommended value first.
 * **Safe saving:** Original files are backed up before saving, and the app will never overwrite a file if the game changed it while the app was open.
-* **Edit any setting:** Search, filter, and change any setting from your SkyBlock mods, not just the shared ones.
+* **Edit any setting:** Search, filter, and change any setting from your SkyBlock mods, not just the shared ones. Debug settings are locked so they can't be changed.
 * **Update checker:** Shows which version of each mod you have installed and checks Modrinth and CurseForge for newer builds for your Minecraft version.
 * **Setting names that adjust to your game version:** Uses the right setting names for whichever Minecraft version you pick, so shared features still populate even if a mod renamed them in an update.
 * **Automatic support for new mods:** Finds your other installed Hypixel SkyBlock mods, their config files, and their settings on its own, even if they aren't supported yet, so you can browse and edit them.
@@ -74,7 +74,7 @@ Until it's added, the app still finds other Hypixel SkyBlock mods on its own and
 2. **Open the app:** It finds your `config` folder on its own (see [Finding Your Configs](#finding-your-configs)), so the easiest place for the .exe is your `.minecraft` folder or your launcher's instance folder. If it can't find the folder or picks the wrong one, click **Browse…**, or paste the folder's location into the **Config folder** box and press Enter.
 3. **Check the Overview tab:** Each mod gets a row showing its config file, how many settings it has, how many of them are shared with other mods, how many don't match your choices yet (conflicts), and which version is installed. Mods the app found on its own are listed last, marked "(found)". Pick your **Minecraft version**, then click **Check for updates** to see if Modrinth or CurseForge has a newer build for your game. The **Activity** log underneath lists what the app has done, including any files it couldn't read.
 4. **Pick your Priorities:** The list on the left shows how many conflicts each area has (✓ when there are none). For each area, choose a **Prioritized mod**. That mod's features will stay on, and duplicate features in your other mods will be turned off; the **Turns off** column shows which mods lose each feature. To make an exception for a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
-5. **View or edit settings:** The **Shared** tab lists every overlapping setting with its current and recommended value, and highlights any that don't match your choices. The **Unique** tab lists everything else. Both tabs have a search box, an area or mod filter, and a **Conflicts only** checkbox. Double-click a `true`/`false` setting (or select it and press Enter) to flip it, or double-click any other setting to type a new value; the app checks that it fits the setting, like a whole number or a JSON list. **Use recommended** fixes just the selected setting. Each tab shows up to 2,500 settings at a time, so search to narrow down big lists.
+5. **View or edit settings:** The **Shared** tab lists every overlapping setting with its current and recommended value, and highlights any that don't match your choices. The **Unique** tab lists everything else. Both tabs have a search box, an area or mod filter, and a **Conflicts only** checkbox. Double-click a `true`/`false` setting (or select it and press Enter) to flip it, or double-click any other setting to type a new value; the app checks that it fits the setting, like a whole number or a JSON list. **Use recommended** fixes just the selected setting. Debug settings are shown in gray and can't be edited. Each tab shows up to 2,500 settings at a time, so search to narrow down big lists.
 6. **Apply your choices:** Click **Resolve conflicts** to apply all recommended changes at once, or **Apply area** on the Priorities tab to update just one area. Nothing is saved to your files yet; the number of unsaved changes is shown in the bottom-right corner.
 7. **Save and play:** Press `Ctrl+S` or click **Save changes** to update your files, then start Minecraft.
 
@@ -117,6 +117,10 @@ When it loads your `config` folder, the app also reads the mod files in the `mod
 
 For each one it finds, the app loads the JSON and JSONC files in `config` that are named after the mod (like `modname.json` or `modname-config.json`), or every one of those files in a folder named after it. Cache files, backup files, and files over 2 MB are skipped. These mods show up on the Overview tab marked "(found)", and their settings are on the Unique tab, where you can search and edit them like any other setting. They aren't compared with your other mods, since the app doesn't know which of their settings match other mods' features.
 
+### Locked Debug Settings
+
+Debug and developer settings are shown in gray with the status "locked (debug)". You can't edit them, nothing is recommended for them, and **Resolve conflicts** never changes them. A setting is locked when it's in a debug or developer section, like SkyHanni's Dev category, Skyblocker's Debug category, or Firmament's developer settings, or when its own name only says it's a debug option, like the Debug option in NoFrills' Middle Click Override or SkyblockAddons' Developer Mode. This works the same way for mods the app finds on its own. Settings that are only about Minecraft's F3 debug screen, like SkyHanni's **Hide GUI in Debug Menu**, are normal features, so you can still edit them.
+
 ### Checking for Updates
 
 * **Installed version:** The **Installed** column shows the version inside each mod's `.jar` file in the `mods` folder next to `config`.
@@ -147,6 +151,7 @@ If both files exist, the .exe uses whichever was saved last, so switching from t
 
 * **A mod says "not found" on the Overview tab:** The app couldn't find its config file in the usual spot. Make sure you opened the right `config` folder. With the Python version, you can also add the file's location to `MODS` at the top of `skyblock_config_manager.py`.
 * **A mod says "unreadable":** Its config file isn't valid JSON or is bigger than 25 MB. The Activity log on the Overview tab shows the exact problem.
+* **A setting is gray and can't be edited:** It's a debug or developer setting, which the app locks. See [Locked Debug Settings](#locked-debug-settings).
 * **Every mod says "not installed":** The app checks mod versions by looking at the `.jar` files in the `mods` folder right next to your `config` folder.
 * **A SkyBlock mod you have isn't found:** The app can only find mods whose config files are JSON or JSONC and named after the mod. [Request it](#requesting-a-mod) so it can be added properly.
 * **The update check failed:** Make sure you're online and try again. The Activity log shows what went wrong.
