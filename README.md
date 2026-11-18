@@ -64,8 +64,6 @@ Using a Fabric SkyBlock mod that isn't on the list? [Open an issue](../../issues
 * **Config file:** Where the mod saves its settings inside your `config` folder (like `examplemod/config.json`).
 * **Shared features:** Any features it has in common with the supported mods (like a dungeon map or a Diana burrow guesser), if you know them.
 
-You can also add a mod yourself—the notes at the top of `skyblock_config_manager.py` explain how. Once you've edited the `.py` file, you can run it directly or build your own `.exe` by double-clicking `packaging\build_exe.bat` (requires Python 3.8 or newer).
-
 ## How to Use It
 
 1. **Close Minecraft:** The game saves its settings when it closes, which would undo any changes you make here.
