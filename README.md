@@ -2,27 +2,35 @@
 
 Running several Hypixel Skyblock mods at once usually crowds your screen with duplicates: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. Skyblock Config Manager reads your mod settings, finds the features that overlap, and keeps each one turned on in only the mod you choose.
 
-* **83 shared features:** Covers 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
-* **You pick which mod does what:** Choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
-* **Safe saving:** Nothing changes until you click **Save changes**, and your original files are backed up first.
-* **Edit any setting:** Search and change any setting from your SkyBlock mods, not just the shared ones. Debug settings are locked.
-* **Update checker:** Checks Modrinth and CurseForge for newer versions of your mods.
-* **Setting names that adjust to your game version:** Uses the right setting names for whichever Minecraft version you pick, so shared features still populate even if a mod renamed them in an update.
-* **Automatic support for new mods:** Finds your other SkyBlock mods and their settings on its own, even if they aren't supported yet.
-* **Mod list updates:** New mods and renamed settings are downloaded on their own, so they work without a new release. You can turn this off on the Overview tab.
+* **83 shared features** across 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
+* **You pick which mod does what:** choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
+* **Safe saving:** nothing changes until you click **Save changes**, and your original files are backed up first.
+* **Edit any setting** from your SkyBlock mods, not just the shared ones. Debug settings are locked.
+* **Works with your game version:** pick your Minecraft version and the app uses the setting names your mods have in it.
+* **Finds other SkyBlock mods** and their settings on its own, even if they aren't supported yet.
+* **Stays up to date:** checks Modrinth and CurseForge for newer versions of your mods, and downloads new mods and renamed settings without a new release.
 
 ## Download
 
-* **Windows:** Download `SkyblockConfigManager.exe` from the [latest release](../../releases/latest), or the `.zip` if your browser blocks the .exe. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
-* **macOS:** Download `SkyblockConfigManager-macOS.zip`, unzip it, and open the app. It isn't signed by Apple, so the first time, right-click it and choose **Open**. If macOS still won't open it, go to **System Settings → Privacy & Security** and click **Open Anyway**.
-* **Linux:** Download `SkyblockConfigManager-Linux.zip`, unzip it, and run `./SkyblockConfigManager`.
-* **Python:** `skyblock_config_manager.py` runs anywhere with Python 3.8 or newer. On Debian or Ubuntu, install Tkinter first with `sudo apt install python3-tk`.
+Get these from the [latest release](../../releases/latest):
 
-```bash
-python3 skyblock_config_manager.py
-```
+| System | File | First time |
+|---|---|---|
+| Windows 10 or 11 | `SkyblockConfigManager.exe`, or the `.zip` if your browser blocks the .exe | If "Windows protected your PC" shows up, click **More info**, then **Run anyway**. |
+| macOS 10.13 or newer | `SkyblockConfigManager-macOS.zip` | Unzip it, right-click the app and choose **Open**. If macOS still won't open it, click **Open Anyway** in **System Settings → Privacy & Security**. |
+| Linux | `SkyblockConfigManager-Linux.zip` | Unzip it and run `./SkyblockConfigManager`. |
+| Anything with Python 3.8+ | `skyblock_config_manager.py` | Run `python3 skyblock_config_manager.py`. On Debian or Ubuntu, install Tkinter first with `sudo apt install python3-tk`. |
 
 *Do note that only the exe and Python files have been tested on Windows 11. I will test it on Linux at a later date; unable to test on macOS as my laptop is broken.*
+
+## How to Use It
+
+1. **Close Minecraft:** the game saves its settings when it closes, which would undo your changes.
+2. **Open the app:** it finds your `config` folder on its own. If it doesn't, click **Browse…** and pick it.
+3. **Overview tab:** pick your **Minecraft version**. **Check for updates** shows newer versions of your mods.
+4. **Priorities tab:** for each area, pick a **Prioritized mod**. Its features stay on, and the same features in your other mods are turned off. To change a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
+5. **Shared and Unique tabs:** look over your settings, and double-click one to change it.
+6. **Save:** click **Resolve conflicts** to apply your choices, then **Save changes** (or press `Ctrl+S`).
 
 ## Supported Mods
 
@@ -40,18 +48,7 @@ python3 skyblock_config_manager.py
 
 These are the Fabric versions of each mod, for Minecraft 1.21.5 to 26.3. Config files are read from your `.minecraft/config` folder.
 
-## Requesting a Mod
-
 Using a mod that isn't on the list? [Open an issue](../../issues/new) with a link to its Modrinth, CurseForge, or GitHub page.
-
-## How to Use It
-
-1. **Close Minecraft:** The game saves its settings when it closes, which would undo your changes.
-2. **Open the app:** It finds your `config` folder on its own. If it doesn't, click **Browse…** and pick it.
-3. **Overview tab:** Pick your **Minecraft version**. Click **Check for updates** to see newer versions of your mods.
-4. **Priorities tab:** For each area, pick a **Prioritized mod**. Its features stay on, and the same features in your other mods are turned off. To change a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
-5. **Shared and Unique tabs:** Look over your settings. Double-click one to change it.
-6. **Save:** Click **Resolve conflicts** to apply your choices, then **Save changes** (or press `Ctrl+S`).
 
 ## Backups
 
@@ -59,8 +56,12 @@ The first time a file is saved, the original is copied next to it as `<name>.bak
 
 ## Troubleshooting
 
-* **A mod says "not found":** Make sure you opened the right `config` folder.
-* **Every mod says "not installed":** The app reads mod versions from the `mods` folder next to your `config` folder.
+* **A mod says "not found":** make sure you opened the right `config` folder.
+* **Every mod says "not installed":** the app reads mod versions from the `mods` folder next to your `config` folder.
 * **A file wasn't saved:** Minecraft was probably still open. Close it, click **Reload**, and make your changes again.
-* **Your antivirus flags the .exe:** It's a false positive. The .exe is built by GitHub from the source code in this repository, and each release lists its SHA-256 so you can check that you have the same file. You can also use the `.py` file instead.
-* **Something else went wrong:** The **Activity** log on the Overview tab has the details. Include them when you [open an issue](../../issues/new).
+* **Your antivirus flags the .exe:** it's a false positive. The .exe is built by GitHub from the source code in this repository, and each release lists its SHA-256 so you can check that you have the same file. You can also use the `.py` file instead.
+* **Something else went wrong:** the **Activity** log on the Overview tab has the details. Include them when you [open an issue](../../issues/new).
+
+## Updating the Mod List
+
+The mods, features and setting names live in `features.jsonc`. After changing it, raise its `"revision"` number: the app downloads the file from this repository and only switches to a copy with a higher revision than its own.
