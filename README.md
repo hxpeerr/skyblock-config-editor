@@ -13,6 +13,7 @@ Running several Hypixel Skyblock mods at once usually means duplicate features c
 
 * **Windows:** Download `SkyBlockConfigManager.exe` from the [latest release](../../releases/latest) for 64-bit Windows 10 or 11. Everything is in one file with nothing to install. The first time you open it, Windows might show a "Windows protected your PC" pop-up. Just click **More info**, then **Run anyway**.
 * **macOS, Linux, or Windows with Python:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. It only uses built-in Python tools, so you don't need to install anything extra.
+*Do note that only the exe and python files have been tested on windows 11. I will test it on linux at a later date; unable to test on macOS as my laptop is broken.
 
 ```bash
 python3 skyblock_config_manager.py
