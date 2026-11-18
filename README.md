@@ -1,6 +1,6 @@
 # SkyBlock Config Manager
 
-Running several Fabric SkyBlock mods at once usually means duplicate features crowding your screen—two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
+Using several Fabric SkyBlock mods at once usually means duplicate features crowding your screen—two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
 
 * **83 shared features:** Covers 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
 * **You pick which mod does what:** Choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
@@ -73,6 +73,11 @@ Using a Fabric SkyBlock mod that isn't on the list? [Open an issue](../../issues
 7. **Save and play:** Press `Ctrl+S` or click **Save changes** to update your files, then start Minecraft.
 
 If the main mod you picked for an area doesn't have a certain feature, the app keeps that feature on in the first mod on the list that does have it. The app remembers your choices for next time.
+
+## Planned Features
+
+* **Version-specific setting names:** Uses the right setting names for your chosen Minecraft version, so shared features still match even if a mod renamed them between updates.
+* **Automatic mod detection:** Automatically finds any installed SkyBlock mods, their config files, and their settings—even if they aren’t on the supported list yet.
 
 ## Keeping Your Configs Safe
 
