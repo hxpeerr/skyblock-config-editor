@@ -38,7 +38,7 @@ The app looks for these mods inside your `.minecraft/config` folder:
 | [Odin](https://modrinth.com/mod/odin) | `odin/odin-config.json` | 29 |
 | [Skyblock Overhaul (SBO)](https://modrinth.com/mod/skyblock-overhaul) | `SBO/config.jsonc` | 8 |
 
-Settings are based on each mod's Fabric version for Minecraft 26.1.2. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
+Settings are based on each mod's Fabric version for Minecraft 26.1.2. Other versions from 1.21.5 to 26.3 work too: pick yours on the Overview tab. If a mod named a setting differently in your version, that feature just isn't compared for it. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
 
 Here are the 13 areas of the game and examples of the shared features they include:
 
@@ -72,7 +72,7 @@ You can also add a mod yourself: the lists at the top of `skyblock_config_manage
 
 1. **Close Minecraft:** The game saves its settings when it closes, which would undo any changes you make here.
 2. **Open the app:** It looks for your `config` folder on its own—checking the folder you used last time, the folder the app is in, or your normal `.minecraft` folder. If it can't find it, click **Browse…** and pick it yourself.
-3. **Check the Overview tab:** See which mods were found, how many settings overlap, and how many don't match your choices yet. Click **Check for updates** to compare your installed mods with the newest versions on Modrinth.
+3. **Check the Overview tab:** See which mods were found, how many settings overlap, and how many don't match your choices yet. Pick your **Minecraft version**, then click **Check for updates** to compare your installed mods with the newest versions for it on Modrinth.
 4. **Pick your Priorities:** For each area, choose a **Prioritized mod**. That mod's features will stay on, and duplicate features in your other mods will be turned off. To make an exception for a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
 5. **View or edit settings:** The **Shared** tab lists every overlapping setting and highlights conflicts. The **Unique** tab lists everything else. In both tabs, you can double-click a `true`/`false` setting to flip it, or double-click any other setting to type a new value.
 6. **Apply your choices:** Click **Resolve conflicts** to apply all recommended changes at once, or **Apply area** to update just one section. Nothing is saved to your files yet.

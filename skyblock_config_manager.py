@@ -38,8 +38,13 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 from tkinter import font as tkfont
 
-GAME_VERSION = "26.1.2"
 LOADER = "fabric"
+# Minecraft versions in the version menu on the Overview tab, newest first: the ones most of the
+# supported mods have Fabric builds for. "Check for updates" looks for builds for the version
+# you pick. Add new versions here as the mods support them.
+GAME_VERSIONS = ["26.3", "26.2", "26.1.2", "26.1.1", "26.1",
+                 "1.21.11", "1.21.10", "1.21.8", "1.21.7", "1.21.5"]
+GAME_VERSION = "26.1.2"          # picked until you choose another; the FEATURES keys come from it
 MAX_FILE_BYTES = 25 * 1024 * 1024
 ALL = "All"
 OFF = "Off"                       # a feature override meaning "turn it off in every mod"
@@ -771,12 +776,13 @@ def sha1_file(path):
 def version_core(v):
     """Drop the parts that only say which Minecraft version a build is for.
 
-    'v6.11.0+26.1.2' -> '6.11.0', '44.3.0+mc26.1' -> '44.3.0', '0.7.2-beta.3-26.1.X' -> '0.7.2-beta.3'
+    'v6.11.0+26.1.2' -> '6.11.0', '44.3.0+mc26.1' -> '44.3.0', '0.7.2-beta.3-26.1.X' -> '0.7.2-beta.3',
+    '1.4.2-mc1.21.10' -> '1.4.2'
     """
     v = str(v).strip().lower()
     v = v[1:] if v.startswith("v") else v
     v = v.split("+", 1)[0]
-    return re.sub(r"[-_](?:mc-?)?\d{2}\.\d+(?:\.(?:\d+|x))*$", "", v)
+    return re.sub(r"[-_](?:mc-?)?(?:1\.\d{2}|\d{2}\.\d+)(?:\.(?:\d+|x))*$", "", v)
 
 
 def version_key(v):
@@ -813,8 +819,8 @@ def _compare(installed, latest):
     return (f"↑ {latest}", "new") if b > a else ("up to date", "ok")
 
 
-def modrinth_status(jars):
-    """{mod name: (text, state)} for installed jars, against Fabric GAME_VERSION builds only.
+def modrinth_status(jars, game_version=GAME_VERSION):
+    """{mod name: (text, state)} for installed jars, against Fabric builds for game_version only.
 
     First asks Modrinth which project each exact jar file belongs to (by SHA-1), which avoids
     every naming difference. Jars Modrinth doesn't know fall back to the project slug.
@@ -827,7 +833,7 @@ def modrinth_status(jars):
         hashes = dict(zip(names, pool.map(lambda n: sha1_file(jars[n][1]), names)))
     latest = http_json(f"{API}/version_files/update", {
         "hashes": sorted(set(hashes.values())), "algorithm": "sha1",
-        "loaders": [LOADER], "game_versions": [GAME_VERSION]})
+        "loaders": [LOADER], "game_versions": [game_version]})
     if not isinstance(latest, dict):
         latest = {}
     out, fallback = {}, []
@@ -844,14 +850,14 @@ def modrinth_status(jars):
             out[name] = ("not on Modrinth", "missing")
 
     q = urllib.parse.urlencode({"loaders": json.dumps([LOADER]),
-                                "game_versions": json.dumps([GAME_VERSION])})
+                                "game_versions": json.dumps([game_version])})
 
     def by_slug(name):
         slug = urllib.parse.quote(MODS[name]["slug"], safe="")
         try:
             versions = http_json(f"{API}/project/{slug}/version?{q}")
             if not isinstance(versions, list) or not versions:
-                return f"no {GAME_VERSION} build", "missing"
+                return f"no {game_version} build", "missing"
             return _compare(jars[name][0], versions[0]["version_number"])
         except urllib.error.HTTPError as e:
             if e.code == 404:
@@ -1691,6 +1697,8 @@ class App(tk.Tk):
         self.minsize(self.px(920), self.px(560))
         self.configure(background=BG)
         self.prefs = load_prefs()
+        saved = self.prefs.get("game_version")
+        self.game_version = saved if saved in GAME_VERSIONS else GAME_VERSION
         self.ws = Workspace(self.prefs.get("priority"), self.prefs.get("overrides"))
         self._queue = queue.Queue()
         self._style()
@@ -1866,14 +1874,21 @@ class App(tk.Tk):
         px, tab = self.px, self.overview
         bar = ttk.Frame(tab)
         bar.pack(fill="x", pady=(0, px(10)))
-        ttk.Label(bar, text=f"Fabric {GAME_VERSION}", style="Muted.TLabel").pack(side="left")
+        ttk.Label(bar, text="Minecraft version", style="Muted.TLabel").pack(side="left")
+        self.version_var = tk.StringVar(value=self.game_version)
+        box = ttk.Combobox(bar, textvariable=self.version_var, values=GAME_VERSIONS,
+                           state="readonly", width=9)
+        box.pack(side="left", padx=px(8))
+        box.bind("<<ComboboxSelected>>", lambda _e: self.set_game_version(self.version_var.get()))
+        for seq in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
+            box.bind(seq, "break")              # scrolling past it mustn't change the version
         self.btn_updates = ttk.Button(bar, text="Check for updates", command=self.check_updates)
         self.btn_updates.pack(side="right")
 
         cols = (("mod", "Mod", 120, "w", False), ("config", "Config file", 300, "w", True),
                 ("settings", "Settings", 80, "e", False), ("shared", "Shared", 70, "e", False),
                 ("conflicts", "Conflicts", 80, "e", False), ("installed", "Installed", 160, "w", False),
-                ("latest", "Latest for " + GAME_VERSION, 170, "w", False))
+                ("latest", "Latest for " + self.game_version, 170, "w", False))
         card = ttk.Frame(tab, style="Card.TFrame", padding=1)
         card.pack(fill="x")
         self.ov = ttk.Treeview(card, columns=[c[0] for c in cols], show="headings",
@@ -2060,28 +2075,46 @@ class App(tk.Tk):
             return
         self.destroy()
 
+    # ── Minecraft version ──
+    def set_game_version(self, version):
+        """Pick the Minecraft version that "Check for updates" looks for builds for."""
+        if version == self.game_version:
+            return
+        self.game_version = version
+        self.prefs["game_version"] = version
+        save_prefs(self.prefs)
+        self.ov.heading("latest", text=f"Latest for {version}")
+        for m in self.ws.mods.values():
+            m.latest = None                          # those results were for the other version
+        self.update_overview()
+        self.note(f"Minecraft {version} selected: Check for updates now looks for Fabric {version} builds.")
+
     # ── update check (background thread, results handed over through a queue) ──
     def check_updates(self):
         jars = {m.name: (m.installed, m.jar) for m in self.ws.mods.values() if m.jar}
         if not jars:
             return self.say("No mod jars found next to the config folder (../mods).")
+        version = self.game_version
         self.btn_updates.state(["disabled"])
-        self.say(f"Checking Modrinth for Fabric {GAME_VERSION} builds…")
-        threading.Thread(target=self._update_worker, args=(jars,), daemon=True).start()
+        self.say(f"Checking Modrinth for Fabric {version} builds…")
+        threading.Thread(target=self._update_worker, args=(jars, version), daemon=True).start()
         self.after(150, self._poll)
 
-    def _update_worker(self, jars):
+    def _update_worker(self, jars, version):
         try:
-            self._queue.put(("result", modrinth_status(jars)))
+            self._queue.put(("result", version, modrinth_status(jars, version)))
         except Exception as e:                       # network, JSON or API-shape problems
-            self._queue.put(("error", f"{type(e).__name__}: {e}"))
+            self._queue.put(("error", version, f"{type(e).__name__}: {e}"))
 
     def _poll(self):
         try:
-            kind, payload = self._queue.get_nowait()
+            kind, version, payload = self._queue.get_nowait()
         except queue.Empty:
             return self.after(150, self._poll)
         self.btn_updates.state(["!disabled"])
+        if version != self.game_version:             # the version was changed during the check
+            return self.say(f"That check was for Minecraft {version}. "
+                            f"Click Check for updates again for {self.game_version}.")
         if kind == "error":
             self.log(f"Update check failed: {payload}")
             return self.say("Update check failed; see Activity.")
@@ -2094,7 +2127,7 @@ class App(tk.Tk):
         parts = [f"Updates available for {', '.join(new)}."] if new else []
         if failed:
             parts.append(f"Couldn't check {', '.join(failed)}; try again later.")
-        self.note(" ".join(parts) or f"Everything installed is up to date for Fabric {GAME_VERSION}.")
+        self.note(" ".join(parts) or f"Everything installed is up to date for Fabric {version}.")
 
 
 def main():
