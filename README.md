@@ -12,7 +12,7 @@ Running several Hypixel Skyblock mods at once usually crowds your screen with du
 
 ## Download
 
-* **Windows:** Download `SkyBlockConfigManager.exe` from the [latest release](../../releases/latest), or the `.zip` if your browser blocks the .exe. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
+* **Windows:** Download `SkyblockConfigManager.exe` from the [latest release](../../releases/latest), or the `.zip` if your browser blocks the .exe. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
 * **macOS or Linux:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. On Debian or Ubuntu, install Tkinter first with `sudo apt install python3-tk`.
 
 ```bash
@@ -56,8 +56,8 @@ The first time a file is saved, the original is copied next to it as `<name>.bak
 
 ## Troubleshooting
 
-**A mod says "not found":** Make sure you opened the right `config` folder.
+* **A mod says "not found":** Make sure you opened the right `config` folder.
 * **Every mod says "not installed":** The app reads mod versions from the `mods` folder next to your `config` folder.
 * **A file wasn't saved:** Minecraft was probably still open. Close it, click **Reload**, and make your changes again.
-* **Your antivirus flags the .exe:** This is a false alarm that's common for Python apps packaged with PyInstaller. Since 3.4.0, Microsoft Defender and most antivirus programs don't flag it. You can also use the `.py` file instead.
+* **Your antivirus flags the .exe:** This is a false positive that's common for Python apps packaged with PyInstaller. Since 3.4.0, Microsoft Defender and most antivirus programs don't flag it. You can also use the `.py` file instead.
 * **Something else went wrong:** The **Activity** log on the Overview tab has the details. Include them when you [open an issue](../../issues/new).

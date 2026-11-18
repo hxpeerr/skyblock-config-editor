@@ -73,7 +73,7 @@ jobs:
               sys.exit(1)
 
       - name: Build the .exe
-        run: python -m PyInstaller --noconfirm --clean packaging/SkyBlockConfigManager.spec
+        run: python -m PyInstaller --noconfirm --clean packaging/SkyblockConfigManager.spec
 
       - name: Check the .exe starts and loads a config folder
         shell: pwsh
@@ -81,9 +81,9 @@ jobs:
           # A folder laid out like .minecraft: the exe next to a config folder with one mod config.
           $dir = Join-Path $env:RUNNER_TEMP "smoke"
           New-Item -ItemType Directory -Force -Path (Join-Path $dir "config") | Out-Null
-          Copy-Item dist/SkyBlockConfigManager.exe $dir
+          Copy-Item dist/SkyblockConfigManager.exe $dir
           Set-Content -Path (Join-Path $dir "config/skyblocker.json") -Value '{"quickNav": {"enableQuickNav": true}}'
-          $exe = Start-Process -FilePath (Join-Path $dir "SkyBlockConfigManager.exe") -WorkingDirectory $dir -PassThru
+          $exe = Start-Process -FilePath (Join-Path $dir "SkyblockConfigManager.exe") -WorkingDirectory $dir -PassThru
           $null = $exe.Handle                      # keeps the exit code readable later
 
           # Once it has loaded a folder, the app saves its own settings (config_dir) beside the exe.
@@ -98,12 +98,12 @@ jobs:
             if (-not (Test-Path $settings)) { throw "The exe didn't load the test config folder within 2 minutes." }
             $loaded = (Get-Content $settings -Raw | ConvertFrom-Json).config_dir
             if ($loaded -ne (Join-Path $dir "config")) { throw "The exe loaded '$loaded' instead of the test config folder." }
-            $window = Get-Process -Name SkyBlockConfigManager -ErrorAction SilentlyContinue |
+            $window = Get-Process -Name SkyblockConfigManager -ErrorAction SilentlyContinue |
               Where-Object MainWindowTitle | Select-Object -First 1 -ExpandProperty MainWindowTitle
             Write-Host "OK: the exe started and loaded $loaded (window title: '$window')."
           } finally {
             # The one-file exe runs as two processes; stop both.
-            Get-Process -Name SkyBlockConfigManager -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+            Get-Process -Name SkyblockConfigManager -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
           }
 
       - name: Zip it and write the release notes
@@ -111,22 +111,22 @@ jobs:
         run: |
           import hashlib, platform, zipfile
           import PyInstaller
-          exe = "dist/SkyBlockConfigManager.exe"
-          with zipfile.ZipFile("dist/SkyBlockConfigManager.zip", "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-              z.write(exe, "SkyBlockConfigManager.exe")
+          exe = "dist/SkyblockConfigManager.exe"
+          with zipfile.ZipFile("dist/SkyblockConfigManager.zip", "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+              z.write(exe, "SkyblockConfigManager.exe")
           sha256 = hashlib.sha256(open(exe, "rb").read()).hexdigest()
           notes = open("packaging/release_notes.md", encoding="utf-8").read()
           notes = (notes.replace("{sha256}", sha256).replace("{python}", platform.python_version())
                         .replace("{pyinstaller}", PyInstaller.__version__))
           open("dist/release_notes.md", "w", encoding="utf-8").write(notes)
-          print("SHA-256 of SkyBlockConfigManager.exe:", sha256)
+          print("SHA-256 of SkyblockConfigManager.exe:", sha256)
 
       - uses: actions/upload-artifact@v7
         with:
-          name: SkyBlockConfigManager
+          name: SkyblockConfigManager
           path: |
-            dist/SkyBlockConfigManager.exe
-            dist/SkyBlockConfigManager.zip
+            dist/SkyblockConfigManager.exe
+            dist/SkyblockConfigManager.zip
             dist/release_notes.md
           if-no-files-found: error
 
@@ -141,7 +141,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: SkyBlockConfigManager
+          name: SkyblockConfigManager
           path: dist
 
       - name: Create the release, or add the files to one published by hand
@@ -149,7 +149,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          files=(dist/SkyBlockConfigManager.exe dist/SkyBlockConfigManager.zip)
+          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip)
           if body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
             # Published by hand on GitHub: attach the files, and fill in the notes if it has none.
             gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"

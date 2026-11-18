@@ -1,5 +1,5 @@
 @echo off
-rem Builds dist\SkyBlockConfigManager.exe, a portable .exe that runs without Python.
+rem Builds dist\SkyblockConfigManager.exe, a portable .exe that runs without Python.
 rem Building needs Python 3.8+ (python.org) once; double-click this file or run it from a prompt.
 setlocal
 cd /d "%~dp0.."
@@ -13,11 +13,11 @@ echo Installing / updating PyInstaller...
 if errorlevel 1 goto :fail
 
 echo Building...
-%PY% -m PyInstaller --noconfirm --clean packaging\SkyBlockConfigManager.spec
+%PY% -m PyInstaller --noconfirm --clean packaging\SkyblockConfigManager.spec
 if errorlevel 1 goto :fail
 
 echo.
-echo Done: %CD%\dist\SkyBlockConfigManager.exe
+echo Done: %CD%\dist\SkyblockConfigManager.exe
 pause
 exit /b 0
 
