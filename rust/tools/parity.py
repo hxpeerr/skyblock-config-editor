@@ -262,8 +262,8 @@ TEXT_CASES = {
     "label": [["M", "a", ["enabled"]], ["M", "a.b", ["dungeonMap", "enableMap"]], ["M", "x", ["map", "position", "x"]],
               ["M", "x", ["Map", "Pos", "Y"]], ["M", "x", ["a", "A"]], ["M", "x", ["Some Feature", "value"]],
               ["M", "x", ["gui", "TPS"]], ["M", "x", ["one", "two", "three", "color", "r"]], ["M", "x", ["Waypoints"]]],
-    "notes": [open(Path(__file__).resolve().parents[2] / "packaging" / "release_notes.md", encoding="utf-8").read()
-              .replace("{checksums}", "- `SkyblockConfigManager.exe`: `" + "ab" * 32 + "`").replace("{rust}", "Rust 1.100.0"),
+    "notes": [open(Path(__file__).resolve().parents[2] / "packaging" / "release_notes.md", encoding="utf-8").read(),
+              "- **`SkyblockConfigManager.exe`**: Windows 10 or 11. **`SkyblockConfigManager.zip`** is the same file.",
               "<!-- Release notes generated using configuration in .github/release.yml -->\r\n## What's Changed\r\n"
               "* Fix the macOS build by @someone in https://github.com/o/r/pull/19\r\n\r\n\r\n"
               "**Full Changelog**: https://github.com/o/r/compare/v4.0.1...v4.0.2",

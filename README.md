@@ -61,7 +61,7 @@ The first time a file is saved, the original is copied next to it as `<name>.bak
 * **A mod says "not found":** make sure you opened the right `config` folder.
 * **Every mod says "not installed":** the app reads mod versions from the `mods` folder next to your `config` folder.
 * **A file wasn't saved:** Minecraft was probably still open. Close it, click **Reload**, and make your changes again.
-* **Your antivirus flags the .exe:** it's a false positive. The .exe is built by GitHub from the source code in this repository, and each release lists its SHA-256 so you can check that you have the same file. You can also use the `.py` file instead.
+* **Your antivirus flags the .exe:** it's a false positive. The .exe is built by GitHub from the source code in this repository, and the release page shows each file's SHA-256 so you can check that you have the same file. You can also use the `.py` file instead.
 * **Something else went wrong:** the **Activity** log on the Overview tab has the details. Include them when you [open an issue](../../issues/new).
 
 ## Updating the Mod List
