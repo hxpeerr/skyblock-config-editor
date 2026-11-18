@@ -32,13 +32,13 @@ The app looks for these mods inside your `.minecraft/config` folder:
 | [SkyHanni](https://modrinth.com/mod/skyhanni) | `skyhanni/config.json` | 41 |
 | [Skyblocker](https://modrinth.com/mod/skyblocker-liap) | `skyblocker.json` | 49 |
 | [Aaron's Mod](https://modrinth.com/mod/aaron-mod) | `aaron-mod.json` | 5 |
-| [SkyblockAddons](https://modrinth.com/mod/skyblockaddons-unofficial) | `skyblockaddons/configurations.json` | Settings only |
+| [SkyblockAddons](https://modrinth.com/mod/skyblockaddons-unofficial) | `skyblockaddons/configurations.json` | 7 |
 | [SkyOcean](https://modrinth.com/mod/skyocean) | `skyocean/config.jsonc` | 15 |
 | [Firmament](https://modrinth.com/mod/firmament) | `firmament/` (one file per feature) | 4 |
 | [Odin](https://modrinth.com/mod/odin) | `odin/odin-config.json` | 29 |
 | [Skyblock Overhaul (SBO)](https://modrinth.com/mod/skyblock-overhaul) | `SBO/config.jsonc` | 8 |
 
-Settings are based on each mod's Fabric version for Minecraft 26.1.2. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it. You can browse and edit SkyblockAddons settings, though shared features aren't set up for it yet.
+Settings are based on each mod's Fabric version for Minecraft 26.1.2. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
 
 Here are the 13 areas of the game and examples of the shared features they include:
 
