@@ -2,8 +2,6 @@
 
 Running several Fabric SkyBlock mods at once usually means duplicate features crowding your screen—two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
 
-![The Priorities tab: pick which mod handles each area, and override single features](docs/priorities.png)
-
 * **83 shared features:** Covers 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
 * **You pick which mod does what:** Choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
 * **Preview every change:** Nothing changes on your computer until you review the list of current and recommended settings.
@@ -14,7 +12,7 @@ Running several Fabric SkyBlock mods at once usually means duplicate features cr
 ## Download
 
 * **Windows:** Download `SkyBlockConfigManager.exe` from the [latest release](../../releases/latest) for 64-bit Windows 10 or 11. Everything is in one file with nothing to install. The first time you open it, Windows may show a "Windows protected your PC" pop-up—click **More info**, then **Run anyway**.
-* **macOS, Linux, or Windows with Python:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. It uses built-in Python tools, so you don't need to install any extra packages.
+* **macOS, Linux, or Windows with Python:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. It only uses built-in Python tools, so you don't need to install anything extra.
 
 ```bash
 python3 skyblock_config_manager.py
@@ -38,7 +36,7 @@ The app looks for these mods inside your `.minecraft/config` folder:
 | [Odin](https://modrinth.com/mod/odin) | `odin/odin-config.json` | 29 |
 | [Skyblock Overhaul (SBO)](https://modrinth.com/mod/skyblock-overhaul) | `SBO/config.jsonc` | 8 |
 
-Settings are based on each mod's Fabric version for Minecraft 26.1.2. Other versions from 1.21.5 to 26.3 work too: pick yours on the Overview tab. If a mod named a setting differently in your version, that feature just isn't compared for it. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
+Settings are based on each mod's Fabric version for Minecraft 26.1.2, and versions from 1.21.5 to 26.3 work too—just pick your version on the Overview tab. If a mod uses a different name for a setting in your version, the app simply skips comparing that feature for that mod. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
 
 Here are the 13 areas of the game and examples of the shared features they include:
 
@@ -60,21 +58,21 @@ Here are the 13 areas of the game and examples of the shared features they inclu
 
 ## Requesting a Mod
 
-Using a Fabric SkyBlock mod that isn't listed above? [Open an issue](../../issues/new) to ask for it to be added. To help get it supported quickly, include:
+Using a Fabric SkyBlock mod that isn't on the list? [Open an issue](../../issues/new) to ask for it to be added. To help get it set up quickly, include:
 
-* **Mod name and link:** The mod's Modrinth, CurseForge, or GitHub page.
-* **Config file:** Where the mod saves its settings inside your `config` folder, like `examplemod/config.json`.
-* **Shared features:** Any features it has in common with the supported mods, like a dungeon map or a Diana burrow guesser, if you know them.
+* **Mod name and link:** A link to the mod's Modrinth, CurseForge, or GitHub page.
+* **Config file:** Where the mod saves its settings inside your `config` folder (like `examplemod/config.json`).
+* **Shared features:** Any features it has in common with the supported mods (like a dungeon map or a Diana burrow guesser), if you know them.
 
-You can also add a mod yourself: the lists at the top of `skyblock_config_manager.py` explain how. Then run your edited `.py` file, or build your own `.exe` by double-clicking `packaging\build_exe.bat` (this needs Python 3.8 or newer).
+You can also add a mod yourself—the notes at the top of `skyblock_config_manager.py` explain how. Once you've edited the `.py` file, you can run it directly or build your own `.exe` by double-clicking `packaging\build_exe.bat` (requires Python 3.8 or newer).
 
 ## How to Use It
 
 1. **Close Minecraft:** The game saves its settings when it closes, which would undo any changes you make here.
 2. **Open the app:** It looks for your `config` folder on its own—checking the folder you used last time, the folder the app is in, or your normal `.minecraft` folder. If it can't find it, click **Browse…** and pick it yourself.
-3. **Check the Overview tab:** See which mods were found, how many settings overlap, and how many don't match your choices yet. Pick your **Minecraft version**, then click **Check for updates** to compare your installed mods with the newest versions for it on Modrinth.
+3. **Check the Overview tab:** See which mods were found, how many settings are shared across your mods, and how many don't match your choices yet. Pick your **Minecraft version** and click **Check for updates** to see if Modrinth has newer versions for your game.
 4. **Pick your Priorities:** For each area, choose a **Prioritized mod**. That mod's features will stay on, and duplicate features in your other mods will be turned off. To make an exception for a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
-5. **View or edit settings:** The **Shared** tab lists every overlapping setting and highlights conflicts. The **Unique** tab lists everything else. In both tabs, you can double-click a `true`/`false` setting to flip it, or double-click any other setting to type a new value.
+5. **View or edit settings:** The **Shared** tab lists every overlapping setting and highlights any that don't match your choices. The **Unique** tab lists everything else. In both tabs, you can double-click a `true`/`false` setting to flip it, or double-click any other setting to type a new value.
 6. **Apply your choices:** Click **Resolve conflicts** to apply all recommended changes at once, or **Apply area** to update just one section. Nothing is saved to your files yet.
 7. **Save and play:** Press `Ctrl+S` or click **Save changes** to update your files, then start Minecraft.
 
@@ -84,9 +82,9 @@ If the main mod you picked for an area doesn't have a certain feature, the app k
 
 * **Automatic backups:** The first time a file is saved after you open the app, a backup copy of the original is saved right next to it as `<name>.bak_<date>_<time>`. To undo your changes, delete the updated file and remove `.bak_<date>_<time>` from the backup's name.
 * **No overwriting while the game is open:** If a file was changed on your computer after you loaded it (usually because Minecraft was still running), the app won't save over it. Close the game, click **Reload**, and make your changes again.
-* **Note awareness:** Notes written inside `.jsonc` files can't be kept when saving, so the app warns you which files have them and asks before saving.
+* **Heads-up on file notes:** Extra notes written inside `.jsonc` files can't be kept when saving, so the app lets you know which files have them and asks before saving.
 
 ## Troubleshooting
 
-* **A mod says "not found" on the Overview tab:** Its config file isn't where the app expects it. Make sure you opened the right `config` folder, or add the file's location to `MODS` in the script.
+* **A mod says "not found" on the Overview tab:** The app couldn't find its config file in the usual spot. Make sure you opened the right `config` folder, or add the file's location to `MODS` at the top of `skyblock_config_manager.py`.
 * **Every mod says "not installed":** The app checks mod versions by looking at the `.jar` files in the `mods` folder right next to your `config` folder.
