@@ -13,7 +13,7 @@ Python installed: run packaging/build_exe.bat (recipe in packaging/SkyBlockConfi
 """
 from __future__ import annotations
 
-__version__ = "3.2.0"
+__version__ = "3.3.0"
 
 import hashlib
 import json
@@ -57,24 +57,27 @@ FROZEN = bool(getattr(sys, "frozen", False))      # running as the packaged .exe
 #   dir:  the mod keeps one JSON file per feature in that folder; every file in it is loaded.
 #   id:   the mod id inside its jar (fabric.mod.json), used to find the installed version.
 #   slug: the Modrinth project, used by "Check for updates".
+#   curseforge: the CurseForge project id, for mods published there too ("Check for updates").
+# Hypixel SkyBlock mods that aren't listed here are found automatically; their settings can be
+# browsed and edited, but they aren't compared with other mods.
 MODS = {
     "NoFrills":       {"files": ["NoFrills/Configuration.json", "Configuration.json"],
                        "id": "nofrills", "slug": "nofrills"},
     "SkyHanni":       {"files": ["skyhanni/config.json", "config.json"],
                        "id": "skyhanni", "slug": "skyhanni"},
     "Skyblocker":     {"files": ["skyblocker.json", "skyblocker_optimized.json"],
-                       "id": "skyblocker", "slug": "skyblocker-liap"},
+                       "id": "skyblocker", "slug": "skyblocker-liap", "curseforge": 936169},
     "AaronsMod":      {"files": ["aaron-mod.json"],
                        "id": "aaron-mod", "slug": "aaron-mod"},
     "SkyBlockAddons": {"files": ["skyblockaddons/configurations.json", "configurations.json"],
                        "id": "skyblockaddons", "slug": "skyblockaddons-unofficial"},
     "SkyOcean":       {"files": ["skyocean/config.jsonc", "skyocean_config.json", "skyocean.json"],
-                       "id": "skyocean", "slug": "skyocean"},
+                       "id": "skyocean", "slug": "skyocean", "curseforge": 1353380},
     "Firmament":      {"dir": "firmament", "files": ["firmament.json"],
                        "id": "firmament", "slug": "firmament"},
     "Odin":           {"files": ["odin/odin-config.json", "odin-config.json"],
                        "id": "odin", "slug": "odin"},
-    "SBO":            {"files": ["SBO/config.jsonc", "config.jsonc"],
+    "SBO":            {"files": ["sbo/config.jsonc", "SBO/config.jsonc", "config.jsonc"],
                        "id": "sbo", "slug": "skyblock-overhaul"},
 }
 
@@ -89,9 +92,13 @@ AREAS = ["Dungeons", "Kuudra", "Slayers", "Farming", "Mining", "Foraging", "Hunt
 #  * None means the mod offers the feature but has no single on/off switch; it still competes.
 #  * A mod only competes if one of its switches is actually in your config, so unknown
 #    keys are harmless.
+#  * A dict means the mod renamed the switch between Minecraft versions: each key is a version
+#    or a range ("1.21.5-1.21.10") and gives the name used there; "other" covers the rest.
+#    The name for the version picked on the Overview tab is tried first, then the others, so a
+#    mod build that doesn't match the picked version is still found.
 #  * Order matters: an area's default owner is the first mod listed for it, and if the owner
 #    doesn't offer a feature, the first listed mod that does keeps it.
-# Keys were read from each mod's 26.1.2 Fabric build.
+# Keys were read from each mod's Fabric builds for every version in GAME_VERSIONS.
 FEATURES = [
     # ── Dungeons ──
     ("Dungeons", "Dungeon map", {
@@ -135,7 +142,7 @@ FEATURES = [
     ("Dungeons", "Wither door / key highlight", {
         "Odin": "Door Highlight.enabled",
         "Skyblocker": "dungeons.highlightDoorKeys",
-        "NoFrills": "keyHighlight.enabled"}),
+        "NoFrills": "witherKeyHighlight.enabled"}),
     ("Dungeons", "Secret chime", {
         "NoFrills": "secretChime.enabled",
         "SkyHanni": "dungeon.secretChime.enabled"}),
@@ -212,15 +219,17 @@ FEATURES = [
     # ── Farming ──
     ("Farming", "Pest finder", {
         "SkyHanni": ["garden.pests.pestFinder.showDisplay", "garden.pests.pestFinder.showPlotInWorld"],
-        "Skyblocker": "farming.pestHighlighter.enabled",
+        "Skyblocker": {"1.21.5-1.21.8": "farming.garden.pestHighlighter",
+                       "other": "farming.pestHighlighter.enabled"},
         "SkyOcean": "*garden.deskPestHighlight"}),
     ("Farming", "Visitor helper", {
         "SkyHanni": "garden.visitors.shoppingList.enabled",
-        "Skyblocker": "farming.visitorHelper.enabled"}),
+        "Skyblocker": {"1.21.5-1.21.8": "farming.visitorHelper.visitorHelper",
+                       "other": "farming.visitorHelper.enabled"}}),
     ("Farming", "Glowing mushrooms", {
         "SkyHanni": "misc.glowingMushroomHighlighter.enabled",
         "Skyblocker": "otherLocations.barn.enableGlowingMushroomHelper",
-        "NoFrills": "glowingMushroom.enabled"}),
+        "NoFrills": "shroomHighlight.enabled"}),
     # ── Mining ──
     ("Mining", "Metal detector solver", {
         "SkyHanni": "mining.metalDetector.metalDetectorSolver",
@@ -254,8 +263,10 @@ FEATURES = [
         "NoFrills": "endNodeHighlight.enabled"}),
     # ── Foraging ──
     ("Foraging", "Moonglade beacon solver", {
-        "SkyHanni": "foraging.foragingBeacon.enabled",
-        "Skyblocker": "foraging.moongladeMarsh.enableTunerSolver",
+        "SkyHanni": {"1.21.5-1.21.10": "foraging.moongladeBeacon.enabled",
+                     "other": "foraging.foragingBeacon.enabled"},
+        "Skyblocker": {"1.21.5-1.21.11": "foraging.galatea.enableTunerSolver",
+                       "other": "foraging.moongladeMarsh.enableTunerSolver"},
         "NoFrills": "beaconTuningSolver.enabled"}),
     ("Foraging", "Mute phantoms", {
         "SkyHanni": "foraging.mutePhantoms",
@@ -286,7 +297,7 @@ FEATURES = [
         "Skyblocker": "helpers.fishing.enableFishingHelper"}),
     # ── Events ──
     ("Events", "Diana burrow guess", {
-        "SBO": "*spadeGuess",
+        "SBO": {"1.21.5-1.21.10": "*dianaBurrowGuess", "other": "*spadeGuess"},
         "SkyHanni": "event.diana.guess",
         "Skyblocker": "helpers.mythologicalRitual.enableMythologicalRitualHelper",
         "Firmament": "diana.ancestral-spade",
@@ -295,17 +306,19 @@ FEATURES = [
         "SBO": "*arrowGuess",
         "SkyHanni": "event.diana.guessFromArrow"}),
     ("Events", "Nearby burrow detection", {
-        "SBO": "*closeBurrowDetection",
+        "SBO": {"1.21.5-1.21.10": "*dianaBurrowDetect", "other": "*closeBurrowDetection"},
         "SkyHanni": "event.diana.burrowsNearbyDetection"}),
     ("Events", "Nearest warp hint", {
         "SBO": "*showTitleWhenWarpAvailable",
         "SkyHanni": "event.diana.burrowNearestWarp"}),
     ("Events", "Rare mob sharing", {
         "SBO": "*shareRareMob",
-        "SkyHanni": "event.diana.rareMobsSharing.enabled"}),
+        "SkyHanni": {"1.21.7": "event.diana.inquisitorSharing.enabled",
+                     "other": "event.diana.rareMobsSharing.enabled"}}),
     ("Events", "Rare mob highlight", {
-        "SBO": "*highlightRareMobs",
-        "SkyHanni": "event.diana.highlightRareMobs"}),
+        "SBO": "*HighlightRareMobs",
+        "SkyHanni": {"1.21.7": "event.diana.highlightInquisitors",
+                     "other": "event.diana.highlightRareMobs"}}),
     ("Events", "Mute bugged spade sounds", {
         "SBO": "*muteBuggedSpadeSounds",
         "SkyHanni": "event.diana.muteBuggedSpade"}),
@@ -392,7 +405,7 @@ FEATURES = [
         "NoFrills": "loadoutKeybinds.enabled"}),
     ("Misc", "Command keybinds", {
         "Odin": "Command Keybinds.enabled",
-        "NoFrills": "commandKeybinds.enabled"}),
+        "NoFrills": "customKeybinds.enabled"}),
     ("Misc", "Party chat commands", {
         "Odin": "Chat Commands.enabled",
         "NoFrills": "partyCommands.enabled"}),
@@ -401,7 +414,8 @@ FEATURES = [
         "NoFrills": "chatWaypoints.enabled"}),
     ("Misc", "Hide lightning", {
         "AaronsMod": "uiAndVisuals.world.hideLightning",
-        "SkyOcean": "*environmental.hideLightning"}),
+        "SkyOcean": {"1.21.5-1.21.11": "*misc.hideLightning",
+                     "other": "*environmental.hideLightning"}}),
 ]
 
 # Settings nothing else overlaps with, but that you want held at a fixed value: (mod, key, value).
@@ -703,7 +717,7 @@ def detect_config_dir(hints=()):
 
 # ── installed jars & update check ──
 
-_JAR_META = {}        # jar path -> ((size, mtime_ns), (mod id, version) or None)
+_JAR_META = {}        # jar path -> ((size, mtime_ns), what its fabric.mod.json says, or None)
 _SHA1 = {}            # jar path -> ((size, mtime_ns), sha1)
 _CACHE_LOCK = threading.Lock()
 
@@ -714,28 +728,35 @@ def _stamp(p):
 
 
 def _jar_meta(jar, stamp):
-    """(mod id, version) from a jar's fabric.mod.json, cached until the jar changes."""
+    """What a mod jar's fabric.mod.json says about it, cached until the jar changes:
+    {id, version, name, description, deps (ids it depends on), bundled (jar names inside)}."""
     hit = _JAR_META.get(jar)
     if hit and hit[0] == stamp:
         return hit[1]
     try:
         with zipfile.ZipFile(jar) as z:
             meta = json.loads(z.read("fabric.mod.json").decode("utf-8-sig"))
-        info = ((str(meta.get("id", "")), str(meta.get("version") or "?"))
-                if isinstance(meta, dict) else None)
+            bundled = [n.rsplit("/", 1)[-1].lower() for n in z.namelist()
+                       if n.startswith("META-INF/jars/") and n.endswith(".jar")]
+        if not isinstance(meta, dict):
+            raise ValueError("not a JSON object")
+        deps = {str(d).lower() for k in ("depends", "recommends") if isinstance(meta.get(k), dict)
+                for d in meta[k]}
+        info = {"id": str(meta.get("id", "")), "version": str(meta.get("version") or "?"),
+                "name": str(meta.get("name") or meta.get("id") or ""),
+                "description": str(meta.get("description") or ""), "deps": deps, "bundled": bundled}
     except (OSError, KeyError, ValueError, zipfile.BadZipFile, RecursionError):
         info = None
     _JAR_META[jar] = (stamp, info)
     return info
 
 
-def installed_jars(mods_dir):
-    """{mod name: (version, jar path)} found by the mod id inside each jar's fabric.mod.json.
+def scan_mods(mods_dir):
+    """[(fabric.mod.json info, jar path)] for the mod jars in mods_dir, newest file first.
 
     Only jars that changed since the last scan are opened again, so Reload stays instant
     even with a few hundred mods installed.
     """
-    by_id = {spec["id"]: name for name, spec in MODS.items() if spec.get("id")}
     jars = []
     try:
         for p in Path(mods_dir).iterdir():
@@ -745,14 +766,75 @@ def installed_jars(mods_dir):
                 except OSError:
                     continue
     except OSError:
-        return {}
+        return []
     jars.sort(key=lambda js: js[1][1], reverse=True)       # newest first if a mod is there twice
+    return [(info, jar) for jar, stamp in jars if (info := _jar_meta(jar, stamp))]
+
+
+def installed_jars(mods_dir):
+    """{mod name: (version, jar path)} for the MODS found by the mod id in each jar."""
+    by_id = {spec["id"]: name for name, spec in MODS.items() if spec.get("id")}
     found = {}
-    for jar, stamp in jars:
-        info = _jar_meta(jar, stamp)
-        name = by_id.get(info[0]) if info else None
+    for info, jar in scan_mods(mods_dir):
+        name = by_id.get(info["id"])
         if name and name not in found:
-            found[name] = (info[1], jar)
+            found[name] = (info["version"], jar)
+    return found
+
+
+HYPIXEL_APIS = ("hypixel-mod-api", "hm-api")       # Hypixel's mod API, under both of its ids
+SKYBLOCK_LIBS = ("skyblock-api",)                   # libraries only Hypixel SkyBlock mods use
+
+
+def is_skyblock_mod(info):
+    """Is this a Hypixel SkyBlock mod? It must say it's for SkyBlock and either name Hypixel or
+    use Hypixel's mod API, or be built on a SkyBlock-only library. That keeps out Hypixel mods
+    for other games and the unrelated sky-island survival mods also called "skyblock"."""
+    text = f"{info['id']} {info['name']} {info['description']}".lower()
+    uses = lambda ids: any(i in info["deps"] or any(b.startswith(i) for b in info["bundled"]) for i in ids)
+    skyblock = "skyblock" in text or "sky block" in text
+    return (skyblock and ("hypixel" in text or uses(HYPIXEL_APIS))) or uses(SKYBLOCK_LIBS)
+
+
+AUTO_MAX_BYTES = 2 * 1024 * 1024    # larger JSON in a found mod's folder is usually data, not settings
+
+
+def discover_mods(config_dir, claimed=()):
+    """{name: spec} for Hypixel SkyBlock mods in the mods folder that MODS doesn't list, with the
+    JSON files in the config folder named after them (or in a folder named after them)."""
+    config_dir = Path(config_dir)
+    known = {spec.get("id") for spec in MODS.values()}
+    try:
+        entries = sorted(config_dir.iterdir())
+    except OSError:
+        return {}
+    claimed, found, taken = {Path(c) for c in claimed}, {}, set(MODS)
+    for info, jar in scan_mods(config_dir.parent / "mods"):
+        if info["id"] in known or not is_skyblock_mod(info):
+            continue
+        known.add(info["id"])                              # an older copy of the same mod is skipped
+        names = {norm(info["id"]), norm(info["name"])} - {""}
+        wanted = names | {n + suffix for n in names for suffix in ("config", "client", "settings")}
+        paths = []
+        for entry in entries:
+            if norm(entry.name.split(".", 1)[0] if entry.is_file() else entry.name) not in wanted:
+                continue
+            try:
+                inside = sorted(entry.iterdir()) if entry.is_dir() else [entry]
+                for path in inside:
+                    if (path.is_file() and path.suffix.lower() in (".json", ".jsonc") and path not in claimed
+                            and not re.search(r"cache|backup|\.bak", path.name, re.I)
+                            and path.stat().st_size <= AUTO_MAX_BYTES):
+                        paths.append(path)
+            except OSError:
+                continue
+        if paths:
+            name = info["name"] or info["id"]
+            while name in taken:
+                name += " (found)"
+            taken.add(name)
+            found[name] = {"paths": paths, "id": info["id"], "auto": True, "jar": jar,
+                           "version": info["version"]}
     return found
 
 
@@ -797,6 +879,26 @@ def version_key(v):
     return main, pre
 
 
+def vtuple(v):
+    """'1.21.10' -> (1, 21, 10). Compares across the 1.x and year-based (26.x) versions."""
+    return tuple(int(x) for x in re.findall(r"\d+", str(v)))
+
+
+def version_in(version, spec):
+    """Does a Minecraft version fall in "1.21.7" or in the range "1.21.5-1.21.10"?"""
+    lo, _, hi = spec.partition("-")
+    return vtuple(lo) <= vtuple(version) <= vtuple(hi or lo)
+
+
+def switch_names(kspec, version):
+    """The ways to look a mod's switch up, best first: the name used in `version`, then the
+    names its other versions use, since an installed mod build may not match the version picked."""
+    if not isinstance(kspec, dict):
+        return [kspec]
+    picked = next((k for k in kspec if k != "other" and version_in(version, k)), "other")
+    return [kspec[k] for k in [picked] + [k for k in kspec if k != picked] if k in kspec]
+
+
 API = "https://api.modrinth.com/v2"
 UA = f"skyblock-config-manager/{__version__}"
 
@@ -811,19 +913,49 @@ def http_json(url, data=None, timeout=15):
         return json.loads(r.read().decode("utf-8"))
 
 
-def _compare(installed, latest):
+def _compare(installed, latest, source="Modrinth"):
+    where = "" if source == "Modrinth" else f" ({source})"
     a, b = version_key(installed), version_key(latest)
     if a is None or b is None:
-        return (f"Modrinth: {latest}", "info") if version_core(installed) != version_core(latest) \
+        return (f"{source}: {latest}", "info") if version_core(installed) != version_core(latest) \
             else ("up to date", "ok")
-    return (f"↑ {latest}", "new") if b > a else ("up to date", "ok")
+    return (f"↑ {latest}{where}", "new") if b > a else ("up to date", "ok")
 
 
-def modrinth_status(jars, game_version=GAME_VERSION):
-    """{mod name: (text, state)} for installed jars, against Fabric builds for game_version only.
+def _newer(a, b):
+    """Is version a newer than version b? False when either can't be compared."""
+    ka, kb = version_key(a), version_key(b)
+    return ka is not None and kb is not None and ka > kb
 
-    First asks Modrinth which project each exact jar file belongs to (by SHA-1), which avoids
-    every naming difference. Jars Modrinth doesn't know fall back to the project slug.
+
+CFWIDGET = "https://api.cfwidget.com"
+
+
+def curseforge_latest(project_id, game_version):
+    """The mod version of the newest Fabric file for game_version on CurseForge, or None.
+
+    Read through CFWidget, a public mirror of CurseForge's project pages: CurseForge's own API
+    needs a private key, which an app published with its source can't keep secret.
+    """
+    data = http_json(f"{CFWIDGET}/{int(project_id)}")
+    loader = LOADER.capitalize()
+    files = [f for f in (data.get("files") or []) if isinstance(f, dict)
+             and game_version in (f.get("versions") or []) and loader in (f.get("versions") or [])]
+    if not files:
+        return None
+    newest = max(files, key=lambda f: str(f.get("uploaded_at") or ""))
+    stem = re.sub(r"\.jar$", "", str(newest.get("name") or ""), flags=re.I)
+    m = (re.search(r"[-_ ]v?(\d+(?:\.\d+)+\S*)$", stem)
+         or re.search(r"(\d+(?:\.\d+)+[\w.+-]*)", str(newest.get("display") or "")))
+    return m.group(1) if m else None
+
+
+def update_status(jars, game_version=GAME_VERSION):
+    """{mod name: (text, state)} for installed jars: the newest Fabric build for game_version on
+    Modrinth and, for mods also published there, on CurseForge. Whichever is newer is reported.
+
+    Modrinth is first asked which project each exact jar file belongs to (by SHA-1), which avoids
+    every naming difference; jars it doesn't know fall back to the project slug.
     state: "ok" (up to date), "new" (update available), "info", "missing", "failed".
     """
     names = list(jars)
@@ -836,18 +968,20 @@ def modrinth_status(jars, game_version=GAME_VERSION):
         "loaders": [LOADER], "game_versions": [game_version]})
     if not isinstance(latest, dict):
         latest = {}
-    out, fallback = {}, []
+    # Modrinth's answer per mod: ("current", v) when the installed file is its newest build,
+    # ("newest", v) for its newest version, or ("none", (text, state)) when it has none.
+    modrinth, fallback = {}, []
     for name in names:
-        installed, h = jars[name][0], hashes[name]
+        h = hashes[name]
         v = latest.get(h)
         if isinstance(v, dict) and v.get("version_number"):
             files = [(f.get("hashes") or {}).get("sha1") for f in v.get("files") or ()
                      if isinstance(f, dict)]
-            out[name] = ("up to date", "ok") if h in files else _compare(installed, v["version_number"])
+            modrinth[name] = ("current" if h in files else "newest", v["version_number"])
         elif MODS.get(name, {}).get("slug"):
             fallback.append(name)
         else:
-            out[name] = ("not on Modrinth", "missing")
+            modrinth[name] = ("none", ("not on Modrinth", "missing"))
 
     q = urllib.parse.urlencode({"loaders": json.dumps([LOADER]),
                                 "game_versions": json.dumps([game_version])})
@@ -857,18 +991,38 @@ def modrinth_status(jars, game_version=GAME_VERSION):
         try:
             versions = http_json(f"{API}/project/{slug}/version?{q}")
             if not isinstance(versions, list) or not versions:
-                return f"no {game_version} build", "missing"
-            return _compare(jars[name][0], versions[0]["version_number"])
+                return "none", (f"no {game_version} build", "missing")
+            return "newest", versions[0]["version_number"]
         except urllib.error.HTTPError as e:
             if e.code == 404:
-                return "not on Modrinth", "missing"
-            return f"check failed (HTTP {e.code})", "failed"
+                return "none", ("not on Modrinth", "missing")
+            return "none", (f"check failed (HTTP {e.code})", "failed")
         except (OSError, ValueError, KeyError, TypeError):    # this mod only; keep the others
-            return "check failed", "failed"
+            return "none", ("check failed", "failed")
 
-    if fallback:                                   # independent requests: run them side by side
-        with ThreadPoolExecutor(max_workers=min(6, len(fallback))) as pool:
-            out.update(zip(fallback, pool.map(by_slug, fallback)))
+    def on_curseforge(name):
+        try:
+            return curseforge_latest(MODS[name]["curseforge"], game_version)
+        except (OSError, ValueError, KeyError, TypeError):    # a second opinion: Modrinth still counts
+            return None
+
+    curse = [n for n in names if MODS.get(n, {}).get("curseforge")]
+    with ThreadPoolExecutor(max_workers=6) as pool:            # independent requests, side by side
+        slug_answers, cf_answers = pool.map(by_slug, fallback), pool.map(on_curseforge, curse)
+        modrinth.update(zip(fallback, slug_answers))
+        cf = dict(zip(curse, cf_answers))
+
+    out = {}
+    for name in names:
+        installed, (kind, value), cfv = jars[name][0], modrinth[name], cf.get(name)
+        if kind == "current":
+            out[name] = ((f"↑ {cfv} (CurseForge)", "new") if cfv and _newer(cfv, installed)
+                         else ("up to date", "ok"))
+        elif kind == "newest":
+            out[name] = (_compare(installed, cfv, "CurseForge") if cfv and _newer(cfv, value)
+                         else _compare(installed, value))
+        else:
+            out[name] = _compare(installed, cfv, "CurseForge") if cfv else value
     return out
 
 
@@ -954,11 +1108,12 @@ class Setting:
 
 
 class ModInfo:
-    __slots__ = ("name", "files", "errors", "settings", "shared", "installed", "jar", "latest")
+    __slots__ = ("name", "files", "errors", "settings", "shared", "installed", "jar", "latest", "auto")
 
-    def __init__(self, name):
+    def __init__(self, name, auto=False):
         self.name, self.files, self.errors, self.settings = name, [], [], []
         self.shared, self.installed, self.jar, self.latest = 0, None, None, None
+        self.auto = auto              # found automatically: settings only, not compared with others
 
     @property
     def loaded(self):
@@ -988,8 +1143,9 @@ class Feature:
 class Workspace:
     """Everything except the window: loading, recommendations, editing, saving."""
 
-    def __init__(self, priority=None, overrides=None):
+    def __init__(self, priority=None, overrides=None, game_version=GAME_VERSION):
         self.folder = None
+        self.game_version = game_version     # picks the setting names of renamed switches
         self.mods, self.settings, self.index = {}, [], {}
         self.changed = set()                 # uids whose value differs from what is on disk
         self.priority = ({str(k): str(v) for k, v in priority.items()}
@@ -1006,10 +1162,11 @@ class Workspace:
         if not folder.is_dir():
             raise FileNotFoundError(f"Folder not found: {folder}")
         # Build everything into locals first, so a failure can't leave a half-loaded workspace.
-        mods, settings, index = {}, [], {}
-        for name, spec in MODS.items():
-            info = mods[name] = ModInfo(name)
-            for path in find_files(folder, spec):
+        mods, settings, index, claimed = {}, [], {}, set()
+
+        def add(name, spec, paths, auto=False):
+            info = mods[name] = ModInfo(name, auto)
+            for path in paths:
                 try:
                     stamp = _stamp(path)
                     if stamp[0] > MAX_FILE_BYTES:
@@ -1024,7 +1181,8 @@ class Workspace:
                     continue
                 cf = ConfigFile(path, raw, comments, detect_indent(text), stamp)
                 info.files.append(cf)
-                prefix = (path.stem,) if spec.get("dir") else ()
+                claimed.add(path)
+                prefix = (path.stem,) if spec.get("dir") or len(paths) > 1 else ()
                 for real, shown, value in leaves(raw):
                     if not real:
                         continue
@@ -1035,6 +1193,16 @@ class Workspace:
                     settings.append(s)
                     info.settings.append(s)
                     index.setdefault((name, key), s)       # duplicate names: first one wins
+            return info
+
+        for name, spec in MODS.items():
+            add(name, spec, find_files(folder, spec))
+        for name, spec in discover_mods(folder, claimed).items():   # SkyBlock mods MODS doesn't list
+            info = add(name, spec, spec["paths"], auto=True)
+            if info.loaded:
+                info.installed, info.jar = spec["version"], spec["jar"]
+            else:
+                del mods[name]                  # nothing readable: don't list it
         self.folder, self.mods, self.settings, self.index = folder, mods, settings, index
         self.changed = set()
         self._ruled = []
@@ -1050,8 +1218,15 @@ class Workspace:
         s = self.index.get((mod, key))
         return [s] if s else []
 
+    def set_game_version(self, version):
+        """Use the setting names of another Minecraft version for switches a mod renamed."""
+        self.game_version = version
+        if self.folder is not None:
+            self._resolve_features()
+            self.recompute()
+
     def _resolve_features(self):
-        """Find each feature's switches in the loaded configs (done once per load)."""
+        """Find each feature's switches in the loaded configs (on load and on a version change)."""
         leaf_index = {}                      # mod -> {last key segment: [Setting]}, built lazily
 
         def by_leaf(mod):
@@ -1069,15 +1244,17 @@ class Workspace:
                 if spec is None:
                     f.switches[mod] = []
                     continue
-                found, seen = [], set()
-                for key in ([spec] if isinstance(spec, str) else spec):
-                    leaf = by_leaf(mod) if key.startswith("*") else None
-                    for s in self._match(mod, key, leaf):
-                        if isinstance(s.value, bool) and s.uid not in seen:
-                            seen.add(s.uid)
-                            found.append(s)
-                if found:
-                    f.switches[mod] = found
+                for names in switch_names(spec, self.game_version):   # first name found wins
+                    found, seen = [], set()
+                    for key in ([names] if isinstance(names, str) else names):
+                        leaf = by_leaf(mod) if key.startswith("*") else None
+                        for s in self._match(mod, key, leaf):
+                            if isinstance(s.value, bool) and s.uid not in seen:
+                                seen.add(s.uid)
+                                found.append(s)
+                    if found:
+                        f.switches[mod] = found
+                        break
 
     # ── recommendations ──
     def live_features(self, area=None):
@@ -1699,7 +1876,7 @@ class App(tk.Tk):
         self.prefs = load_prefs()
         saved = self.prefs.get("game_version")
         self.game_version = saved if saved in GAME_VERSIONS else GAME_VERSION
-        self.ws = Workspace(self.prefs.get("priority"), self.prefs.get("overrides"))
+        self.ws = Workspace(self.prefs.get("priority"), self.prefs.get("overrides"), self.game_version)
         self._queue = queue.Queue()
         self._style()
         self._build()
@@ -1885,7 +2062,7 @@ class App(tk.Tk):
         self.btn_updates = ttk.Button(bar, text="Check for updates", command=self.check_updates)
         self.btn_updates.pack(side="right")
 
-        cols = (("mod", "Mod", 120, "w", False), ("config", "Config file", 300, "w", True),
+        cols = (("mod", "Mod", 175, "w", False), ("config", "Config file", 260, "w", True),
                 ("settings", "Settings", 80, "e", False), ("shared", "Shared", 70, "e", False),
                 ("conflicts", "Conflicts", 80, "e", False), ("installed", "Installed", 160, "w", False),
                 ("latest", "Latest for " + self.game_version, 170, "w", False))
@@ -1945,14 +2122,23 @@ class App(tk.Tk):
 
     def update_overview(self, counts=None):
         by_mod, _, _ = counts or self.ws.conflicts()
-        for name in MODS:
+        rows = list(MODS) + [n for n, m in self.ws.mods.items() if m.auto]   # found mods go last
+        for iid in self.ov.get_children():
+            if iid not in rows:
+                self.ov.delete(iid)                   # a mod found in a previously loaded folder
+        for name in rows:
             m = self.ws.mods.get(name) or ModInfo(name)
             latest = m.latest[0] if m.latest else "—"
             tag = ("new",) if m.latest and m.latest[1] == "new" else (() if m.loaded else ("dim",))
-            self.ov.item(name, tags=tag, values=(
-                name, self._config_text(m), f"{len(m.settings):,}" if m.loaded else "—",
-                m.shared if m.loaded else "—", by_mod.get(name, 0) if m.loaded else "—",
-                m.installed or "not installed", latest))
+            values = (name + ("  (found)" if m.auto else ""), self._config_text(m),
+                      f"{len(m.settings):,}" if m.loaded else "—",
+                      "—" if m.auto or not m.loaded else m.shared,
+                      by_mod.get(name, 0) if m.loaded else "—", m.installed or "not installed", latest)
+            if self.ov.exists(name):
+                self.ov.item(name, tags=tag, values=values)
+            else:
+                self.ov.insert("", "end", iid=name, tags=tag, values=values)
+        self.ov.configure(height=len(rows))
 
     # ── actions ──
     def browse(self):
@@ -1982,6 +2168,10 @@ class App(tk.Tk):
         for m in self.ws.mods.values():
             for err in m.errors:
                 self.log(f"{m.name}: could not read {err}")
+        auto = [m.name for m in found if m.auto]
+        if auto:
+            self.log(f"Found {plural(len(auto), 'more Hypixel SkyBlock mod')} on its own: {', '.join(auto)}. "
+                     "Their settings are on the Unique tab; they aren't compared with other mods.")
         self.shared.set_groups(list(self.ws.choices))
         self.unique.set_groups([m.name for m in found])
         self.shared.reset()
@@ -2077,7 +2267,8 @@ class App(tk.Tk):
 
     # ── Minecraft version ──
     def set_game_version(self, version):
-        """Pick the Minecraft version that "Check for updates" looks for builds for."""
+        """Pick the Minecraft version: it decides the setting names used for switches a mod
+        renamed, and which builds "Check for updates" looks for."""
         if version == self.game_version:
             return
         self.game_version = version
@@ -2086,8 +2277,15 @@ class App(tk.Tk):
         self.ov.heading("latest", text=f"Latest for {version}")
         for m in self.ws.mods.values():
             m.latest = None                          # those results were for the other version
-        self.update_overview()
-        self.note(f"Minecraft {version} selected: Check for updates now looks for Fabric {version} builds.")
+        self.ws.set_game_version(version)            # renamed switches now use this version's names
+        self.shared.set_groups(list(self.ws.choices))
+        self.shared.refresh()
+        self.unique.refresh()
+        if self.priorities.area not in self.ws.choices and self.ws.choices:
+            self.priorities.area = next(iter(self.ws.choices))
+        self.priorities.rebuild()
+        self.after_change()
+        self.note(f"Minecraft {version} selected: setting names and Check for updates now follow it.")
 
     # ── update check (background thread, results handed over through a queue) ──
     def check_updates(self):
@@ -2096,13 +2294,13 @@ class App(tk.Tk):
             return self.say("No mod jars found next to the config folder (../mods).")
         version = self.game_version
         self.btn_updates.state(["disabled"])
-        self.say(f"Checking Modrinth for Fabric {version} builds…")
+        self.say(f"Checking Modrinth and CurseForge for Fabric {version} builds…")
         threading.Thread(target=self._update_worker, args=(jars, version), daemon=True).start()
         self.after(150, self._poll)
 
     def _update_worker(self, jars, version):
         try:
-            self._queue.put(("result", version, modrinth_status(jars, version)))
+            self._queue.put(("result", version, update_status(jars, version)))
         except Exception as e:                       # network, JSON or API-shape problems
             self._queue.put(("error", version, f"{type(e).__name__}: {e}"))
 
