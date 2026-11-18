@@ -1,5 +1,3 @@
-//! Names and text shown in the window: tidied-up setting labels, value previews, the debug rule.
-
 use std::collections::HashMap;
 
 use serde_json::Value;
@@ -12,11 +10,6 @@ const MINOR: &[&str] = &["and", "or", "of", "the", "in", "on", "to", "for", "a",
 const GENERIC: &[&str] = &["enabled", "enable", "toggle", "active", "state", "on", "value"];
 const CONTAINERS: &[&str] = &["position", "pos", "offset", "color", "colour", "size", "scale"];
 
-// Debug and developer settings are shown but locked: they can't be edited, and nothing is
-// recommended for them. A setting is one if any part of its path is only about debugging: a "dev"
-// or "debug" section, a "debugMode", "DEVELOPER_MODE" or "Debug Only Messages" switch. Names that
-// also say something else, like "hideGuiInDebugMenu" or "debugHud" (features for Minecraft's F3
-// debug screen), are ordinary settings.
 const DEBUG_WORDS: &[&str] = &["debug", "debugs", "debugging", "debugger", "dev", "devs", "developer", "developers",
                                "devmode", "devtool", "devtools"];
 const DEBUG_FILLER: &[&str] = &["mode", "modes", "enabled", "enable", "toggle", "toggled", "on", "active", "value",
@@ -24,14 +17,10 @@ const DEBUG_FILLER: &[&str] = &["mode", "modes", "enabled", "enable", "toggle", 
                                 "print", "verbose", "tool", "tools", "option", "options", "setting", "settings",
                                 "config", "feature", "features", "only"];
 
-/// Lower case with everything but a-z and 0-9 removed: "Skyblock Addons" -> "skyblockaddons".
 pub fn norm(text: &str) -> String {
     text.to_lowercase().chars().filter(|c| c.is_ascii_lowercase() || c.is_ascii_digit()).collect()
 }
 
-/// Splits a config key into words: on `_`, `-` and spaces, before a capital that follows a
-/// lower-case letter or digit, and before the last capital of a run followed by lower case
-/// ("HTMLParser" -> "HTML", "Parser").
 pub fn split_words(segment: &str) -> Vec<String> {
     let chars: Vec<char> = segment.chars().collect();
     let (mut out, mut cur) = (Vec::new(), String::new());
@@ -58,7 +47,6 @@ pub fn split_words(segment: &str) -> Vec<String> {
     out
 }
 
-/// Python's `str.isupper()`: at least one cased letter, and no lower-case ones.
 fn is_upper(s: &str) -> bool {
     let mut cased = false;
     for c in s.chars() {
@@ -70,7 +58,6 @@ fn is_upper(s: &str) -> bool {
     cased
 }
 
-/// "enableTeleportOverlays" / "etherwarp-overlay" -> "Enable Teleport Overlays" / "Etherwarp Overlay".
 pub fn words(segment: &str) -> String {
     let mut out: Vec<String> = Vec::new();
     for w in split_words(segment) {
@@ -90,7 +77,6 @@ pub fn words(segment: &str) -> String {
     if out.is_empty() { segment.to_string() } else { out.join(" ") }
 }
 
-/// Menu-style name for a setting, built from the last parts of its key.
 pub fn make_label(labels: &HashMap<(String, String), String>, mod_name: &str, key: &str, segments: &[String]) -> String {
     if let Some(l) = labels.get(&(mod_name.to_string(), key.to_string())) {
         return l.clone();
@@ -109,20 +95,16 @@ pub fn make_label(labels: &HashMap<(String, String), String>, mod_name: &str, ke
     words(leaf)
 }
 
-/// Is this part of a config path only about debugging?
 pub fn is_debug_segment(segment: &str) -> bool {
     let found: Vec<String> = split_words(segment).iter().map(|w| w.to_lowercase()).collect();
     found.iter().any(|w| DEBUG_WORDS.contains(&w.as_str()))
         && found.iter().all(|w| DEBUG_WORDS.contains(&w.as_str()) || DEBUG_FILLER.contains(&w.as_str()))
 }
 
-/// Is the setting at this config path (as shown, file name first for one-file-per-feature mods)
-/// a debug or developer setting?
 pub fn is_debug(segments: &[String]) -> bool {
     segments.iter().any(|s| is_debug_segment(s))
 }
 
-/// How a value is shown in the tables.
 pub fn fmt(value: &Value, limit: usize) -> String {
     let text = match value {
         Value::Null => return "—".into(),

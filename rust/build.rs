@@ -1,4 +1,3 @@
-// Gives the Windows .exe its icon and the file details Windows shows (right-click > Properties).
 fn main() {
     println!("cargo:rerun-if-changed=../features.jsonc");
     println!("cargo:rerun-if-changed=../packaging/icon.ico");

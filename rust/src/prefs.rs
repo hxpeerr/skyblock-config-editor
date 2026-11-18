@@ -1,9 +1,3 @@
-//! The app's own settings, finding the config folder, and where the mod-list files live.
-//!
-//! The app is portable: it keeps its settings in a file beside itself, and only falls back to the
-//! home folder when it can't write there (e.g. it was put in Program Files). The file names are the
-//! same as the Python version's, so settings carry over.
-
 use std::path::{Path, PathBuf};
 
 use serde_json::{Map, Value};
@@ -15,11 +9,9 @@ const PORTABLE_PREFS: &str = "skyblock_config_manager.settings.json";
 const HOME_PREFS: &str = ".skyblock_config_manager.json";
 const PORTABLE_CACHE: &str = "skyblock_config_manager.features.jsonc";
 const HOME_CACHE: &str = ".skyblock_config_manager.features.jsonc";
-/// A mod list the user put next to the app; it's used instead of the others.
 pub const USER_FEATURES: &str = "features.jsonc";
 const OLD_AREA_NAMES: &[(&str, &str)] = &[("Garden", "Farming"), ("Diana", "Events"), ("Etherwarp", "Misc")];
 
-/// The folder holding the app.
 pub fn exe_dir() -> Option<PathBuf> {
     std::env::current_exe().ok().and_then(|p| p.parent().map(Path::to_path_buf))
 }
@@ -28,7 +20,6 @@ pub fn home() -> Option<PathBuf> {
     std::env::home_dir()
 }
 
-/// Where a file may be kept, preferred first: beside the app, then in the home folder.
 fn places(portable: &str, in_home: &str) -> Vec<PathBuf> {
     exe_dir().map(|d| d.join(portable)).into_iter().chain(home().map(|h| h.join(in_home))).collect()
 }
@@ -54,8 +45,6 @@ fn renamed_area_key(key: &str) -> String {
     key.to_string()
 }
 
-/// The newest readable settings file, so an older copy never shadows the one last saved (this also
-/// carries settings over from the Python version).
 pub fn load_prefs() -> Map<String, Value> {
     let mut found: Vec<(std::time::SystemTime, PathBuf)> = prefs_files()
         .into_iter()
@@ -95,17 +84,14 @@ pub fn save_prefs(prefs: &Map<String, Value>) {
     }
 }
 
-/// Saves a downloaded mod list where the app keeps its settings. Returns where it went.
 pub fn save_feature_cache(text: &str) -> Option<PathBuf> {
     feature_cache_files().into_iter().find(|p| atomic_write(p, text).is_ok())
 }
 
-/// The first readable downloaded mod list.
 pub fn feature_cache_file() -> Option<PathBuf> {
     feature_cache_files().into_iter().find(|p| p.is_file())
 }
 
-/// A string -> string map from the settings (priorities and overrides).
 pub fn string_map(prefs: &Map<String, Value>, key: &str) -> std::collections::HashMap<String, String> {
     prefs
         .get(key)
@@ -114,15 +100,12 @@ pub fn string_map(prefs: &Map<String, Value>, key: &str) -> std::collections::Ha
         .unwrap_or_default()
 }
 
-/// Finds the config folder: the one used last time, then around the app and the folder it was
-/// started from, then the usual .minecraft locations. A folder counts if a listed mod's config is
-/// in it.
 pub fn detect_config_dir(hints: &[String], set: &FeatureSet) -> Option<PathBuf> {
     let mut cands: Vec<PathBuf> = hints.iter().filter(|h| !h.is_empty()).map(PathBuf::from).collect();
     let mut bases: Vec<PathBuf> = std::env::current_dir().ok().into_iter().collect();
     if let Some(exe) = exe_dir() {
         if let Some(parent) = exe.parent() {
-            cands.push(parent.join("config")); // e.g. the app sits in .minecraft/mods
+            cands.push(parent.join("config"));
         }
         if !bases.contains(&exe) {
             bases.push(exe);

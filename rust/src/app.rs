@@ -1,5 +1,3 @@
-//! The window.
-
 use std::path::PathBuf;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
@@ -35,11 +33,9 @@ const BAD_BG: Color32 = Color32::from_rgb(0x2e, 0x1d, 0x1f);
 const GOOD: Color32 = Color32::from_rgb(0x7f, 0xd3, 0xab);
 const NEW: Color32 = Color32::from_rgb(0xf2, 0xc4, 0x6d);
 
-/// Use-column choice meaning "follow the area's prioritized mod".
 const FOLLOW: &str = "Area choice";
 const OFF_LABEL: &str = "Off in every mod";
 const ALL: &str = "All";
-/// Seconds between automatic checks for a newer mod list.
 const FEATURES_EVERY: u64 = 6 * 3600;
 
 pub fn run() -> eframe::Result {
@@ -62,7 +58,6 @@ fn window_icon() -> Option<egui::IconData> {
 }
 
 fn style(ctx: &egui::Context) {
-    // The default text font lacks a few symbols the tables use (like ↑); the monospace one has them.
     let mut fonts = egui::FontDefinitions::default();
     if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
         family.push("Hack".into());
@@ -108,8 +103,6 @@ fn thousands(n: usize) -> String {
     out
 }
 
-/// A value as typed into the edit box: JSON for lists and objects (spaced like Python's json.dumps),
-/// the plain text otherwise.
 fn edit_text(v: &Value) -> String {
     struct Spaced;
     impl serde_json::ser::Formatter for Spaced {
@@ -149,7 +142,6 @@ enum Kind {
     Unique,
 }
 
-/// A searchable table of settings (the Shared and Unique tabs).
 #[derive(Default)]
 struct ListView {
     query: String,
@@ -157,7 +149,6 @@ struct ListView {
     only_bad: bool,
     selected: Option<usize>,
     rows: Vec<usize>,
-    /// (workspace generation, query, group, only_bad) the rows were built for.
     built: Option<(u64, String, String, bool)>,
 }
 
@@ -217,9 +208,7 @@ pub struct App {
     rx: Receiver<Msg>,
     checking: bool,
     fetching_features: bool,
-    /// A newer mod list downloaded while there were unsaved changes; used at the next load.
     pending_set: Option<Arc<FeatureSet>>,
-    /// Bumped whenever the workspace changes, so the tables know to filter again.
     generation: u64,
     counts: Counts,
     allow_close: bool,
@@ -260,8 +249,6 @@ impl App {
         app
     }
 
-    // ── status / log ──
-
     fn say(&mut self, msg: &str) {
         self.status = msg.to_string();
     }
@@ -289,8 +276,6 @@ impl App {
         self.prefs.insert("overrides".into(), serde_json::to_value(&self.ws.overrides).unwrap_or_default());
         prefs::save_prefs(&self.prefs);
     }
-
-    // ── loading ──
 
     fn load(&mut self, folder: &str) {
         let folder = folder.trim().trim_matches('"').to_string();
@@ -355,8 +340,6 @@ impl App {
         self.note(&format!("Loaded {} settings from {} in {:.2}s.", thousands(self.ws.settings.len()),
                            plural(found, "mod"), t0.elapsed().as_secs_f64()));
     }
-
-    // ── editing ──
 
     fn apply(&mut self, uid: usize, value: Value) {
         match self.ws.set_value(uid, value) {
@@ -433,8 +416,6 @@ impl App {
         }
     }
 
-    // ── Minecraft version and updates ──
-
     fn set_game_version(&mut self, version: String) {
         if version == self.ws.game_version {
             return;
@@ -442,7 +423,7 @@ impl App {
         self.prefs.insert("game_version".into(), Value::String(version.clone()));
         prefs::save_prefs(&self.prefs);
         for m in self.ws.mods.values_mut() {
-            m.latest = None; // those results were for the other version
+            m.latest = None;
         }
         self.ws.set_game_version(&version);
         if !self.ws.choices.contains_key(&self.area) {
@@ -477,8 +458,6 @@ impl App {
         });
     }
 
-    /// Looks for a newer mod list in the background: on start (at most every few hours) and with
-    /// Check for updates. Never replaces a list the user put next to the app.
     fn check_features(&mut self, manual: bool) {
         if !self.auto_features() || self.fetching_features || matches!(self.ws.set.source, Source::UserFile(_)) {
             return;
@@ -573,8 +552,6 @@ impl App {
             self.log(&format!("Downloaded a newer mod list (revision {revision}). It's used the next time you load or reload the folder."));
         }
     }
-
-    // ── one frame ──
 
     fn run_actions(&mut self) {
         for action in std::mem::take(&mut self.actions) {
@@ -917,7 +894,6 @@ impl App {
         let selected_conflict = selected_uid.is_some_and(|u| self.ws.settings[u].is_conflict());
         let selected_locked = selected_uid.is_some_and(|u| self.ws.settings[u].locked);
 
-        // the toolbar
         let view = match kind {
             Kind::Shared => &mut self.shared,
             Kind::Unique => &mut self.unique,
@@ -952,7 +928,6 @@ impl App {
             });
         });
 
-        // filter the rows again only when something changed
         let key = (generation, view.query.clone(), view.group.clone(), view.only_bad);
         if view.built.as_ref() != Some(&key) {
             let terms: Vec<String> = view.query.to_lowercase().split_whitespace().map(str::to_string).collect();
@@ -970,7 +945,6 @@ impl App {
             view.built = Some(key);
         }
 
-        // the footer goes first, so the table can take the rest of the height
         let count = plural(view.rows.len(), "setting");
         let rows = view.rows.clone();
         let where_text = selected_uid
@@ -1054,7 +1028,6 @@ impl App {
                 self.actions.push(Action::Edit(uid));
             }
         }
-        // Enter edits the selected setting (when no text box has the keyboard)
         if let Some(u) = selected_uid {
             if !ui.ctx().egui_wants_keyboard_input() && ui.input(|i| i.key_pressed(Key::Enter)) && self.edit.is_none() && self.dialog.is_none() {
                 self.actions.push(Action::Edit(u));
@@ -1106,7 +1079,7 @@ impl App {
                 }
                 Err(e) => {
                     edit.error = e;
-                    edit.focus = true; // keep typing where you were
+                    edit.focus = true;
                 }
             }
         } else if cancel {

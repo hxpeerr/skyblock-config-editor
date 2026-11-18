@@ -1,11 +1,3 @@
-"""Checks that the Rust version loads, recommends and saves exactly like the Python version.
-
-    python rust/tools/parity.py <path to scm-dump>
-
-Builds config folders covering every mod and feature in the list (plus JSONC, tabs, one-line files,
-named lists, renamed switches, debug settings, broken files and Hypixel SkyBlock mods found in the
-mods folder), runs both versions on them, and compares what they load, recommend and save.
-"""
 import json
 import os
 import random
@@ -17,15 +9,12 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_features import load_python_app  # noqa: E402
+from export_features import load_python_app
 
 app = load_python_app()
 
 
-# ── building config folders ──
-
 def put(tree, segments, value):
-    """Sets tree[a][b][c] = value, creating dicts on the way; False if something's in the way."""
     node = tree
     for seg in segments[:-1]:
         child = node.setdefault(seg, {})
@@ -57,7 +46,6 @@ EXTRAS = {
 
 
 def config_for(mod, keys, rng):
-    """A config for one mod holding these switches plus every kind of extra value."""
     tree = json.loads(json.dumps(EXTRAS))
     for key in keys:
         segs = key.lstrip("*.").split(".")
@@ -99,7 +87,7 @@ def write(path, data, style, rng):
 
 def make_jar(path, meta, bundled=(), mtime=None):
     path.parent.mkdir(parents=True, exist_ok=True)
-    stamp = (2026, 1, 1, 0, 0, 0)          # fixed, so each jar's SHA-1 is the same on every run
+    stamp = (2026, 1, 1, 0, 0, 0)
     with zipfile.ZipFile(path, "w") as z:
         z.writestr(zipfile.ZipInfo("fabric.mod.json", stamp), json.dumps(meta))
         for b in bundled:
@@ -109,7 +97,6 @@ def make_jar(path, meta, bundled=(), mtime=None):
 
 
 def keys_by_mod(names_version, skip_mods=()):
-    """{mod: [keys]} with the switch names a given Minecraft version uses."""
     out = {}
     for _area, _feature, spec in app.FEATURES:
         for mod, kspec in spec.items():
@@ -142,13 +129,11 @@ def build(root, seed, names_version, skip_mods=()):
         else:
             data = config_for(mod, keys, rng)
             if mod == "SBO":
-                data.setdefault("debug", {})["dianaBurrowGuess"] = True   # a debug copy of a shared switch
+                data.setdefault("debug", {})["dianaBurrowGuess"] = True
             write(config / spec["files"][0], data, rng.choice(styles), rng)
         if spec.get("id"):
             make_jar(mods_dir / f"{spec['id']}-1.{seed}.0.jar", {"id": spec["id"], "version": f"1.{seed}.0+26.1.2", "name": mod})
-    # an older copy of one mod: the newer file wins
     make_jar(mods_dir / "skyhanni-old.jar", {"id": "skyhanni", "version": "0.1.0"}, mtime=1_000_000)
-    # Hypixel SkyBlock mods the list doesn't have, found on their own
     make_jar(mods_dir / "examplesb.jar", {"id": "examplesb", "name": "Example SB", "version": "2.0",
                                           "description": "Hypixel SkyBlock helper"})
     write(config / "examplesb.json", {"general": {"enabled": True, "debugMode": False}, "radius": 3.5}, "2", rng)
@@ -161,13 +146,11 @@ def build(root, seed, names_version, skip_mods=()):
     make_jar(mods_dir / "odin-clone.jar", {"id": "odinclone", "name": "Odin", "version": "1",
                                            "description": "skyblock mod"}, bundled=["hm-api-1.0.jar"])
     write(config / "odinclone.json", {"thing": False}, "2", rng)
-    # mods that must not be found: not for Hypixel, and an unrelated "skyblock" survival mod
     make_jar(mods_dir / "sodium.jar", {"id": "sodium", "name": "Sodium", "version": "0.6"})
     write(config / "sodium.json", {"quality": True}, "2", rng)
     make_jar(mods_dir / "islands.jar", {"id": "islands", "name": "Skyblock Islands", "version": "1",
                                         "description": "A sky block survival mod"})
     write(config / "islands.json", {"x": 1}, "2", rng)
-    # broken files: a listed mod with unreadable JSON, and one whose file is a bare number
     if "AaronsMod" in skip_mods:
         (config / "aaron-mod.json").write_text('{"broken": [1, 2,,]}')
         make_jar(mods_dir / "aaron.jar", {"id": "aaron-mod", "version": "3.0.1+26.1.2"})
@@ -175,8 +158,6 @@ def build(root, seed, names_version, skip_mods=()):
         (config / "skyhanni").mkdir(parents=True, exist_ok=True)
         (config / "skyhanni" / "config.json").write_text("123")
 
-
-# ── running both versions ──
 
 def py_dump(folder, gv, priority, overrides, resolve, save):
     ws = app.Workspace(priority, overrides, gv)
@@ -242,7 +223,6 @@ def first_difference(a, b, path="$"):
 
 
 def files_of(root):
-    """{relative path: bytes} for every file, with backups named by what they back up."""
     out = {}
     for p in sorted(root.rglob("*")):
         if p.is_file():
@@ -254,7 +234,6 @@ def files_of(root):
 
 
 SCENARIOS = [
-    # (name, seed, names in the files, version picked, priority, overrides, mods left out)
     ("everything", 1, "26.1.2", "26.1.2", {}, {}, ()),
     ("old names, new version picked", 2, "1.21.8", "26.1.2",
      {"Dungeons": "Skyblocker", "Events": "SBO", "Misc": "NoFrills", "Farming": "Nowhere"},
@@ -318,7 +297,6 @@ def check_text(exe):
 
 
 def check_updates(exe):
-    """Both versions' update checks against the same stand-in Modrinth and CurseForge server."""
     import hashlib
     import threading
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -403,7 +381,7 @@ def check_updates(exe):
 
 
 def main():
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows consoles default to cp1252
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     exe = sys.argv[1]
     failures = check_text(exe) + check_updates(exe)
     for name, seed, names_version, gv, priority, overrides, skip in SCENARIOS:

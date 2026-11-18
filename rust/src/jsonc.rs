@@ -1,23 +1,17 @@
-//! Reading JSON with comments (JSONC), and writing JSON the way the Python version did, so a saved
-//! file keeps its layout.
-
 use std::io::{self, Write};
 
 use serde::Serialize;
 use serde_json::Value;
 
-/// `json.loads` that also accepts `//` and `/* */` comments and trailing commas.
-/// Returns (data, had_comments). Strings are skipped first, so "https://x" is never a comment.
 pub fn parse_jsonc(text: &str) -> Result<(Value, bool), String> {
     if let Ok(v) = serde_json::from_str::<Value>(text) {
-        return Ok((v, false)); // fast path: most configs are plain JSON
+        return Ok((v, false));
     }
     let (clean, found) = strip_comments(text);
     let clean = strip_trailing_commas(&clean);
     serde_json::from_str::<Value>(&clean).map(|v| (v, found)).map_err(|e| e.to_string())
 }
 
-/// Length in bytes of the string literal starting at `start` (a `"`), or None if it never ends.
 fn string_len(b: &[u8], start: usize) -> Option<usize> {
     let mut j = start + 1;
     while j < b.len() {
@@ -30,7 +24,6 @@ fn string_len(b: &[u8], start: usize) -> Option<usize> {
     None
 }
 
-/// Blanks out comments (keeping line breaks, so error positions still match).
 fn strip_comments(text: &str) -> (String, bool) {
     let b = text.as_bytes();
     let mut out = String::with_capacity(text.len());
@@ -68,7 +61,6 @@ fn strip_comments(text: &str) -> (String, bool) {
     (out, found)
 }
 
-/// Drops commas that come right before a `}` or `]`.
 fn strip_trailing_commas(text: &str) -> String {
     let b = text.as_bytes();
     let mut out = String::with_capacity(text.len());
@@ -97,16 +89,13 @@ fn strip_trailing_commas(text: &str) -> String {
     out
 }
 
-/// How a file is laid out, so saving doesn't reformat it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Indent {
-    /// Written on a single line: kept that way.
     OneLine,
     Spaces(usize),
     Tab,
 }
 
-/// The file's own indent: "\t", 2, 4 ..., or one line.
 pub fn detect_indent(text: &str) -> Indent {
     let body = text.trim();
     if !body.contains('\n') {
@@ -122,9 +111,6 @@ pub fn detect_indent(text: &str) -> Indent {
         }
         i
     };
-    // After the opening bracket: blanks, maybe one /* comment */, blanks, a line break, then the
-    // first line's indent and something that isn't a blank. Like the Python regex, a comment may
-    // end at any later "*/" if the nearer one doesn't fit.
     let after_bracket = skip_blanks(1);
     let mut starts = vec![after_bracket];
     if body[after_bracket..].starts_with("/*") {
@@ -157,9 +143,6 @@ pub fn detect_indent(text: &str) -> Indent {
     Indent::Spaces(2)
 }
 
-/// The JSON text of a value, laid out like Python's `json.dumps(v, indent=…, ensure_ascii=False)`
-/// (or compact `separators=(",", ":")` for one-line files). Numbers keep the text they were read
-/// with.
 pub fn to_json_text(v: &Value, indent: &Indent) -> String {
     let bytes = match indent {
         Indent::OneLine => serde_json::to_vec(v).expect("JSON values always serialize"),
@@ -176,8 +159,6 @@ fn pretty(v: &Value, indent: &[u8]) -> Vec<u8> {
     buf
 }
 
-/// Compact JSON, cut off once it's longer than `limit` characters (for table cells: a list of
-/// thousands of waypoints isn't written out in full on every redraw).
 pub fn compact_preview(v: &Value, limit: usize) -> (String, bool) {
     struct Capped {
         buf: Vec<u8>,
@@ -199,13 +180,11 @@ pub fn compact_preview(v: &Value, limit: usize) -> (String, bool) {
     (text, cut)
 }
 
-/// Python's `repr(float)`: the shortest text that reads back as the same number, in plain notation
-/// from 1e-4 up to 1e16 and in exponent notation ("1e-05", "1.5e+20") outside that.
 pub fn py_float_repr(x: f64) -> String {
     if x == 0.0 {
         return if x.is_sign_negative() { "-0.0".into() } else { "0.0".into() };
     }
-    let sci = format!("{x:e}"); // shortest round-trip digits: "1.2345e17", "-1e-5"
+    let sci = format!("{x:e}");
     let (mant, exp) = sci.split_once('e').expect("{:e} always has an exponent");
     let exp: i32 = exp.parse().expect("exponent is a number");
     let neg = mant.starts_with('-');
@@ -241,7 +220,7 @@ mod tests {
         assert_eq!(v["l"].as_array().unwrap().len(), 2);
         let (_, c) = parse_jsonc("{\"a\": 1}").unwrap();
         assert!(!c);
-        let (v, c) = parse_jsonc("{\"a\": [1,],}").unwrap(); // commas alone aren't comments
+        let (v, c) = parse_jsonc("{\"a\": [1,],}").unwrap();
         assert!(!c);
         assert_eq!(v["a"][0], 1);
     }

@@ -1,22 +1,17 @@
-//! Walking a config file into settings, and reading what the user typed into a value.
-
 use serde_json::{Number, Value};
 
 use crate::jsonc::py_float_repr;
 
-/// One step of a path into a JSON file.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Seg {
     Key(String),
     Index(usize),
 }
 
-/// A number written without a fraction or exponent, like Python reads it as an int.
 pub fn is_int(n: &Number) -> bool {
     !n.to_string().contains(['.', 'e', 'E'])
 }
 
-/// Python's type name, as shown in the edit dialog.
 pub fn type_name(v: &Value) -> &'static str {
     match v {
         Value::Null => "NoneType",
@@ -29,7 +24,6 @@ pub fn type_name(v: &Value) -> &'static str {
     }
 }
 
-/// Python's `str()` of a value, for list entries named by their "name" field.
 pub fn py_str(v: &Value) -> String {
     match v {
         Value::String(s) => s.clone(),
@@ -41,9 +35,6 @@ pub fn py_str(v: &Value) -> String {
     }
 }
 
-/// Every editable value in a JSON tree, in file order: (real path, shown path, value).
-/// Lists of {"name": ...} objects are addressed by name for display but by index for writing, so
-/// edits always land back in the right place. Nulls are skipped.
 pub fn leaves(root: &Value) -> Vec<(Vec<Seg>, Vec<String>, &Value)> {
     let mut out = Vec::new();
     let mut stack: Vec<(&Value, Vec<Seg>, Vec<String>)> = vec![(root, Vec::new(), Vec::new())];
@@ -80,7 +71,6 @@ pub fn leaves(root: &Value) -> Vec<(Vec<Seg>, Vec<String>, &Value)> {
     out
 }
 
-/// The value at a path, for writing.
 pub fn node_mut<'a>(mut v: &'a mut Value, path: &[Seg]) -> Option<&'a mut Value> {
     for seg in path {
         v = match seg {
@@ -91,7 +81,6 @@ pub fn node_mut<'a>(mut v: &'a mut Value, path: &[Seg]) -> Option<&'a mut Value>
     Some(v)
 }
 
-/// Turns what the user typed into a value of the same type as `old`.
 pub fn parse_value(text: &str, old: &Value) -> Result<Value, String> {
     let t = text.trim();
     match old {
@@ -121,7 +110,6 @@ pub fn parse_value(text: &str, old: &Value) -> Result<Value, String> {
     }
 }
 
-/// Python's `int()`: optional sign, digits, single underscores between digits.
 fn parse_int(t: &str) -> Option<Value> {
     let (neg, digits) = match t.strip_prefix('-') {
         Some(rest) => (true, rest),
@@ -137,7 +125,6 @@ fn parse_int(t: &str) -> Option<Value> {
     number(&text).ok()
 }
 
-/// Removes underscores that sit between two digits ("1_000"); None if any other underscore.
 fn without_digit_underscores(t: &str) -> Option<String> {
     let b = t.as_bytes();
     for (i, &c) in b.iter().enumerate() {
@@ -152,7 +139,6 @@ fn number(text: &str) -> Result<Value, String> {
     serde_json::from_str::<Number>(text).map(Value::Number).map_err(|e| e.to_string())
 }
 
-/// Equality that doesn't let `true == 1` slip through at the top level (like the Python version).
 pub fn same(a: &Value, b: &Value) -> bool {
     if a.is_boolean() || b.is_boolean() {
         return a == b;
@@ -160,7 +146,6 @@ pub fn same(a: &Value, b: &Value) -> bool {
     py_eq(a, b)
 }
 
-/// Python's `==` on JSON values: numbers compare by value (1 == 1.0), and nested bools count as 0/1.
 pub fn py_eq(a: &Value, b: &Value) -> bool {
     fn num(v: &Value) -> Option<f64> {
         match v {

@@ -1,26 +1,8 @@
-// The mods, features and Minecraft versions SkyBlock Config Manager knows about.
-//
-// The app has this file built in, and also downloads the newest copy from the repository, so
-// a change merged here reaches everyone without a new release. Raise "revision" with every
-// change: the app only switches to a downloaded copy whose revision is higher than its own.
-// To try changes, put your copy next to the app; it's used instead of the others.
 {
   "format": 1,
   "revision": 1,
-
-  // Minecraft versions in the version menu on the Overview tab, newest first. "Check for
-  // updates" looks for mod builds for the version picked.
   "game_versions": ["26.3", "26.2", "26.1.2", "26.1.1", "26.1", "1.21.11", "1.21.10", "1.21.8", "1.21.7", "1.21.5"],
-  // Picked until the user chooses another; the feature keys below come from it.
   "default_game_version": "26.1.2",
-
-  // Where each mod keeps its config, relative to the config folder (first file found wins).
-  //   dir:  the mod keeps one JSON file per feature in that folder; every file in it is loaded.
-  //   id:   the mod id inside its jar (fabric.mod.json), used to find the installed version.
-  //   slug: the Modrinth project, used by "Check for updates".
-  //   curseforge: the CurseForge project id, for mods published there too.
-  // Hypixel SkyBlock mods that aren't listed here are found automatically; their settings can
-  // be browsed and edited, but they aren't compared with other mods.
   "mods": {
     "NoFrills": {"files": ["NoFrills/Configuration.json", "Configuration.json"], "id": "nofrills", "slug": "nofrills"},
     "SkyHanni": {"files": ["skyhanni/config.json", "config.json"], "id": "skyhanni", "slug": "skyhanni"},
@@ -32,24 +14,8 @@
     "Odin": {"files": ["odin/odin-config.json", "odin-config.json"], "id": "odin", "slug": "odin"},
     "SBO": {"files": ["sbo/config.jsonc", "SBO/config.jsonc", "config.jsonc"], "id": "sbo", "slug": "skyblock-overhaul"}
   },
-
-  // The feature areas shown on the Priorities tab, in order.
   "areas": ["Dungeons", "Kuudra", "Slayers", "Farming", "Mining", "Foraging", "Hunting", "Fishing", "Events", "Rift", "GUI/HUD", "Inventory", "Misc"],
-
-  // Features that more than one mod provides, with each mod's switch for it.
-  //  * A switch is a dotted config key. A list means several switches that all follow together.
-  //  * A key starting with * matches by its ending, for mods whose files nest settings
-  //    differently between versions: "*spadeGuess" matches "spadeGuess" and "burrows.spadeGuess".
-  //  * null means the mod offers the feature but has no single on/off switch; it still competes.
-  //  * A mod only competes if one of its switches is actually in the user's config, so unknown
-  //    keys are harmless.
-  //  * An object means the mod renamed the switch between Minecraft versions: each key is a
-  //    version or a range ("1.21.5-1.21.10") and gives the name used there; "other" covers the
-  //    rest. The name for the version picked is tried first, then the others.
-  //  * Order matters: an area's default owner is the first mod listed for it, and if the owner
-  //    doesn't offer a feature, the first listed mod that does keeps it.
   "features": [
-    // ── Dungeons ──
     {"area": "Dungeons", "name": "Dungeon map", "mods": {
       "Odin": "Dungeon Map.enabled",
       "Skyblocker": "dungeons.dungeonMap.enableMap",
@@ -122,7 +88,6 @@
       "Odin": "Dungeon Queue.enabled",
       "NoFrills": "autoRequeue.enabled"
     }},
-    // ── Kuudra ──
     {"area": "Kuudra", "name": "Supply waypoints", "mods": {
       "Odin": "Supply Helper.enabled",
       "Skyblocker": "crimsonIsle.kuudra.supplyWaypoints",
@@ -154,7 +119,6 @@
       "Odin": "Vesuvius.enabled",
       "NoFrills": "vesuviusSolver.enabled"
     }},
-    // ── Slayers ──
     {"area": "Slayers", "name": "Boss spawn alert", "mods": {
       "Skyblocker": "slayers.bossSpawnAlert",
       "NoFrills": "spawnAlert.enabled"
@@ -192,7 +156,6 @@
       "Skyblocker": "slayers.slainTime",
       "NoFrills": "killTimer.enabled"
     }},
-    // ── Farming ──
     {"area": "Farming", "name": "Pest finder", "mods": {
       "SkyHanni": ["garden.pests.pestFinder.showDisplay", "garden.pests.pestFinder.showPlotInWorld"],
       "Skyblocker": {"1.21.5-1.21.8": "farming.garden.pestHighlighter", "other": "farming.pestHighlighter.enabled"},
@@ -207,7 +170,6 @@
       "Skyblocker": "otherLocations.barn.enableGlowingMushroomHelper",
       "NoFrills": "shroomHighlight.enabled"
     }},
-    // ── Mining ──
     {"area": "Mining", "name": "Metal detector solver", "mods": {
       "SkyHanni": "mining.metalDetector.metalDetectorSolver",
       "Skyblocker": "mining.crystalHollows.metalDetectorHelper"
@@ -247,7 +209,6 @@
       "Skyblocker": "otherLocations.end.enableEnderNodeHelper",
       "NoFrills": "endNodeHighlight.enabled"
     }},
-    // ── Foraging ──
     {"area": "Foraging", "name": "Moonglade beacon solver", "mods": {
       "SkyHanni": {"1.21.5-1.21.10": "foraging.moongladeBeacon.enabled", "other": "foraging.foragingBeacon.enabled"},
       "Skyblocker": {"1.21.5-1.21.11": "foraging.galatea.enableTunerSolver", "other": "foraging.moongladeMarsh.enableTunerSolver"},
@@ -257,7 +218,6 @@
       "SkyHanni": "foraging.mutePhantoms",
       "SkyOcean": "*galatea.muteThePhantoms"
     }},
-    // ── Hunting ──
     {"area": "Hunting", "name": "Shard tracker", "mods": {
       "SkyHanni": "hunting.shardTracker.enabled",
       "NoFrills": "shardTracker.enabled"
@@ -270,7 +230,6 @@
       "Skyblocker": "hunting.moongladeMobs.highlightInvisibug",
       "NoFrills": "invisibugHighlight.enabled"
     }},
-    // ── Fishing ──
     {"area": "Fishing", "name": "Bobber timer", "mods": {
       "SkyHanni": "fishing.bobberTimer.enabled",
       "SkyOcean": "*fishing.bobberTime",
@@ -288,7 +247,6 @@
       "SkyHanni": "fishing.fishingHookDisplay.enabled",
       "Skyblocker": "helpers.fishing.enableFishingHelper"
     }},
-    // ── Events ──
     {"area": "Events", "name": "Diana burrow guess", "mods": {
       "SBO": {"1.21.5-1.21.10": "*dianaBurrowGuess", "other": "*spadeGuess"},
       "SkyHanni": "event.diana.guess",
@@ -333,12 +291,10 @@
       "SkyHanni": "inventory.chocolateFactory.timeTowerReminder",
       "Skyblocker": "helpers.chocolateFactory.enableTimeTowerReminder"
     }},
-    // ── Rift ──
     {"area": "Rift", "name": "Enigma soul waypoints", "mods": {
       "SkyHanni": "rift.enigmaSoulWaypoints.enabled",
       "Skyblocker": "otherLocations.rift.enigmaSoulWaypoints"
     }},
-    // ── GUI/HUD ──
     {"area": "GUI/HUD", "name": "Custom tab list", "mods": {
       "SkyHanni": "gui.compactTabList.enabled",
       "Skyblocker": "uiAndVisuals.tabHud.tabHudEnabled",
@@ -366,7 +322,6 @@
       "NoFrills": "viewmodel.enabled",
       "AaronsMod": "itemModel.enableItemModelCustomization"
     }},
-    // ── Inventory ──
     {"area": "Inventory", "name": "Inventory buttons", "mods": {
       "Firmament": null,
       "NoFrills": "inventoryButtons.enabled",
@@ -399,7 +354,6 @@
       "NoFrills": "priceTooltips.enabled",
       "SkyBlockAddons": "*ITEM_PRICES_IN_TOOLTIP.value"
     }},
-    // ── Misc ──
     {"area": "Misc", "name": "Etherwarp overlay", "mods": {
       "Odin": "Etherwarp.enabled",
       "Firmament": "etherwarp-overlay.etherwarp-overlay",
@@ -435,14 +389,10 @@
       "SkyOcean": {"1.21.5-1.21.11": "*misc.hideLightning", "other": "*environmental.hideLightning"}
     }}
   ],
-
-  // Settings nothing else overlaps with, but that should be held at a fixed value.
   "preferred": [
     {"mod": "Firmament", "key": "inventory-buttons-config.hover-text", "value": true},
     {"mod": "Firmament", "key": "inventory-buttons-config.only-inv", "value": false},
     {"mod": "Skyblocker", "key": "quickNav.enableQuickNav", "value": true}
   ],
-
-  // Exact menu names where the tidied-up config key isn't right: {"Mod": {"dotted.key": "Name"}}.
   "labels": {}
 }
