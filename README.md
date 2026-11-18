@@ -19,9 +19,8 @@ Get these from the [latest release](../../releases/latest):
 | Windows 10 or 11 | `SkyblockConfigManager.exe`, or the `.zip` if your browser blocks the .exe | If "Windows protected your PC" shows up, click **More info**, then **Run anyway**. |
 | macOS 10.13 or newer | `SkyblockConfigManager-macOS.zip` | Unzip it, right-click the app and choose **Open**. If macOS still won't open it, click **Open Anyway** in **System Settings → Privacy & Security**. |
 | Linux | `SkyblockConfigManager-Linux.zip` | Unzip it and run `./SkyblockConfigManager`. |
-| Anything with Python 3.8+ | `skyblock_config_manager.py` | Run `python3 skyblock_config_manager.py`. On Debian or Ubuntu, install Tkinter first with `sudo apt install python3-tk`. |
 
-*Do note that only the exe and Python files have been tested on Windows 11. I will test it on Linux at a later date; unable to test on macOS as my laptop is broken.*
+*Do note that only the exe has been tested on Windows 11. I will test it on Linux at a later date; unable to test on macOS as my laptop is broken.*
 
 ## How to Use It
 
@@ -61,7 +60,7 @@ The first time a file is saved, the original is copied next to it as `<name>.bak
 * **A mod says "not found":** make sure you opened the right `config` folder.
 * **Every mod says "not installed":** the app reads mod versions from the `mods` folder next to your `config` folder.
 * **A file wasn't saved:** Minecraft was probably still open. Close it, click **Reload**, and make your changes again.
-* **Your antivirus flags the .exe:** it's a false positive. The .exe is built by GitHub from the source code in this repository, and the release page shows each file's SHA-256 so you can check that you have the same file. You can also use the `.py` file instead.
+* **Your antivirus flags the .exe:** it's a false positive. The .exe is built by GitHub from the source code in this repository, and the release page shows each file's SHA-256 so you can check that you have the same file.
 * **Something else went wrong:** the **Activity** log on the Overview tab has the details. Include them when you [open an issue](../../issues/new).
 
 ## Updating the Mod List

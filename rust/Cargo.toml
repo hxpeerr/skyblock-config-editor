@@ -16,10 +16,6 @@ name = "SkyblockConfigManager"
 path = "src/main.rs"
 required-features = ["gui"]
 
-[[bin]]
-name = "scm-dump"
-path = "src/bin/scm_dump.rs"
-
 [features]
 default = ["gui"]
 gui = ["dep:eframe", "dep:egui_extras", "dep:rfd", "dep:ico"]

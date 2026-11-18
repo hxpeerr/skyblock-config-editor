@@ -7,7 +7,6 @@ on:
     paths:
       - rust/**
       - features.jsonc
-      - skyblock_config_manager.py
       - packaging/**
       - .github/workflows/release.yml
   workflow_dispatch:
@@ -34,15 +33,12 @@ jobs:
       - name: Update Rust
         run: rustup update stable --no-self-update && rustup default stable
 
-      - name: Check the versions (and the tag) match
+      - name: Check the tag and release notes match the version
         shell: python
         run: |
-          import os, re, sys, tomllib
-          py = re.search(r'^__version__ = "(.+?)"', open("skyblock_config_manager.py", encoding="utf-8").read(), re.M).group(1)
+          import os, sys, tomllib
           rs = tomllib.load(open("rust/Cargo.toml", "rb"))["package"]["version"]
           errors = []
-          if py != rs:
-              errors.append(f"skyblock_config_manager.py is {py} but rust/Cargo.toml is {rs}; make them the same")
           tag = os.environ.get("GITHUB_REF_NAME", "")
           if os.environ.get("GITHUB_REF", "").startswith("refs/tags/") and tag != "v" + rs:
               errors.append(f"Tag {tag} doesn't match version {rs}: tag the release v{rs}")
@@ -53,17 +49,9 @@ jobs:
               print(f"::error::{e}")
           sys.exit(1 if errors else 0)
 
-      - name: Check features.jsonc matches the Python tables
-        run: python rust/tools/export_features.py --check
-
       - name: Unit tests
         working-directory: rust
         run: cargo test --no-default-features
-
-      - name: Compare with the Python version
-        run: |
-          cargo build --manifest-path rust/Cargo.toml --no-default-features --bin scm-dump
-          python rust/tools/parity.py rust/target/debug/scm-dump
 
   build:
     name: Build (${{ matrix.name }})
@@ -236,7 +224,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-Linux.zip skyblock_config_manager.py)
+          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-Linux.zip)
           if body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
             gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
             if [ -z "$body" ]; then

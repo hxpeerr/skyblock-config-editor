@@ -102,8 +102,7 @@ pub fn parse_release(v: &Value) -> Result<Release, String> {
     })
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Block {
     Heading,
     Bullet,
@@ -111,8 +110,7 @@ pub enum Block {
     Gap,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Span {
     Plain,
     Strong,
