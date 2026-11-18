@@ -11,14 +11,11 @@ build = "build.rs"
 name = "scm"
 path = "src/lib.rs"
 
-# The app.
 [[bin]]
 name = "SkyblockConfigManager"
 path = "src/main.rs"
 required-features = ["gui"]
 
-# Prints what the app would load, recommend and save for a config folder, as JSON. Used by the
-# tests that compare this version with the Python one.
 [[bin]]
 name = "scm-dump"
 path = "src/bin/scm_dump.rs"
@@ -42,8 +39,6 @@ egui_extras = { version = "0.37.0", optional = true }
 ico = { version = "0.6.0", optional = true }
 rfd = { version = "0.18.0", optional = true }
 
-# The window is drawn with wgpu on Windows (Direct3D 12, which has a software fallback for machines
-# without a graphics card or with basic drivers) and macOS (Metal), and with OpenGL on Linux.
 [target.'cfg(any(windows, target_os = "macos"))'.dependencies]
 eframe = { version = "0.37.0", optional = true, default-features = false, features = ["accesskit", "clipboard", "default_fonts", "system_fonts", "wgpu"] }
 

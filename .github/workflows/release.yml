@@ -1,10 +1,3 @@
-# Builds the app (the Rust version in rust/) for Windows, macOS and Linux and checks it.
-#
-# - A version tag (v4.0.0, ...) also publishes the builds as a GitHub Release. Publish a release on
-#   GitHub with a new tag, or push the tag with git. The tag must match the version in
-#   rust/Cargo.toml (and __version__ in skyblock_config_manager.py, which must be the same).
-# - Pull requests that change the app or its packaging get the same tests and builds; the builds
-#   are attached to the run so they can be tried before merging.
 name: Build & release
 
 on:
@@ -113,21 +106,19 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          # A folder laid out like .minecraft: the app next to a config folder with one mod config.
           $dir = Join-Path $env:RUNNER_TEMP "smoke"
           New-Item -ItemType Directory -Force -Path (Join-Path $dir "config") | Out-Null
           Copy-Item rust/target/release/SkyblockConfigManager.exe $dir
           Set-Content -Path (Join-Path $dir "config/skyblocker.json") -Value '{"quickNav": {"enableQuickNav": true}}'
           $exe = Start-Process -FilePath (Join-Path $dir "SkyblockConfigManager.exe") -WorkingDirectory $dir -PassThru
-          $null = $exe.Handle                      # keeps the exit code readable later
+          $null = $exe.Handle
 
-          # Once it has loaded a folder, the app saves its own settings (config_dir) beside itself.
           $settings = Join-Path $dir "skyblock_config_manager.settings.json"
           $deadline = (Get-Date).AddSeconds(120)
           while (-not (Test-Path $settings) -and -not $exe.HasExited -and (Get-Date) -lt $deadline) {
             Start-Sleep -Seconds 1
           }
-          Start-Sleep -Seconds 3                   # it must still be running a moment later
+          Start-Sleep -Seconds 3
           try {
             if ($exe.HasExited) { throw "The app closed by itself (exit code $($exe.ExitCode))." }
             if (-not (Test-Path $settings)) { throw "The app didn't load the test config folder within 2 minutes." }
@@ -155,7 +146,6 @@ jobs:
               mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
               cp rust/target/release/SkyblockConfigManager "$app/Contents/MacOS/"
               sed "s/{version}/$version/g" packaging/Info.plist > "$app/Contents/Info.plist"
-              # The app icon, made from packaging/icon.ico; without it the app just has the default icon.
               ( set -e
                 mkdir -p icon.iconset
                 sips -s format png packaging/icon.ico --out icon.png > /dev/null
@@ -165,7 +155,7 @@ jobs:
                 done
                 iconutil -c icns icon.iconset -o "$app/Contents/Resources/icon.icns"
               ) || echo "::warning::Couldn't make the macOS app icon"
-              codesign --force --deep --sign - "$app"    # ad-hoc: Apple chips won't run unsigned code
+              codesign --force --deep --sign - "$app"
               (cd dist && ditto -c -k --keepParent SkyblockConfigManager.app SkyblockConfigManager-macOS.zip && rm -rf SkyblockConfigManager.app)
               ;;
             Linux)
@@ -219,7 +209,6 @@ jobs:
         run: |
           files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-macOS.zip dist/SkyblockConfigManager-Linux.zip)
           if body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
-            # Published by hand on GitHub: attach the files, and fill in the notes if it has none.
             gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
             if [ -z "$body" ]; then
               gh release edit "$TAG" --notes-file dist/release_notes.md --repo "$GITHUB_REPOSITORY"

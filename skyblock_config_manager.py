@@ -1,17 +1,4 @@
 #!/usr/bin/env python3
-"""
-SkyBlock Config Manager
------------------------
-Finds settings that overlap between Fabric SkyBlock mods, lets you choose which mod
-owns each feature area (and each feature), and rewrites the configs so only the owner
-keeps it enabled.
-
-    python skyblock_config_manager.py
-
-Python 3.8+, standard library only. The apps on the releases page (Windows, macOS, Linux) are
-built from the Rust version in rust/, which works the same way and reads the same tables
-(exported to features.jsonc by rust/tools/export_features.py).
-"""
 from __future__ import annotations
 
 __version__ = "4.0.1"
@@ -40,27 +27,14 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter import font as tkfont
 
 LOADER = "fabric"
-# Minecraft versions in the version menu on the Overview tab, newest first: the ones most of the
-# supported mods have Fabric builds for. "Check for updates" looks for builds for the version
-# you pick. Add new versions here as the mods support them.
 GAME_VERSIONS = ["26.3", "26.2", "26.1.2", "26.1.1", "26.1",
                  "1.21.11", "1.21.10", "1.21.8", "1.21.7", "1.21.5"]
-GAME_VERSION = "26.1.2"          # picked until you choose another; the FEATURES keys come from it
+GAME_VERSION = "26.1.2"
 MAX_FILE_BYTES = 25 * 1024 * 1024
 ALL = "All"
-OFF = "Off"                       # a feature override meaning "turn it off in every mod"
-FROZEN = bool(getattr(sys, "frozen", False))      # running as the packaged .exe
+OFF = "Off"
+FROZEN = bool(getattr(sys, "frozen", False))
 
-# ═══════════════════════════════ Edit these to match your pack ═══════════════════════════════
-# (The .exe has these built in: after editing, rebuild it with packaging/build_exe.bat.)
-
-# Where each mod keeps its config, relative to the config folder (first file found wins).
-#   dir:  the mod keeps one JSON file per feature in that folder; every file in it is loaded.
-#   id:   the mod id inside its jar (fabric.mod.json), used to find the installed version.
-#   slug: the Modrinth project, used by "Check for updates".
-#   curseforge: the CurseForge project id, for mods published there too ("Check for updates").
-# Hypixel SkyBlock mods that aren't listed here are found automatically; their settings can be
-# browsed and edited, but they aren't compared with other mods.
 MODS = {
     "NoFrills":       {"files": ["NoFrills/Configuration.json", "Configuration.json"],
                        "id": "nofrills", "slug": "nofrills"},
@@ -82,26 +56,10 @@ MODS = {
                        "id": "sbo", "slug": "skyblock-overhaul"},
 }
 
-# The feature areas shown in the Priorities tab, in order.
 AREAS = ["Dungeons", "Kuudra", "Slayers", "Farming", "Mining", "Foraging", "Hunting",
          "Fishing", "Events", "Rift", "GUI/HUD", "Inventory", "Misc"]
 
-# Features that more than one mod provides: (area, feature, {mod: its switch(es)}).
-#  * A switch is a dotted config key. A list means several switches that all follow together.
-#  * A key starting with * matches by its ending, for mods whose files nest settings
-#    differently between versions: "*spadeGuess" matches "spadeGuess" and "burrows.spadeGuess".
-#  * None means the mod offers the feature but has no single on/off switch; it still competes.
-#  * A mod only competes if one of its switches is actually in your config, so unknown
-#    keys are harmless.
-#  * A dict means the mod renamed the switch between Minecraft versions: each key is a version
-#    or a range ("1.21.5-1.21.10") and gives the name used there; "other" covers the rest.
-#    The name for the version picked on the Overview tab is tried first, then the others, so a
-#    mod build that doesn't match the picked version is still found.
-#  * Order matters: an area's default owner is the first mod listed for it, and if the owner
-#    doesn't offer a feature, the first listed mod that does keeps it.
-# Keys were read from each mod's Fabric builds for every version in GAME_VERSIONS.
 FEATURES = [
-    # ── Dungeons ──
     ("Dungeons", "Dungeon map", {
         "Odin": "Dungeon Map.enabled",
         "Skyblocker": "dungeons.dungeonMap.enableMap",
@@ -163,7 +121,6 @@ FEATURES = [
     ("Dungeons", "Auto requeue", {
         "Odin": "Dungeon Queue.enabled",
         "NoFrills": "autoRequeue.enabled"}),
-    # ── Kuudra ──
     ("Kuudra", "Supply waypoints", {
         "Odin": "Supply Helper.enabled",
         "Skyblocker": "crimsonIsle.kuudra.supplyWaypoints",
@@ -188,7 +145,6 @@ FEATURES = [
     ("Kuudra", "Vesuvius solver", {
         "Odin": "Vesuvius.enabled",
         "NoFrills": "vesuviusSolver.enabled"}),
-    # ── Slayers ──
     ("Slayers", "Boss spawn alert", {
         "Skyblocker": "slayers.bossSpawnAlert",
         "NoFrills": "spawnAlert.enabled"}),
@@ -217,7 +173,6 @@ FEATURES = [
     ("Slayers", "Boss kill timer", {
         "Skyblocker": "slayers.slainTime",
         "NoFrills": "killTimer.enabled"}),
-    # ── Farming ──
     ("Farming", "Pest finder", {
         "SkyHanni": ["garden.pests.pestFinder.showDisplay", "garden.pests.pestFinder.showPlotInWorld"],
         "Skyblocker": {"1.21.5-1.21.8": "farming.garden.pestHighlighter",
@@ -231,7 +186,6 @@ FEATURES = [
         "SkyHanni": "misc.glowingMushroomHighlighter.enabled",
         "Skyblocker": "otherLocations.barn.enableGlowingMushroomHelper",
         "NoFrills": "shroomHighlight.enabled"}),
-    # ── Mining ──
     ("Mining", "Metal detector solver", {
         "SkyHanni": "mining.metalDetector.metalDetectorSolver",
         "Skyblocker": "mining.crystalHollows.metalDetectorHelper"}),
@@ -262,7 +216,6 @@ FEATURES = [
     ("Mining", "Ender node highlight", {
         "Skyblocker": "otherLocations.end.enableEnderNodeHelper",
         "NoFrills": "endNodeHighlight.enabled"}),
-    # ── Foraging ──
     ("Foraging", "Moonglade beacon solver", {
         "SkyHanni": {"1.21.5-1.21.10": "foraging.moongladeBeacon.enabled",
                      "other": "foraging.foragingBeacon.enabled"},
@@ -272,7 +225,6 @@ FEATURES = [
     ("Foraging", "Mute phantoms", {
         "SkyHanni": "foraging.mutePhantoms",
         "SkyOcean": "*galatea.muteThePhantoms"}),
-    # ── Hunting ──
     ("Hunting", "Shard tracker", {
         "SkyHanni": "hunting.shardTracker.enabled",
         "NoFrills": "shardTracker.enabled"}),
@@ -282,7 +234,6 @@ FEATURES = [
     ("Hunting", "Invisibug highlight", {
         "Skyblocker": "hunting.moongladeMobs.highlightInvisibug",
         "NoFrills": "invisibugHighlight.enabled"}),
-    # ── Fishing ──
     ("Fishing", "Bobber timer", {
         "SkyHanni": "fishing.bobberTimer.enabled",
         "SkyOcean": "*fishing.bobberTime",
@@ -296,7 +247,6 @@ FEATURES = [
     ("Fishing", "Fishing hook display", {
         "SkyHanni": "fishing.fishingHookDisplay.enabled",
         "Skyblocker": "helpers.fishing.enableFishingHelper"}),
-    # ── Events ──
     ("Events", "Diana burrow guess", {
         "SBO": {"1.21.5-1.21.10": "*dianaBurrowGuess", "other": "*spadeGuess"},
         "SkyHanni": "event.diana.guess",
@@ -333,11 +283,9 @@ FEATURES = [
     ("Events", "Time tower reminder", {
         "SkyHanni": "inventory.chocolateFactory.timeTowerReminder",
         "Skyblocker": "helpers.chocolateFactory.enableTimeTowerReminder"}),
-    # ── Rift ──
     ("Rift", "Enigma soul waypoints", {
         "SkyHanni": "rift.enigmaSoulWaypoints.enabled",
         "Skyblocker": "otherLocations.rift.enigmaSoulWaypoints"}),
-    # ── GUI/HUD ──
     ("GUI/HUD", "Custom tab list", {
         "SkyHanni": "gui.compactTabList.enabled",
         "Skyblocker": "uiAndVisuals.tabHud.tabHudEnabled",
@@ -359,7 +307,6 @@ FEATURES = [
     ("GUI/HUD", "Held item position", {
         "NoFrills": "viewmodel.enabled",
         "AaronsMod": "itemModel.enableItemModelCustomization"}),
-    # ── Inventory ──
     ("Inventory", "Inventory buttons", {
         "Firmament": None,
         "NoFrills": "inventoryButtons.enabled",
@@ -389,7 +336,6 @@ FEATURES = [
                        "general.itemTooltip.enableBazaarPrice"],
         "NoFrills": "priceTooltips.enabled",
         "SkyBlockAddons": "*ITEM_PRICES_IN_TOOLTIP.value"}),
-    # ── Misc ──
     ("Misc", "Etherwarp overlay", {
         "Odin": "Etherwarp.enabled",
         "Firmament": "etherwarp-overlay.etherwarp-overlay",
@@ -419,17 +365,13 @@ FEATURES = [
                      "other": "*environmental.hideLightning"}}),
 ]
 
-# Settings nothing else overlaps with, but that you want held at a fixed value: (mod, key, value).
 PREFERRED = [
     ("Firmament",  "inventory-buttons-config.hover-text", True),
     ("Firmament",  "inventory-buttons-config.only-inv",   False),
     ("Skyblocker", "quickNav.enableQuickNav",             True),
 ]
 
-# Exact menu names where the tidied-up config key isn't right: {("Mod", "dotted.key"): "Name"}.
 LABELS: dict = {}
-
-# ═════════════════════════════════════════ Helpers ═══════════════════════════════════════════
 
 HOME_PREFS = Path.home() / ".skyblock_config_manager.json"
 PORTABLE_PREFS = "skyblock_config_manager.settings.json"
@@ -437,7 +379,6 @@ OLD_AREA_NAMES = {"Garden": "Farming", "Diana": "Events", "Etherwarp": "Misc"}
 
 
 def renamed_area_key(key):
-    """'Garden/Pest finder' -> 'Farming/Pest finder' for overrides saved by older versions."""
     for old, new in OLD_AREA_NAMES.items():
         if key.startswith(old + "/"):
             return new + key[len(old):]
@@ -456,14 +397,11 @@ _PREVIEW = json.JSONEncoder(ensure_ascii=False, separators=(",", ":"))
 
 
 def fmt(value, limit=80):
-    """How a value is shown in the tables."""
     if value is None:
         return "—"
     if isinstance(value, bool):
         return "true" if value else "false"
     if isinstance(value, (dict, list)):
-        # Encode lazily and stop once the cell is full, instead of turning a list of thousands
-        # of waypoints into JSON in full for every row on every refresh.
         parts, size = [], 0
         for chunk in _PREVIEW.iterencode(value):
             parts.append(chunk)
@@ -477,7 +415,6 @@ def fmt(value, limit=80):
 
 
 def same(a, b):
-    """Equality that doesn't let True == 1 slip through."""
     if isinstance(a, bool) or isinstance(b, bool):
         return a is b
     return a == b
@@ -506,7 +443,6 @@ _CONTAINERS = frozenset("position pos offset color colour size scale".split())
 
 @lru_cache(maxsize=None)
 def words(segment):
-    """'enableTeleportOverlays' / 'etherwarp-overlay' -> 'Enable Teleport Overlays' / 'Etherwarp Overlay'."""
     out = []
     for w in filter(None, _SPLIT.split(segment)):
         low = w.lower()
@@ -522,7 +458,6 @@ def words(segment):
 
 
 def make_label(mod, key, segments):
-    """Menu-style name for a setting, built from its last config keys."""
     if (mod, key) in LABELS:
         return LABELS[(mod, key)]
     leaf = str(segments[-1])
@@ -530,17 +465,12 @@ def make_label(mod, key, segments):
     if parent and leaf.lower() in _GENERIC:
         return words(parent)
     if parent and norm(parent) != norm(leaf):
-        if len(segments) > 2 and parent.lower() in _CONTAINERS:       # "Feature › Position › X"
+        if len(segments) > 2 and parent.lower() in _CONTAINERS:
             return f"{words(str(segments[-3]))} › {words(parent)} › {words(leaf)}"
         return f"{words(parent)} › {words(leaf)}"
     return words(leaf)
 
 
-# Debug and developer settings are shown but locked: they can't be edited, and nothing is
-# recommended for them. A setting is one if any part of its path is only about debugging: a "dev"
-# or "debug" section, a "debugMode", "DEVELOPER_MODE" or "Debug Only Messages" switch. Names that
-# also say something else, like "hideGuiInDebugMenu" or "debugHud" (features for Minecraft's F3
-# debug screen), are ordinary settings.
 _DEBUG_WORDS = frozenset("debug debugs debugging debugger dev devs developer developers devmode "
                          "devtool devtools".split())
 _DEBUG_FILLER = frozenset("mode modes enabled enable toggle toggled on active value show info log logs "
@@ -555,8 +485,6 @@ def is_debug_segment(segment):
 
 
 def is_debug(segments):
-    """Is the setting at this config path (as shown, file name first for one-file-per-feature mods)
-    a debug or developer setting?"""
     return any(is_debug_segment(str(s)) for s in segments)
 
 
@@ -567,13 +495,8 @@ _NOT_NEWLINE = re.compile(r"[^\n]")
 
 
 def parse_jsonc(text):
-    """json.loads that also accepts // and /* */ comments and trailing commas.
-
-    Strings are matched first, so a URL like "https://x" is never mistaken for a comment.
-    Returns (data, had_comments).
-    """
-    try:                                         # fast path: most configs are plain JSON, and the
-        return json.loads(text), False           # C parser is far quicker than the regex passes
+    try:
+        return json.loads(text), False
     except ValueError:
         pass
     found = False
@@ -584,7 +507,7 @@ def parse_jsonc(text):
         if s[0] == '"':
             return s
         found = True
-        return _NOT_NEWLINE.sub(" ", s)          # keep line numbers intact for error messages
+        return _NOT_NEWLINE.sub(" ", s)
 
     text = _TOKENS.sub(blank, text)
     text = _COMMAS.sub(lambda m: m.group(1) if m.group(1) is not None else m.group(0), text)
@@ -592,14 +515,6 @@ def parse_jsonc(text):
 
 
 def leaves(root):
-    """Yield (real path, display path, value) for every editable value in a JSON tree.
-
-    Lists of {"name": ...} objects are addressed by name for display but by index for writing,
-    so edits always land back in the right place.
-
-    Walks with an explicit stack (same order as a recursive walk), so deeply nested files
-    can't raise RecursionError and there's no per-level generator overhead.
-    """
     stack = [(root, (), ())]
     pop, extend = stack.pop, stack.extend
     while stack:
@@ -620,7 +535,6 @@ def leaves(root):
 
 
 def parse_value(text, old):
-    """Turn what the user typed into a value of the same type as `old`."""
     t = text.strip()
     if isinstance(old, bool):
         if t.lower() in ("true", "1", "yes", "on"):
@@ -653,7 +567,6 @@ def parse_value(text, old):
 
 
 def atomic_write(path, text):
-    """Write through a temp file and rename, so a crash can't leave a half-written config."""
     fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
@@ -665,8 +578,8 @@ def atomic_write(path, text):
         os.replace(tmp, path)
     except BaseException:
         try:
-            os.chmod(tmp, 0o600)        # copymode may have made it read-only, and Windows
-        except OSError:                 # won't delete a read-only file
+            os.chmod(tmp, 0o600)
+        except OSError:
             pass
         try:
             os.unlink(tmp)
@@ -676,7 +589,6 @@ def atomic_write(path, text):
 
 
 def find_files(folder, spec):
-    """Config files for one mod. Unreadable folders count as "not found" instead of raising."""
     d = spec.get("dir")
     if d:
         try:
@@ -700,8 +612,6 @@ _INDENT = re.compile(r"^[{\[][ \t]*(?:/\*.*?\*/)?[ \t]*\r?\n([ \t]+)\S", re.S)
 
 
 def detect_indent(text):
-    """The file's own layout, so saving doesn't reformat the whole file: its indent ("\\t",
-    2, 4 ...), or None for a file written on a single line."""
     body = text.strip()
     if "\n" not in body:
         return None
@@ -713,7 +623,6 @@ def detect_indent(text):
 
 
 def exe_dir():
-    """Folder holding the packaged .exe (None when running as a script)."""
     return Path(sys.executable).resolve().parent if FROZEN else None
 
 
@@ -723,11 +632,11 @@ def detect_config_dir(hints=()):
     bases = []
     try:
         bases.append(Path.cwd())
-    except OSError:                                  # the working folder was deleted
+    except OSError:
         pass
-    if FROZEN:                                       # look around wherever the .exe was put
+    if FROZEN:
         bases.append(exe_dir())
-        cands.append(exe_dir().parent / "config")    # e.g. the .exe sits in .minecraft/mods
+        cands.append(exe_dir().parent / "config")
     for b in dict.fromkeys(bases):
         cands += [b, b / "config", b / "minecraft" / "config", b / ".minecraft" / "config"]
     if os.environ.get("APPDATA"):
@@ -742,10 +651,8 @@ def detect_config_dir(hints=()):
     return ""
 
 
-# ── installed jars & update check ──
-
-_JAR_META = {}        # jar path -> ((size, mtime_ns), what its fabric.mod.json says, or None)
-_SHA1 = {}            # jar path -> ((size, mtime_ns), sha1)
+_JAR_META = {}
+_SHA1 = {}
 _CACHE_LOCK = threading.Lock()
 
 
@@ -755,8 +662,6 @@ def _stamp(p):
 
 
 def _jar_meta(jar, stamp):
-    """What a mod jar's fabric.mod.json says about it, cached until the jar changes:
-    {id, version, name, description, deps (ids it depends on), bundled (jar names inside)}."""
     hit = _JAR_META.get(jar)
     if hit and hit[0] == stamp:
         return hit[1]
@@ -779,11 +684,6 @@ def _jar_meta(jar, stamp):
 
 
 def scan_mods(mods_dir):
-    """[(fabric.mod.json info, jar path)] for the mod jars in mods_dir, newest file first.
-
-    Only jars that changed since the last scan are opened again, so Reload stays instant
-    even with a few hundred mods installed.
-    """
     jars = []
     try:
         for p in Path(mods_dir).iterdir():
@@ -794,12 +694,11 @@ def scan_mods(mods_dir):
                     continue
     except OSError:
         return []
-    jars.sort(key=lambda js: js[1][1], reverse=True)       # newest first if a mod is there twice
+    jars.sort(key=lambda js: js[1][1], reverse=True)
     return [(info, jar) for jar, stamp in jars if (info := _jar_meta(jar, stamp))]
 
 
 def installed_jars(mods_dir):
-    """{mod name: (version, jar path)} for the MODS found by the mod id in each jar."""
     by_id = {spec["id"]: name for name, spec in MODS.items() if spec.get("id")}
     found = {}
     for info, jar in scan_mods(mods_dir):
@@ -809,26 +708,21 @@ def installed_jars(mods_dir):
     return found
 
 
-HYPIXEL_APIS = ("hypixel-mod-api", "hm-api")       # Hypixel's mod API, under both of its ids
-SKYBLOCK_LIBS = ("skyblock-api",)                   # libraries only Hypixel SkyBlock mods use
+HYPIXEL_APIS = ("hypixel-mod-api", "hm-api")
+SKYBLOCK_LIBS = ("skyblock-api",)
 
 
 def is_skyblock_mod(info):
-    """Is this a Hypixel SkyBlock mod? It must say it's for SkyBlock and either name Hypixel or
-    use Hypixel's mod API, or be built on a SkyBlock-only library. That keeps out Hypixel mods
-    for other games and the unrelated sky-island survival mods also called "skyblock"."""
     text = f"{info['id']} {info['name']} {info['description']}".lower()
     uses = lambda ids: any(i in info["deps"] or any(b.startswith(i) for b in info["bundled"]) for i in ids)
     skyblock = "skyblock" in text or "sky block" in text
     return (skyblock and ("hypixel" in text or uses(HYPIXEL_APIS))) or uses(SKYBLOCK_LIBS)
 
 
-AUTO_MAX_BYTES = 2 * 1024 * 1024    # larger JSON in a found mod's folder is usually data, not settings
+AUTO_MAX_BYTES = 2 * 1024 * 1024
 
 
 def discover_mods(config_dir, claimed=()):
-    """{name: spec} for Hypixel SkyBlock mods in the mods folder that MODS doesn't list, with the
-    JSON files in the config folder named after them (or in a folder named after them)."""
     config_dir = Path(config_dir)
     known = {spec.get("id") for spec in MODS.values()}
     try:
@@ -839,7 +733,7 @@ def discover_mods(config_dir, claimed=()):
     for info, jar in scan_mods(config_dir.parent / "mods"):
         if info["id"] in known or not is_skyblock_mod(info):
             continue
-        known.add(info["id"])                              # an older copy of the same mod is skipped
+        known.add(info["id"])
         names = {norm(info["id"]), norm(info["name"])} - {""}
         wanted = names | {n + suffix for n in names for suffix in ("config", "client", "settings")}
         paths = []
@@ -883,11 +777,6 @@ def sha1_file(path):
 
 
 def version_core(v):
-    """Drop the parts that only say which Minecraft version a build is for.
-
-    'v6.11.0+26.1.2' -> '6.11.0', '44.3.0+mc26.1' -> '44.3.0', '0.7.2-beta.3-26.1.X' -> '0.7.2-beta.3',
-    '1.4.2-mc1.21.10' -> '1.4.2'
-    """
     v = str(v).strip().lower()
     v = v[1:] if v.startswith("v") else v
     v = v.split("+", 1)[0]
@@ -895,7 +784,6 @@ def version_core(v):
 
 
 def version_key(v):
-    """Sortable form of a version: release beats beta of the same number. None if unparseable."""
     m = re.match(r"(\d+(?:\.\d+)*)(.*)$", version_core(v))
     if not m:
         return None
@@ -907,19 +795,15 @@ def version_key(v):
 
 
 def vtuple(v):
-    """'1.21.10' -> (1, 21, 10). Compares across the 1.x and year-based (26.x) versions."""
     return tuple(int(x) for x in re.findall(r"\d+", str(v)))
 
 
 def version_in(version, spec):
-    """Does a Minecraft version fall in "1.21.7" or in the range "1.21.5-1.21.10"?"""
     lo, _, hi = spec.partition("-")
     return vtuple(lo) <= vtuple(version) <= vtuple(hi or lo)
 
 
 def switch_names(kspec, version):
-    """The ways to look a mod's switch up, best first: the name used in `version`, then the
-    names its other versions use, since an installed mod build may not match the version picked."""
     if not isinstance(kspec, dict):
         return [kspec]
     picked = next((k for k in kspec if k != "other" and version_in(version, k)), "other")
@@ -950,7 +834,6 @@ def _compare(installed, latest, source="Modrinth"):
 
 
 def _newer(a, b):
-    """Is version a newer than version b? False when either can't be compared."""
     ka, kb = version_key(a), version_key(b)
     return ka is not None and kb is not None and ka > kb
 
@@ -959,11 +842,6 @@ CFWIDGET = "https://api.cfwidget.com"
 
 
 def curseforge_latest(project_id, game_version):
-    """The mod version of the newest Fabric file for game_version on CurseForge, or None.
-
-    Read through CFWidget, a public mirror of CurseForge's project pages: CurseForge's own API
-    needs a private key, which an app published with its source can't keep secret.
-    """
     data = http_json(f"{CFWIDGET}/{int(project_id)}")
     loader = LOADER.capitalize()
     files = [f for f in (data.get("files") or []) if isinstance(f, dict)
@@ -978,13 +856,6 @@ def curseforge_latest(project_id, game_version):
 
 
 def update_status(jars, game_version=GAME_VERSION):
-    """{mod name: (text, state)} for installed jars: the newest Fabric build for game_version on
-    Modrinth and, for mods also published there, on CurseForge. Whichever is newer is reported.
-
-    Modrinth is first asked which project each exact jar file belongs to (by SHA-1), which avoids
-    every naming difference; jars it doesn't know fall back to the project slug.
-    state: "ok" (up to date), "new" (update available), "info", "missing", "failed".
-    """
     names = list(jars)
     if not names:
         return {}
@@ -995,8 +866,6 @@ def update_status(jars, game_version=GAME_VERSION):
         "loaders": [LOADER], "game_versions": [game_version]})
     if not isinstance(latest, dict):
         latest = {}
-    # Modrinth's answer per mod: ("current", v) when the installed file is its newest build,
-    # ("newest", v) for its newest version, or ("none", (text, state)) when it has none.
     modrinth, fallback = {}, []
     for name in names:
         h = hashes[name]
@@ -1024,17 +893,17 @@ def update_status(jars, game_version=GAME_VERSION):
             if e.code == 404:
                 return "none", ("not on Modrinth", "missing")
             return "none", (f"check failed (HTTP {e.code})", "failed")
-        except (OSError, ValueError, KeyError, TypeError):    # this mod only; keep the others
+        except (OSError, ValueError, KeyError, TypeError):
             return "none", ("check failed", "failed")
 
     def on_curseforge(name):
         try:
             return curseforge_latest(MODS[name]["curseforge"], game_version)
-        except (OSError, ValueError, KeyError, TypeError):    # a second opinion: Modrinth still counts
+        except (OSError, ValueError, KeyError, TypeError):
             return None
 
     curse = [n for n in names if MODS.get(n, {}).get("curseforge")]
-    with ThreadPoolExecutor(max_workers=6) as pool:            # independent requests, side by side
+    with ThreadPoolExecutor(max_workers=6) as pool:
         slug_answers, cf_answers = pool.map(by_slug, fallback), pool.map(on_curseforge, curse)
         modrinth.update(zip(fallback, slug_answers))
         cf = dict(zip(curse, cf_answers))
@@ -1053,22 +922,13 @@ def update_status(jars, game_version=GAME_VERSION):
     return out
 
 
-# ── preferences ──
-
 def prefs_files():
-    """Where settings may be kept, preferred first.
-
-    The .exe is portable: it keeps its settings in a file beside itself, and only falls back
-    to the home folder when it can't write there (e.g. it was put in Program Files).
-    """
     if FROZEN:
         return [exe_dir() / PORTABLE_PREFS, HOME_PREFS]
     return [HOME_PREFS]
 
 
 def load_prefs():
-    """The newest readable settings file, so an older copy never shadows the one last saved
-    (this also carries settings over from the script version to the .exe)."""
     found = []
     for path in prefs_files():
         try:
@@ -1083,11 +943,11 @@ def load_prefs():
         if not isinstance(data, dict):
             continue
         pr = data.get("priority")
-        if isinstance(pr, dict):                     # areas were renamed in this version
+        if isinstance(pr, dict):
             data["priority"] = {OLD_AREA_NAMES.get(k, k): v for k, v in pr.items()
                                 if isinstance(k, str) and isinstance(v, str)}
         ov = data.get("overrides")
-        if isinstance(ov, dict):                     # keys are "Area/Feature"
+        if isinstance(ov, dict):
             data["overrides"] = {renamed_area_key(k): v for k, v in ov.items()
                                  if isinstance(k, str) and isinstance(v, str)}
         return data
@@ -1105,14 +965,11 @@ def save_prefs(prefs):
 
 
 def app_icon():
-    """The window icon (.ico): bundled inside the .exe, or packaging/icon.ico next to the script."""
     base = (Path(getattr(sys, "_MEIPASS", exe_dir())) if FROZEN
             else Path(__file__).resolve().parent / "packaging")
     p = base / "icon.ico"
     return p if p.is_file() else None
 
-
-# ═════════════════════════════════════════ Model ═════════════════════════════════════════════
 
 class ConfigFile:
     __slots__ = ("path", "raw", "comments", "backup", "warned", "indent", "stamp")
@@ -1120,7 +977,7 @@ class ConfigFile:
     def __init__(self, path, raw, comments, indent=2, stamp=None):
         self.path, self.raw, self.comments = path, raw, comments
         self.backup, self.warned = None, False
-        self.indent, self.stamp = indent, stamp          # stamp: (size, mtime_ns) when loaded
+        self.indent, self.stamp = indent, stamp
 
 
 class Setting:
@@ -1130,8 +987,8 @@ class Setting:
     def __init__(self, uid, mod, cf, path, key, label, value, locked=False):
         self.uid, self.mod, self.cf, self.path, self.key, self.label = uid, mod, cf, path, key, label
         self.value = self.orig = value
-        self.locked = locked                           # a debug setting: shown, never changed
-        self.hay = f"{mod} {label} {key}".lower()      # built once, so searching is just `in`
+        self.locked = locked
+        self.hay = f"{mod} {label} {key}".lower()
         self.shared, self.domain, self.feature, self.rec, self.order = False, "", None, None, ()
 
 
@@ -1141,7 +998,7 @@ class ModInfo:
     def __init__(self, name, auto=False):
         self.name, self.files, self.errors, self.settings = name, [], [], []
         self.shared, self.installed, self.jar, self.latest = 0, None, None, None
-        self.auto = auto              # found automatically: settings only, not compared with others
+        self.auto = auto
 
     @property
     def loaded(self):
@@ -1149,14 +1006,13 @@ class ModInfo:
 
 
 class Feature:
-    """One row of FEATURES, resolved against the loaded configs."""
     __slots__ = ("index", "area", "name", "key", "spec", "switches", "winner")
 
     def __init__(self, index, area, name, spec):
         self.index, self.area, self.name, self.spec = index, area, name, spec
         self.key = f"{area}/{name}"
-        self.switches = {}              # {mod: [Setting]} for every mod that competes here
-        self.winner = None              # mod whose switches stay on, or None for "Off"
+        self.switches = {}
+        self.winner = None
 
     @property
     def contenders(self):
@@ -1164,18 +1020,16 @@ class Feature:
 
     @property
     def live(self):
-        """Two or more of your mods offer it, and at least one has a switch to flip."""
         return len(self.switches) > 1 and any(self.switches.values())
 
 
 class Workspace:
-    """Everything except the window: loading, recommendations, editing, saving."""
 
     def __init__(self, priority=None, overrides=None, game_version=GAME_VERSION):
         self.folder = None
-        self.game_version = game_version     # picks the setting names of renamed switches
+        self.game_version = game_version
         self.mods, self.settings, self.index = {}, [], {}
-        self.changed = set()                 # uids whose value differs from what is on disk
+        self.changed = set()
         self.priority = ({str(k): str(v) for k, v in priority.items()}
                          if isinstance(priority, dict) else {})
         self.overrides = ({str(k): str(v) for k, v in overrides.items()}
@@ -1184,12 +1038,10 @@ class Workspace:
         self.choices, self.owner = {}, {}
         self.shared, self.unique, self._ruled = [], [], []
 
-    # ── loading ──
     def load(self, folder):
         folder = Path(folder).expanduser()
         if not folder.is_dir():
             raise FileNotFoundError(f"Folder not found: {folder}")
-        # Build everything into locals first, so a failure can't leave a half-loaded workspace.
         mods, settings, index, claimed = {}, [], {}, set()
 
         def add(name, spec, paths, auto=False):
@@ -1220,17 +1072,17 @@ class Workspace:
                                 make_label(name, key, shown), value, is_debug(shown))
                     settings.append(s)
                     info.settings.append(s)
-                    index.setdefault((name, key), s)       # duplicate names: first one wins
+                    index.setdefault((name, key), s)
             return info
 
         for name, spec in MODS.items():
             add(name, spec, find_files(folder, spec))
-        for name, spec in discover_mods(folder, claimed).items():   # SkyBlock mods MODS doesn't list
+        for name, spec in discover_mods(folder, claimed).items():
             info = add(name, spec, spec["paths"], auto=True)
             if info.loaded:
                 info.installed, info.jar = spec["version"], spec["jar"]
             else:
-                del mods[name]                  # nothing readable: don't list it
+                del mods[name]
         self.folder, self.mods, self.settings, self.index = folder, mods, settings, index
         self.changed = set()
         self._ruled = []
@@ -1247,15 +1099,13 @@ class Workspace:
         return [s] if s else []
 
     def set_game_version(self, version):
-        """Use the setting names of another Minecraft version for switches a mod renamed."""
         self.game_version = version
         if self.folder is not None:
             self._resolve_features()
             self.recompute()
 
     def _resolve_features(self):
-        """Find each feature's switches in the loaded configs (on load and on a version change)."""
-        leaf_index = {}                      # mod -> {last key segment: [Setting]}, built lazily
+        leaf_index = {}
 
         def by_leaf(mod):
             if mod not in leaf_index:
@@ -1272,7 +1122,7 @@ class Workspace:
                 if spec is None:
                     f.switches[mod] = []
                     continue
-                for names in switch_names(spec, self.game_version):   # first name found wins
+                for names in switch_names(spec, self.game_version):
                     found, seen = [], set()
                     for key in ([names] if isinstance(names, str) else names):
                         leaf = by_leaf(mod) if key.startswith("*") else None
@@ -1284,12 +1134,10 @@ class Workspace:
                         f.switches[mod] = found
                         break
 
-    # ── recommendations ──
     def live_features(self, area=None):
         return [f for f in self.features if f.live and (area is None or f.area == area)]
 
     def recompute(self):
-        """Work out which setting should be what, from the loaded mods and the priorities."""
         for s in self._ruled:
             s.rec, s.shared, s.domain, s.feature, s.order = None, False, "", None, ()
         for m in self.mods.values():
@@ -1319,7 +1167,7 @@ class Workspace:
             area_i = AREAS.index(f.area) if f.area in AREAS else len(AREAS)
             for rank, mod in enumerate(sorted(present, key=lambda m: m != f.winner)):
                 for j, s in enumerate(f.switches[mod]):
-                    if s.uid in seen:                # a key listed under two features: first wins
+                    if s.uid in seen:
                         continue
                     seen.add(s.uid)
                     s.rec, s.shared, s.domain, s.feature = (mod == f.winner), True, f.area, f
@@ -1341,7 +1189,6 @@ class Workspace:
         self.recompute()
 
     def set_override(self, feature_key, mod):
-        """mod: a mod name, OFF, or None to follow the area's choice."""
         if mod is None:
             self.overrides.pop(feature_key, None)
         else:
@@ -1349,7 +1196,6 @@ class Workspace:
         self.recompute()
 
     def conflicts(self):
-        """(per mod, per area, per feature key) conflict counts."""
         by_mod, by_area, by_feature = {}, {}, {}
         for s in self._ruled:
             if is_conflict(s):
@@ -1359,7 +1205,6 @@ class Workspace:
                     by_feature[s.feature.key] = by_feature.get(s.feature.key, 0) + 1
         return by_mod, by_area, by_feature
 
-    # ── editing ──
     def set_value(self, s, value):
         if s.locked:
             raise ValueError(f"{s.mod} › {s.key} is a debug setting, which can't be edited")
@@ -1374,7 +1219,6 @@ class Workspace:
             self.changed.add(s.uid)
 
     def resolve(self, area=None, feature_key=None):
-        """Apply recommended values: everywhere, for one area, or for one feature."""
         n = 0
         for s in self._ruled:
             if not is_conflict(s):
@@ -1387,16 +1231,10 @@ class Workspace:
             n += 1
         return n
 
-    # ── saving ──
     def dirty_files(self):
         return list(dict.fromkeys(self.settings[uid].cf for uid in sorted(self.changed)))
 
     def save(self):
-        """Write every modified file, backing each up once. Returns (saved names, errors).
-
-        A file that something else (usually the game) rewrote since it was loaded is skipped,
-        so its newer settings aren't silently overwritten with stale ones.
-        """
         stamp = time.strftime("%Y%m%d_%H%M%S")
         saved, errors = [], []
         by_file = {}
@@ -1409,18 +1247,14 @@ class Workspace:
                                      "Reload, then make the change again")
                 if cf.backup is None:
                     bak = cf.path.with_name(f"{cf.path.name}.bak_{stamp}")
-                    # Never overwrite an earlier backup (saving again within the same second,
-                    # after a Reload, used to replace the original file's backup).
                     n = 1
                     while bak.exists():
                         bak = cf.path.with_name(f"{cf.path.name}.bak_{stamp}_{n}")
                         n += 1
-                    # copyfile + copystat = copy2, minus its use of the CopyFile2 API (Python
-                    # 3.12+ on Windows), which some Wine/Proton/CrossOver versions lack.
                     shutil.copyfile(cf.path, bak)
                     shutil.copystat(cf.path, bak)
                     cf.backup = bak
-                if cf.indent is None:                 # written on one line: keep it that way
+                if cf.indent is None:
                     text = json.dumps(cf.raw, ensure_ascii=False, separators=(",", ":"))
                 else:
                     text = json.dumps(cf.raw, indent=cf.indent, ensure_ascii=False)
@@ -1439,20 +1273,17 @@ class Workspace:
         return saved, errors
 
 
-# ═══════════════════════════════════════════ GUI ═════════════════════════════════════════════
-
 BG, PANEL, RAISED, LINE = "#14161b", "#1b1e25", "#242832", "#2d323d"
 FG, MUTED, DIM = "#e4e7ec", "#8c94a3", "#5b6270"
 ACCENT, ACCENT_DARK, ON_ACCENT = "#4cc4a2", "#3aa688", "#0c1714"
 SELECT, HOVER = "#1f3a33", "#2b303b"
 BAD, BAD_BG, GOOD, NEW = "#ff8f80", "#2e1d1f", "#7fd3ab", "#f2c46d"
 
-FOLLOW = "Area choice"            # combobox prefix for "follow the area's prioritized mod"
+FOLLOW = "Area choice"
 OFF_LABEL = "Off in every mod"
 
 
 def dark_title_bar(win):
-    """Ask Windows 10/11 for a dark title bar; silently does nothing elsewhere."""
     if sys.platform != "win32":
         return
     try:
@@ -1460,7 +1291,7 @@ def dark_title_bar(win):
         win.update_idletasks()
         hwnd = ctypes.windll.user32.GetParent(win.winfo_id())
         on = ctypes.c_int(1)
-        for attr in (20, 19):                      # DWMWA_USE_IMMERSIVE_DARK_MODE (new, old)
+        for attr in (20, 19):
             if ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(on),
                                                           ctypes.sizeof(on)) == 0:
                 break
@@ -1469,7 +1300,6 @@ def dark_title_bar(win):
 
 
 class EditDialog(tk.Toplevel):
-    """Small themed prompt for typing a new value. `result` holds the parsed value or None."""
 
     def __init__(self, app, s):
         super().__init__(app)
@@ -1521,7 +1351,6 @@ class EditDialog(tk.Toplevel):
 
 
 class ScrollFrame(ttk.Frame):
-    """A frame whose content scrolls vertically; the scrollbar only shows when needed."""
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -1534,8 +1363,6 @@ class ScrollFrame(ttk.Frame):
         self.inner.bind("<Configure>", lambda _e: self._sync())
         self.canvas.bind("<Configure>", lambda e: (self.canvas.itemconfigure(self._win, width=e.width),
                                                    self._sync()))
-        # The wheel handler is registered with Tcl once and then bound by name. Binding Python
-        # functions on every <Enter> created three Tcl commands each time, never freed.
         wheel = self.register(self._on_delta)
         self._wheel_scripts = {"<MouseWheel>": f"{wheel} %D", "<Button-4>": f"{wheel} 120",
                                "<Button-5>": f"{wheel} -120"}
@@ -1544,16 +1371,14 @@ class ScrollFrame(ttk.Frame):
             w.bind("<Leave>", lambda _e: self._wheel(False), add="+")
 
     def _contains_pointer(self):
-        """True if the mouse is over this frame or any widget inside it."""
         try:
             w = self.winfo_containing(*self.winfo_pointerxy())
-        except (tk.TclError, KeyError):            # KeyError: pointer over a non-Tk window/popup
+        except (tk.TclError, KeyError):
             return False
         me = str(self)
         return w is not None and (str(w) == me or str(w).startswith(me + "."))
 
     def passthrough(self, widget):
-        """Make the wheel scroll this frame instead of changing a combobox's value."""
         for seq, script in self._wheel_scripts.items():
             widget.bind(seq, script + "\nbreak")
 
@@ -1567,8 +1392,6 @@ class ScrollFrame(ttk.Frame):
             self.canvas.yview_moveto(0)
 
     def _wheel(self, on):
-        # <Leave> also fires when the pointer moves onto a child (a label, a combobox), which
-        # used to switch scrolling off while over the rows; only unbind once it really left.
         if on:
             for seq, script in self._wheel_scripts.items():
                 self.bind_all(seq, script)
@@ -1595,12 +1418,11 @@ class ScrollFrame(ttk.Frame):
 
 
 class SettingsView(ttk.Frame):
-    """A searchable table of settings, used for both the Shared and Unique tabs."""
 
     COLUMNS = (("mod", "Mod", 110, False), ("setting", "Setting", 340, True),
                ("current", "Current", 150, False), ("rec", "Recommended", 130, False),
                ("status", "Status", 190, False))
-    LIMIT = 2500                              # rows drawn at once; keeps huge configs snappy
+    LIMIT = 2500
 
     def __init__(self, app, source, group_label, group_of):
         px = app.px
@@ -1653,9 +1475,7 @@ class SettingsView(ttk.Frame):
         self.where = ttk.Label(foot, style="Muted.TLabel")
         self.where.pack(side="right")
 
-    # ── content ──
     def reset(self):
-        """Forget everything shown (used when a different load replaces the settings)."""
         self.tree.delete(*self.tree.get_children())
         self._shown, self._painted = [], {}
 
@@ -1678,12 +1498,12 @@ class SettingsView(ttk.Frame):
         self._timer = self.after(180, self.refresh)
 
     def refresh(self):
-        if self._timer:                               # a direct refresh supersedes a pending one
+        if self._timer:
             self.after_cancel(self._timer)
         self._timer = None
         terms = self.query.get().lower().split()
         group, only_bad = self.group.get(), self.only_bad.get()
-        rows = self.source()                          # narrow with the cheapest test first
+        rows = self.source()
         if group != ALL:
             group_of = self.group_of
             rows = [s for s in rows if group_of(s) == group]
@@ -1692,7 +1512,7 @@ class SettingsView(ttk.Frame):
         for t in terms:
             rows = [s for s in rows if t in s.hay]
         total, rows = len(rows), rows[: self.LIMIT]
-        if rows == self._shown:                       # same rows: only touch the ones that changed
+        if rows == self._shown:
             for s in rows:
                 self._paint_row(s)
         else:
@@ -1720,12 +1540,10 @@ class SettingsView(ttk.Frame):
             self._painted[s.uid] = now
 
     def paint(self, s):
-        """Update one row after an edit (no-op if the row isn't currently in the table)."""
         if s.uid in self._painted:
             self._paint_row(s)
             self._on_select()
 
-    # ── selection / actions ──
     def selected(self):
         sel = self.tree.selection()
         return self.app.ws.settings[int(sel[0])] if sel else None
@@ -1761,14 +1579,13 @@ class SettingsView(ttk.Frame):
 
 
 class PrioritiesView(ttk.Frame):
-    """Area list on the left (one tab per area), the chosen area's features on the right."""
 
     def __init__(self, app):
         px = app.px
         super().__init__(app.notebook, padding=(0, px(14), 0, 0))
         self.app = app
         self.area = AREAS[0]
-        self.rows = {}               # feature key -> widgets of that row
+        self.rows = {}
 
         side = ttk.Frame(self, style="Card.TFrame", padding=1)
         side.pack(side="left", fill="y")
@@ -1786,9 +1603,7 @@ class PrioritiesView(ttk.Frame):
         self.body = ScrollFrame(self)
         self.body.pack(side="left", fill="both", expand=True, padx=(px(22), 0))
 
-    # ── building ──
     def rebuild(self):
-        """Redraw the area panel (after a load or when switching areas)."""
         px, ws, app = self.app.px, self.app.ws, self.app
         if self.side.selection() != (self.area,):
             self.side.selection_set(self.area)
@@ -1848,7 +1663,7 @@ class PrioritiesView(ttk.Frame):
             combo.grid(row=r, column=1, sticky="w", padx=(0, px(18)))
             combo.bind("<<ComboboxSelected>>",
                        lambda _e, k=f.key, v=var: app.set_override(k, self._decode(v.get())))
-            self.body.passthrough(combo)      # scrolling past it must not change the override
+            self.body.passthrough(combo)
             off = ttk.Label(inner, style="Muted.TLabel")
             off.grid(row=r, column=2, sticky="w", padx=(0, px(18)))
             status = ttk.Label(inner, width=13)
@@ -1862,7 +1677,6 @@ class PrioritiesView(ttk.Frame):
             return None
         return OFF if text == OFF_LABEL else text
 
-    # ── refreshing in place ──
     def update_view(self, counts=None):
         ws = self.app.ws
         _, by_area, by_feature = counts or ws.conflicts()
@@ -1902,7 +1716,7 @@ class App(tk.Tk):
         icon = app_icon() if sys.platform == "win32" else None
         if icon:
             try:
-                self.iconbitmap(default=str(icon))          # also used by dialogs
+                self.iconbitmap(default=str(icon))
             except tk.TclError:
                 pass
         self.scale = max(1.0, self.winfo_fpixels("1i") / 96.0)
@@ -1918,7 +1732,7 @@ class App(tk.Tk):
         self._build()
         dark_title_bar(self)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
-        for seq in ("<Control-s>", "<Control-S>"):         # also with Caps Lock on
+        for seq in ("<Control-s>", "<Control-S>"):
             self.bind(seq, lambda _e: self.save())
         folder = detect_config_dir([self.prefs.get("config_dir", "")])
         if folder:
@@ -1930,17 +1744,16 @@ class App(tk.Tk):
         return int(round(n * self.scale))
 
     def report_callback_exception(self, exc, val, tb):
-        """Show unexpected errors: the .exe has no console, so Tk's default printout is lost."""
         detail = "".join(traceback.format_exception(exc, val, tb)).rstrip()
         if sys.stderr:
             print(detail, file=sys.stderr)
         try:
             self.log("Unexpected error:\n" + detail)
-        except Exception:                              # the Activity log isn't built yet
+        except Exception:
             pass
         key = (exc, str(val))
         if self._error_open or key in self._errors_shown:
-            return                       # e.g. failing in a redraw: logged, but only one dialog
+            return
         self._errors_shown.add(key)
         self._error_open = True
         try:
@@ -1950,7 +1763,6 @@ class App(tk.Tk):
         finally:
             self._error_open = False
 
-    # ── look ──
     def _style(self):
         base = tkfont.nametofont("TkDefaultFont")
         if sys.platform == "win32":
@@ -1963,10 +1775,9 @@ class App(tk.Tk):
         title.configure(size=base.actual("size") + 4, weight="bold")
         strong = base.copy()
         strong.configure(weight="bold")
-        self._fonts = (title, strong)                 # keep references alive
+        self._fonts = (title, strong)
         px = self.px
 
-        # classic-Tk parts that ttk styles don't reach (combobox drop-down list, dialogs)
         self.option_add("*TCombobox*Listbox.font", base)
         self.option_add("*TCombobox*Listbox.background", RAISED)
         self.option_add("*TCombobox*Listbox.foreground", FG)
@@ -2048,7 +1859,6 @@ class App(tk.Tk):
                     borderwidth=0, rowheight=base.metrics("linespace") + px(15), indent=0)
         s.map("Side.Treeview", background=[("selected", SELECT)], foreground=[("selected", ACCENT)])
 
-    # ── layout ──
     def _build(self):
         px = self.px
         top = ttk.Frame(self, padding=(px(16), px(14), px(16), px(6)))
@@ -2094,7 +1904,7 @@ class App(tk.Tk):
         box.pack(side="left", padx=px(8))
         box.bind("<<ComboboxSelected>>", lambda _e: self.set_game_version(self.version_var.get()))
         for seq in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
-            box.bind(seq, "break")              # scrolling past it mustn't change the version
+            box.bind(seq, "break")
         self.btn_updates = ttk.Button(bar, text="Check for updates", command=self.check_updates)
         self.btn_updates.pack(side="right")
 
@@ -2125,7 +1935,6 @@ class App(tk.Tk):
                                 font=tkfont.nametofont("TkFixedFont"))
         self.activity.pack(fill="both", expand=True)
 
-    # ── status / log ──
     def say(self, msg):
         self.status.set(msg)
 
@@ -2142,7 +1951,7 @@ class App(tk.Tk):
     def after_change(self):
         n = len(self.ws.changed)
         self.unsaved.set(plural(n, "unsaved change") if n else "")
-        counts = self.ws.conflicts()                 # one pass, shared by both views
+        counts = self.ws.conflicts()
         self.update_overview(counts)
         self.priorities.update_view(counts)
 
@@ -2158,10 +1967,10 @@ class App(tk.Tk):
 
     def update_overview(self, counts=None):
         by_mod, _, _ = counts or self.ws.conflicts()
-        rows = list(MODS) + [n for n, m in self.ws.mods.items() if m.auto]   # found mods go last
+        rows = list(MODS) + [n for n, m in self.ws.mods.items() if m.auto]
         for iid in self.ov.get_children():
             if iid not in rows:
-                self.ov.delete(iid)                   # a mod found in a previously loaded folder
+                self.ov.delete(iid)
         for name in rows:
             m = self.ws.mods.get(name) or ModInfo(name)
             latest = m.latest[0] if m.latest else "—"
@@ -2176,7 +1985,6 @@ class App(tk.Tk):
                 self.ov.insert("", "end", iid=name, tags=tag, values=values)
         self.ov.configure(height=len(rows))
 
-    # ── actions ──
     def browse(self):
         p = filedialog.askdirectory(parent=self, title="Select your Minecraft config folder",
                                     initialdir=self.path_var.get() or str(Path.home()))
@@ -2239,7 +2047,6 @@ class App(tk.Tk):
     def set_override(self, feature_key, mod):
         self.ws.set_override(feature_key, mod)
         self._remember_priorities()
-        # Look the name up: area names can contain "/" themselves ("GUI/HUD").
         name = next((f.name for f in self.ws.features if f.key == feature_key), feature_key)
         self.note(f"{name}: " + ("follows the area choice." if mod is None else
                                  "off in every mod." if mod == OFF else f"uses {mod}."))
@@ -2252,7 +2059,6 @@ class App(tk.Tk):
         self.say(f"{s.mod} › {s.label} set to {fmt(value)}. Not saved yet.")
 
     def ask_value(self, s):
-        """Show the edit dialog; returns the parsed value or None if cancelled."""
         dlg = EditDialog(self, s)
         self.wait_window(dlg)
         return dlg.result
@@ -2306,10 +2112,7 @@ class App(tk.Tk):
             return
         self.destroy()
 
-    # ── Minecraft version ──
     def set_game_version(self, version):
-        """Pick the Minecraft version: it decides the setting names used for switches a mod
-        renamed, and which builds "Check for updates" looks for."""
         if version == self.game_version:
             return
         self.game_version = version
@@ -2317,8 +2120,8 @@ class App(tk.Tk):
         save_prefs(self.prefs)
         self.ov.heading("latest", text=f"Latest for {version}")
         for m in self.ws.mods.values():
-            m.latest = None                          # those results were for the other version
-        self.ws.set_game_version(version)            # renamed switches now use this version's names
+            m.latest = None
+        self.ws.set_game_version(version)
         self.shared.set_groups(list(self.ws.choices))
         self.shared.refresh()
         self.unique.refresh()
@@ -2328,7 +2131,6 @@ class App(tk.Tk):
         self.after_change()
         self.note(f"Minecraft {version} selected: setting names and Check for updates now follow it.")
 
-    # ── update check (background thread, results handed over through a queue) ──
     def check_updates(self):
         jars = {m.name: (m.installed, m.jar) for m in self.ws.mods.values() if m.jar}
         if not jars:
@@ -2342,7 +2144,7 @@ class App(tk.Tk):
     def _update_worker(self, jars, version):
         try:
             self._queue.put(("result", version, update_status(jars, version)))
-        except Exception as e:                       # network, JSON or API-shape problems
+        except Exception as e:
             self._queue.put(("error", version, f"{type(e).__name__}: {e}"))
 
     def _poll(self):
@@ -2351,7 +2153,7 @@ class App(tk.Tk):
         except queue.Empty:
             return self.after(150, self._poll)
         self.btn_updates.state(["!disabled"])
-        if version != self.game_version:             # the version was changed during the check
+        if version != self.game_version:
             return self.say(f"That check was for Minecraft {version}. "
                             f"Click Check for updates again for {self.game_version}.")
         if kind == "error":
@@ -2373,7 +2175,7 @@ def main():
     if sys.platform == "win32":
         try:
             import ctypes
-            ctypes.windll.shcore.SetProcessDpiAwareness(1)       # crisp text on high-DPI screens
+            ctypes.windll.shcore.SetProcessDpiAwareness(1)
         except Exception:
             pass
     App().mainloop()

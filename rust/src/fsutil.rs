@@ -1,5 +1,3 @@
-//! Files: change stamps, crash-safe writes, finding a mod's configs, backups.
-
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -7,7 +5,6 @@ use std::time::UNIX_EPOCH;
 
 use crate::features::ModSpec;
 
-/// (size, modified time in ns): if either changes, something else rewrote the file.
 pub type Stamp = (u64, u128);
 
 pub fn stamp(p: &Path) -> io::Result<Stamp> {
@@ -16,8 +13,6 @@ pub fn stamp(p: &Path) -> io::Result<Stamp> {
     Ok((m.len(), ns))
 }
 
-/// A text file as Python's `read_text(encoding="utf-8-sig")` reads it: BOM dropped, line breaks
-/// turned into "\n".
 pub fn read_text(p: &Path) -> io::Result<String> {
     let bytes = fs::read(p)?;
     let bytes = bytes.strip_prefix(b"\xef\xbb\xbf").unwrap_or(&bytes);
@@ -26,7 +21,6 @@ pub fn read_text(p: &Path) -> io::Result<String> {
     Ok(if text.contains('\r') { text.replace("\r\n", "\n").replace('\r', "\n") } else { text })
 }
 
-/// Writes through a temp file and a rename, so a crash can't leave a half-written config.
 pub fn atomic_write(path: &Path, text: &str) -> io::Result<()> {
     let dir = path.parent().filter(|d| !d.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
@@ -40,7 +34,6 @@ pub fn atomic_write(path: &Path, text: &str) -> io::Result<()> {
     Ok(())
 }
 
-/// Copies a file with its permissions and times (Python's copyfile + copystat).
 pub fn copy_with_times(src: &Path, dst: &Path) -> io::Result<()> {
     fs::copy(src, dst)?;
     let m = fs::metadata(src)?;
@@ -48,7 +41,6 @@ pub fn copy_with_times(src: &Path, dst: &Path) -> io::Result<()> {
     fs::OpenOptions::new().write(true).open(dst)?.set_times(times)
 }
 
-/// File names of a folder's entries, sorted the way the Python version sorted paths.
 pub fn sorted_entries(dir: &Path) -> io::Result<Vec<PathBuf>> {
     let mut out: Vec<PathBuf> = fs::read_dir(dir)?.filter_map(|e| e.ok().map(|e| e.path())).collect();
     out.sort_by(|a, b| sort_key(a).cmp(&sort_key(b)));
@@ -64,7 +56,6 @@ pub fn has_json_suffix(p: &Path) -> bool {
     p.extension().map(|e| e.to_string_lossy().to_lowercase()).is_some_and(|e| e == "json" || e == "jsonc")
 }
 
-/// Config files for one mod. Unreadable folders count as "not found" instead of failing.
 pub fn find_files(folder: &Path, spec: &ModSpec) -> Vec<PathBuf> {
     if let Some(d) = &spec.dir {
         let found: Vec<PathBuf> = sorted_entries(&folder.join(d))

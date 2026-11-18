@@ -1,5 +1,3 @@
-//! Minecraft version ranges, and comparing mod versions.
-
 use std::cmp::Ordering;
 use std::sync::LazyLock;
 
@@ -7,7 +5,6 @@ use regex::Regex;
 
 use crate::features::{Keys, SwitchSpec};
 
-/// A whole number of any size, compared by value.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Num(String);
 
@@ -36,12 +33,10 @@ fn numbers(s: &str) -> Vec<Num> {
     DIGITS.find_iter(s).map(|m| Num::new(m.as_str())).collect()
 }
 
-/// "1.21.10" -> [1, 21, 10]. Compares across the 1.x and year-based (26.x) versions.
 pub fn vtuple(v: &str) -> Vec<Num> {
     numbers(v)
 }
 
-/// Does a Minecraft version fall in "1.21.7" or in the range "1.21.5-1.21.10"?
 pub fn version_in(version: &str, spec: &str) -> bool {
     let (lo, hi) = spec.split_once('-').unwrap_or((spec, ""));
     let hi = if hi.is_empty() { lo } else { hi };
@@ -49,8 +44,6 @@ pub fn version_in(version: &str, spec: &str) -> bool {
     vtuple(lo) <= v && v <= vtuple(hi)
 }
 
-/// The ways to look a mod's switch up, best first: the name used in `version`, then the names its
-/// other versions use, since an installed mod build may not match the version picked.
 pub fn switch_names<'a>(spec: &'a SwitchSpec, version: &str) -> Vec<&'a Keys> {
     match spec {
         SwitchSpec::NoSwitch => Vec::new(),
@@ -68,8 +61,6 @@ static MC_SUFFIX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"[-_](?:mc-?)?(?:1\.\d{2}|\d{2}\.\d+)(?:\.(?:\d+|x))*$").unwrap());
 static LEAD: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(\d+(?:\.\d+)*)(.*)$").unwrap());
 
-/// Drops the parts that only say which Minecraft version a build is for:
-/// "v6.11.0+26.1.2" -> "6.11.0", "44.3.0+mc26.1" -> "44.3.0", "0.7.2-beta.3-26.1.X" -> "0.7.2-beta.3".
 pub fn version_core(v: &str) -> String {
     let v = v.trim().to_lowercase();
     let v = v.strip_prefix('v').unwrap_or(&v);
@@ -77,7 +68,6 @@ pub fn version_core(v: &str) -> String {
     MC_SUFFIX.replace_all(v, "").into_owned()
 }
 
-/// Sortable form of a version: a release beats a beta of the same number. None if unreadable.
 pub fn version_key(v: &str) -> Option<(Vec<Num>, Vec<Num>)> {
     let core = version_core(v);
     let caps = LEAD.captures(&core)?;
@@ -94,12 +84,10 @@ pub fn version_key(v: &str) -> Option<(Vec<Num>, Vec<Num>)> {
     Some((main, pre))
 }
 
-/// Is version a newer than version b? False when either can't be read.
 pub fn newer(a: &str, b: &str) -> bool {
     matches!((version_key(a), version_key(b)), (Some(ka), Some(kb)) if ka > kb)
 }
 
-/// What the update check says about one mod.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum State {
     Ok,
@@ -109,7 +97,6 @@ pub enum State {
     Failed,
 }
 
-/// The update text for an installed version against the newest one at `source`.
 pub fn compare(installed: &str, latest: &str, source: &str) -> (String, State) {
     let at = if source == "Modrinth" { String::new() } else { format!(" ({source})") };
     match (version_key(installed), version_key(latest)) {

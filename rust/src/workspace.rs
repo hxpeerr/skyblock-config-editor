@@ -1,5 +1,3 @@
-//! Everything except the window: loading the configs, recommendations, editing, saving.
-
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -21,32 +19,26 @@ pub struct ConfigFile {
     pub raw: Value,
     pub comments: bool,
     pub backup: Option<PathBuf>,
-    /// The user already agreed to lose this file's comments.
     pub warned: bool,
     pub indent: Indent,
-    /// (size, mtime) when loaded, to notice the game rewriting it.
     pub stamp: Option<Stamp>,
 }
 
 pub struct Setting {
     pub uid: usize,
     pub mod_name: String,
-    /// Index into `Workspace::files`.
     pub cf: usize,
     pub path: Vec<Seg>,
     pub key: String,
     pub label: String,
     pub value: Value,
     pub orig: Value,
-    /// "mod label key" in lower case, so searching is just `contains`.
     pub hay: String,
     pub shared: bool,
     pub domain: String,
-    /// Index into `Workspace::features` for shared switches.
     pub feature: Option<usize>,
     pub rec: Option<Value>,
     pub order: (usize, usize, usize, usize),
-    /// A debug setting: shown, never changed.
     pub locked: bool,
 }
 
@@ -75,7 +67,6 @@ pub struct ModInfo {
     pub installed: Option<String>,
     pub jar: Option<PathBuf>,
     pub latest: Option<(String, State)>,
-    /// Found automatically: settings only, not compared with other mods.
     pub auto: bool,
 }
 
@@ -90,15 +81,12 @@ impl ModInfo {
     }
 }
 
-/// One feature of the mod list, resolved against the loaded configs.
 pub struct Feature {
     pub index: usize,
     pub area: String,
     pub name: String,
     pub key: String,
-    /// {mod: [setting uid]} for every mod that competes here.
     pub switches: IndexMap<String, Vec<usize>>,
-    /// Mod whose switches stay on, or None for "off in every mod".
     pub winner: Option<String>,
 }
 
@@ -107,25 +95,21 @@ impl Feature {
         self.switches.keys().cloned().collect()
     }
 
-    /// Two or more of your mods offer it, and at least one has a switch to flip.
     pub fn live(&self) -> bool {
         self.switches.len() > 1 && self.switches.values().any(|v| !v.is_empty())
     }
 }
 
-/// Counts of conflicts per mod, per area and per feature key.
 pub type Counts = (HashMap<String, usize>, HashMap<String, usize>, HashMap<String, usize>);
 
 pub struct Workspace {
     pub set: Arc<FeatureSet>,
     pub folder: Option<PathBuf>,
-    /// Picks the setting names of renamed switches.
     pub game_version: String,
     pub mods: IndexMap<String, ModInfo>,
     pub files: Vec<ConfigFile>,
     pub settings: Vec<Setting>,
     pub index: HashMap<(String, String), usize>,
-    /// Uids whose value differs from what is on disk.
     pub changed: BTreeSet<usize>,
     pub priority: HashMap<String, String>,
     pub overrides: HashMap<String, String>,
@@ -166,10 +150,6 @@ impl Workspace {
                     ruled: Vec::new() }
     }
 
-    // ── loading ──
-
-    /// Reads every listed mod's config, then the Hypixel SkyBlock mods found in the mods folder.
-    /// Builds everything first, so a failure can't leave a half-loaded workspace.
     pub fn load(&mut self, folder: &Path) -> Result<(), String> {
         let folder = expand_home(folder);
         if !folder.is_dir() {
@@ -189,7 +169,7 @@ impl Workspace {
                 m.installed = Some(found.version.clone());
                 m.jar = Some(found.jar.clone());
             } else {
-                b.mods.shift_remove(&name); // nothing readable: don't list it
+                b.mods.shift_remove(&name);
             }
         }
         self.folder = Some(folder);
@@ -204,7 +184,6 @@ impl Workspace {
         Ok(())
     }
 
-    /// Fills in the installed version of each listed mod from the jars next to the config folder.
     pub fn attach_installed(&mut self) {
         let Some(folder) = &self.folder else { return };
         let mods_dir = folder.parent().map(|p| p.join("mods")).unwrap_or_else(|| PathBuf::from("mods"));
@@ -216,13 +195,11 @@ impl Workspace {
         }
     }
 
-    /// Switches to another mod list without loading anything; call `load` next.
     pub fn set_feature_set(&mut self, set: Arc<FeatureSet>) {
         self.features = features_of(&set);
         self.set = set;
     }
 
-    /// Switches to another mod list. The folder is loaded again, since the list says where configs are.
     pub fn use_feature_set(&mut self, set: Arc<FeatureSet>) -> Result<(), String> {
         self.set_feature_set(set);
         match self.folder.clone() {
@@ -231,7 +208,6 @@ impl Workspace {
         }
     }
 
-    /// Uses the setting names of another Minecraft version for switches a mod renamed.
     pub fn set_game_version(&mut self, version: &str) {
         self.game_version = version.into();
         if self.folder.is_some() {
@@ -253,7 +229,6 @@ impl Workspace {
         self.index.get(&(mod_name.to_string(), key.to_string())).map(|&u| vec![u]).unwrap_or_default()
     }
 
-    /// Finds each feature's switches in the loaded configs (on load and on a version change).
     fn resolve_features(&mut self) {
         let mut leaf_index: HashMap<String, HashMap<String, Vec<usize>>> = HashMap::new();
         let set = Arc::clone(&self.set);
@@ -278,7 +253,6 @@ impl Workspace {
                 }
                 let by_leaf = &leaf_index[mod_name];
                 for keys in switch_names(sw, &self.game_version) {
-                    // the first name found wins
                     let (mut found, mut seen) = (Vec::new(), HashSet::new());
                     for key in keys.iter() {
                         for u in self.match_key(mod_name, key, by_leaf) {
@@ -301,13 +275,10 @@ impl Workspace {
         }
     }
 
-    // ── recommendations ──
-
     pub fn live_features(&self, area: Option<&str>) -> Vec<usize> {
         self.features.iter().filter(|f| f.live() && area.is_none_or(|a| f.area == a)).map(|f| f.index).collect()
     }
 
-    /// Works out which setting should be what, from the loaded mods and the priorities.
     pub fn recompute(&mut self) {
         for &u in &self.ruled {
             let s = &mut self.settings[u];
@@ -356,12 +327,12 @@ impl Workspace {
             self.features[fi].winner = winner.clone();
             let area_i = self.set.area_index(&area);
             let mut ranked = present.clone();
-            ranked.sort_by_key(|m| Some(m) != winner.as_ref()); // stable: winner first
+            ranked.sort_by_key(|m| Some(m) != winner.as_ref());
             for (rank, m) in ranked.iter().enumerate() {
                 let uids = self.features[fi].switches[m].clone();
                 for (j, u) in uids.into_iter().enumerate() {
                     if !seen.insert(u) {
-                        continue; // a key listed under two features: first wins
+                        continue;
                     }
                     let s = &mut self.settings[u];
                     s.rec = Some(Value::Bool(Some(m) == winner.as_ref()));
@@ -397,7 +368,6 @@ impl Workspace {
         self.recompute();
     }
 
-    /// `mod_name`: a mod, OFF, or None to follow the area's choice.
     pub fn set_override(&mut self, feature_key: &str, mod_name: Option<&str>) {
         match mod_name {
             None => self.overrides.remove(feature_key),
@@ -423,8 +393,6 @@ impl Workspace {
         (by_mod, by_area, by_feature)
     }
 
-    // ── editing ──
-
     pub fn set_value(&mut self, uid: usize, value: Value) -> Result<(), String> {
         let s = &self.settings[uid];
         if s.locked {
@@ -442,7 +410,6 @@ impl Workspace {
         Ok(())
     }
 
-    /// Applies recommended values: everywhere, for one area, or for one feature.
     pub fn resolve(&mut self, area: Option<&str>, feature_key: Option<&str>) -> usize {
         let mut n = 0;
         for u in self.ruled.clone() {
@@ -464,9 +431,6 @@ impl Workspace {
         n
     }
 
-    // ── saving ──
-
-    /// Files with unsaved changes, in the order their first changed setting was loaded.
     pub fn dirty_files(&self) -> Vec<usize> {
         let mut out: Vec<usize> = Vec::new();
         for &u in &self.changed {
@@ -478,9 +442,6 @@ impl Workspace {
         out
     }
 
-    /// Writes every modified file, backing each up once. Returns (saved file names, errors).
-    /// A file that something else (usually the game) rewrote since it was loaded is skipped, so its
-    /// newer settings aren't silently overwritten with stale ones.
     pub fn save(&mut self) -> (Vec<String>, Vec<String>) {
         let when = chrono::Local::now().format("%Y%m%d_%H%M%S").to_string();
         let (mut saved, mut errors) = (Vec::new(), Vec::new());
@@ -513,7 +474,6 @@ fn write_one(file: &mut ConfigFile, name: &str, when: &str) -> Result<(), String
         }
     }
     if file.backup.is_none() {
-        // Never overwrite an earlier backup (saving twice within a second, after a Reload).
         let mut bak = file.path.with_file_name(format!("{name}.bak_{when}"));
         let mut n = 1;
         while bak.exists() {
@@ -584,7 +544,7 @@ impl Building {
                     order: (0, 0, 0, 0), locked: is_debug(&shown),
                 });
                 info.settings.push(uid);
-                self.index.entry((name.to_string(), key)).or_insert(uid); // duplicate names: first wins
+                self.index.entry((name.to_string(), key)).or_insert(uid);
             }
             self.files.push(ConfigFile { path: path.clone(), raw, comments, backup: None, warned: false, indent, stamp: Some(st) });
             info.files.push(cf);

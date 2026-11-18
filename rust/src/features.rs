@@ -1,9 +1,3 @@
-//! The mods, features and Minecraft versions the app knows about (features.jsonc).
-//!
-//! A copy is built into the app. A newer copy downloaded from the repository, or a file the user
-//! put next to the app, can replace it; every copy is checked here before it's used, so a broken
-//! or unexpected file can't point the app outside the config folder.
-
 use std::collections::{HashMap, HashSet};
 use std::path::{Component, Path, PathBuf};
 
@@ -12,12 +6,9 @@ use serde_json::{Map, Value};
 
 use crate::jsonc::parse_jsonc;
 
-/// The file layout this app understands. Files with a higher "format" are refused.
 pub const FORMAT: u64 = 1;
-/// The copy built into the app.
 pub const BUILTIN: &str = include_str!("../../features.jsonc");
 
-/// One switch, or several switches that always follow together.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Keys {
     One(String),
@@ -33,13 +24,10 @@ impl Keys {
     }
 }
 
-/// How a mod switches a feature on and off.
 #[derive(Clone, Debug, PartialEq)]
 pub enum SwitchSpec {
-    /// The mod has the feature but no single switch for it; it still competes.
     NoSwitch,
     Keys(Keys),
-    /// Renamed between Minecraft versions: (version or range, or "other") -> keys, in file order.
     ByVersion(Vec<(String, Keys)>),
 }
 
@@ -87,12 +75,10 @@ pub struct FeatureSet {
 }
 
 impl FeatureSet {
-    /// The copy built into the app (checked by the tests, so it can't fail at runtime).
     pub fn builtin() -> FeatureSet {
         FeatureSet::parse(BUILTIN, Source::BuiltIn).expect("the built-in features.jsonc is valid")
     }
 
-    /// Reads and checks a features.jsonc.
     pub fn parse(text: &str, source: Source) -> Result<FeatureSet, String> {
         let text = text.strip_prefix('\u{feff}').unwrap_or(text);
         let (value, _) = parse_jsonc(text)?;
@@ -203,7 +189,6 @@ impl FeatureSet {
         self.areas.iter().position(|a| a == area).unwrap_or(self.areas.len())
     }
 
-    /// Where this list came from, for the Activity log.
     pub fn describe(&self) -> String {
         match &self.source {
             Source::BuiltIn => format!("the built-in mod list (revision {})", self.revision),
@@ -213,8 +198,6 @@ impl FeatureSet {
     }
 }
 
-/// Which list to use: a features.jsonc the user put next to the app, else a downloaded copy
-/// newer than the built-in one, else the built-in one. Problems are returned as notes.
 pub fn choose(user_file: Option<&Path>, cache_file: Option<&Path>) -> (FeatureSet, Vec<String>) {
     let mut notes = Vec::new();
     if let Some(path) = user_file.filter(|p| p.is_file()) {
@@ -238,8 +221,6 @@ pub fn read(path: &Path, source: Source) -> Result<FeatureSet, String> {
     let text = std::fs::read_to_string(path).map_err(|e| e.to_string())?;
     FeatureSet::parse(&text, source)
 }
-
-// ── checking helpers ──
 
 fn switch_spec(v: &Value, at: &str) -> Result<SwitchSpec, String> {
     match v {
@@ -272,7 +253,6 @@ fn keys_of(v: &Value, at: &str) -> Result<Keys, String> {
     }
 }
 
-/// A path inside the config folder: relative, no "..", no drive letters or streams.
 fn safe_path(p: &str, at: &str) -> Result<(), String> {
     let path = Path::new(p);
     let ok = !p.is_empty()

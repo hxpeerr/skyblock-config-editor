@@ -1,10 +1,3 @@
-//! Prints, as JSON, what the app loads, recommends and saves for a config folder.
-//! The tests run the Python version on the same folder and compare.
-//!
-//!     scm-dump <config folder> [--game-version V] [--features FILE] [--priority JSON]
-//!              [--overrides JSON] [--resolve] [--save] [--updates]
-//!     scm-dump --text-cases FILE     (labels, previews, typed values: see tools/parity.py)
-
 use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 use std::sync::Arc;
@@ -80,8 +73,6 @@ fn state(s: State) -> &'static str {
     }
 }
 
-/// Runs the text helpers on the cases in a JSON file: {"parse": [[text, old value]], "fmt": [value],
-/// "label": [[mod, key, [segments]]], "debug": [segment], "words": [segment]}.
 fn text_cases(path: &str) -> Value {
     let cases: Value = serde_json::from_str(&std::fs::read_to_string(path).expect("read cases")).expect("cases are JSON");
     let list = |k: &str| cases[k].as_array().cloned().unwrap_or_default();

@@ -1,8 +1,3 @@
-//! "Check for updates" (Modrinth and CurseForge), and downloading the newest mod list.
-//!
-//! Every address can be overridden with an environment variable, which the tests use to talk to a
-//! local stand-in server: SCM_MODRINTH_API, SCM_CFWIDGET, SCM_FEATURES_URL.
-
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
@@ -22,10 +17,7 @@ use crate::versions::{compare, newer, State};
 
 pub const LOADER: &str = "fabric";
 const MODRINTH_API: &str = "https://api.modrinth.com/v2";
-/// A public mirror of CurseForge's project pages: CurseForge's own API needs a private key, which an
-/// app published with its source can't keep secret.
 const CFWIDGET: &str = "https://api.cfwidget.com";
-/// Where the newest mod list lives.
 pub const FEATURES_URL: &str = "https://raw.githubusercontent.com/hxpeerr/skyblock-config-manager/main/features.jsonc";
 const MAX_BODY: u64 = 16 * 1024 * 1024;
 const MAX_FEATURES: u64 = 2 * 1024 * 1024;
@@ -46,7 +38,6 @@ fn agent() -> ureq::Agent {
         .into()
 }
 
-/// A failed request: the HTTP status if the server answered with an error, else what went wrong.
 #[derive(Debug)]
 pub enum HttpError {
     Status(u16),
@@ -88,7 +79,6 @@ fn post_json(url: &str, body: &Value) -> Result<Value, HttpError> {
     serde_json::from_str(&text).map_err(|e| HttpError::Other(e.to_string()))
 }
 
-/// Percent-encodes everything but letters, digits and `_.-~` (Python's `quote(s, safe="")`).
 fn quote(s: &str) -> String {
     s.bytes()
         .map(|b| match b {
@@ -126,7 +116,6 @@ static CF_NAME: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[-_ ]v?(\d+(?:\.
 static CF_DISPLAY: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\d+(?:\.\d+)+[\w.+-]*)").unwrap());
 static JAR_SUFFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)\.jar$").unwrap());
 
-/// The mod version of the newest Fabric file for `game_version` on CurseForge, or None.
 pub fn curseforge_latest(project_id: u64, game_version: &str) -> Result<Option<String>, HttpError> {
     let data = get_json(&format!("{}/{project_id}", base("SCM_CFWIDGET", CFWIDGET)))?;
     let loader = "Fabric";
@@ -153,20 +142,12 @@ pub fn curseforge_latest(project_id: u64, game_version: &str) -> Result<Option<S
     Ok(CF_DISPLAY.captures(&display).map(|c| c[1].to_string()))
 }
 
-/// Modrinth's answer for one mod.
 enum Modrinth {
-    /// The installed file is its newest build.
     Current,
-    /// Its newest version.
     Newest(String),
-    /// No version to compare with: the text and state to show.
     None((String, State)),
 }
 
-/// {mod: (text, state)} for installed jars ({mod: (version, jar)}): the newest Fabric build for
-/// `game_version` on Modrinth and, for mods also published there, on CurseForge. Whichever is newer
-/// is reported. Modrinth is first asked which project each exact file belongs to (by SHA-1), which
-/// avoids every naming difference; files it doesn't know fall back to the project slug.
 pub fn update_status(jars: &IndexMap<String, (String, PathBuf)>, game_version: &str, set: &FeatureSet)
                      -> Result<IndexMap<String, (String, State)>, String> {
     if jars.is_empty() {
@@ -253,7 +234,6 @@ pub fn update_status(jars: &IndexMap<String, (String, PathBuf)>, game_version: &
     Ok(out)
 }
 
-/// Downloads the newest mod list and checks it. Returns the file's text and what it contains.
 pub fn fetch_features() -> Result<(String, FeatureSet), String> {
     let url = features_url();
     let text = get_text(&url, MAX_FEATURES).map_err(|e| e.to_string())?;

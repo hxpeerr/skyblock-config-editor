@@ -1,6 +1,3 @@
-//! Installed mod jars: what their fabric.mod.json says, and finding Hypixel SkyBlock mods that the
-//! mod list doesn't cover.
-
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Read;
@@ -17,9 +14,7 @@ use crate::text::norm;
 use crate::value::py_str;
 use crate::AUTO_MAX_BYTES;
 
-/// Hypixel's mod API, under both of its ids.
 const HYPIXEL_APIS: &[&str] = &["hypixel-mod-api", "hm-api"];
-/// Libraries only Hypixel SkyBlock mods use.
 const SKYBLOCK_LIBS: &[&str] = &["skyblock-api"];
 
 #[derive(Clone, Debug, PartialEq)]
@@ -28,13 +23,10 @@ pub struct JarInfo {
     pub version: String,
     pub name: String,
     pub description: String,
-    /// Ids it depends on or recommends, lower case.
     pub deps: HashSet<String>,
-    /// Names of the jars bundled inside it, lower case.
     pub bundled: Vec<String>,
 }
 
-/// jar path -> (stamp, what its fabric.mod.json says), so only changed jars are opened again.
 static CACHE: LazyLock<Mutex<HashMap<PathBuf, (Stamp, Option<Arc<JarInfo>>)>>> = LazyLock::new(Default::default);
 
 fn text_of(meta: &serde_json::Map<String, Value>, key: &str) -> Option<String> {
@@ -87,7 +79,6 @@ fn jar_meta(jar: &Path, st: Stamp) -> Option<Arc<JarInfo>> {
     info
 }
 
-/// The mod jars in a folder with what each says about itself, newest file first.
 pub fn scan_mods(mods_dir: &Path) -> Vec<(Arc<JarInfo>, PathBuf)> {
     let Ok(rd) = fs::read_dir(mods_dir) else { return Vec::new() };
     let mut jars: Vec<(PathBuf, Stamp)> = rd
@@ -95,11 +86,10 @@ pub fn scan_mods(mods_dir: &Path) -> Vec<(Arc<JarInfo>, PathBuf)> {
         .filter(|p| p.extension().is_some_and(|e| e.to_string_lossy().to_lowercase() == "jar"))
         .filter_map(|p| stamp(&p).ok().map(|s| (p, s)))
         .collect();
-    jars.sort_by(|a, b| b.1 .1.cmp(&a.1 .1)); // newest first if a mod is there twice
+    jars.sort_by(|a, b| b.1 .1.cmp(&a.1 .1));
     jars.into_iter().filter_map(|(p, s)| jar_meta(&p, s).map(|i| (i, p))).collect()
 }
 
-/// {mod name: (version, jar)} for the listed mods, found by the mod id inside each jar.
 pub fn installed_jars(mods_dir: &Path, set: &FeatureSet) -> IndexMap<String, (String, PathBuf)> {
     let by_id: HashMap<&str, &str> = set
         .mods
@@ -115,9 +105,6 @@ pub fn installed_jars(mods_dir: &Path, set: &FeatureSet) -> IndexMap<String, (St
     found
 }
 
-/// Is this a Hypixel SkyBlock mod? It must say it's for SkyBlock and either name Hypixel or use
-/// Hypixel's mod API, or be built on a SkyBlock-only library. That keeps out Hypixel mods for other
-/// games and the unrelated sky-island survival mods also called "skyblock".
 pub fn is_skyblock_mod(info: &JarInfo) -> bool {
     let text = format!("{} {} {}", info.id, info.name, info.description).to_lowercase();
     let uses = |ids: &[&str]| ids.iter().any(|i| info.deps.contains(*i) || info.bundled.iter().any(|b| b.starts_with(i)));
@@ -125,7 +112,6 @@ pub fn is_skyblock_mod(info: &JarInfo) -> bool {
     (skyblock && (text.contains("hypixel") || uses(HYPIXEL_APIS))) || uses(SKYBLOCK_LIBS)
 }
 
-/// A Hypixel SkyBlock mod the mod list doesn't cover, with the config files named after it.
 #[derive(Clone, Debug)]
 pub struct FoundMod {
     pub paths: Vec<PathBuf>,
@@ -136,8 +122,6 @@ pub struct FoundMod {
 
 static SKIP: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)cache|backup|\.bak").unwrap());
 
-/// {name: found mod} for Hypixel SkyBlock mods in the mods folder that the list doesn't have, with
-/// the JSON files in the config folder named after them (or in a folder named after them).
 pub fn discover_mods(config_dir: &Path, claimed: &HashSet<PathBuf>, set: &FeatureSet) -> IndexMap<String, FoundMod> {
     let mut found = IndexMap::new();
     let Ok(entries) = sorted_entries(config_dir) else { return found };
@@ -148,7 +132,7 @@ pub fn discover_mods(config_dir: &Path, claimed: &HashSet<PathBuf>, set: &Featur
         if known.contains(&info.id) || !is_skyblock_mod(&info) {
             continue;
         }
-        known.insert(info.id.clone()); // an older copy of the same mod is skipped
+        known.insert(info.id.clone());
         let names: HashSet<String> = [norm(&info.id), norm(&info.name)].into_iter().filter(|n| !n.is_empty()).collect();
         let mut wanted = names.clone();
         for n in &names {
