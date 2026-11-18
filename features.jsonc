@@ -1,0 +1,448 @@
+// The mods, features and Minecraft versions SkyBlock Config Manager knows about.
+//
+// The app has this file built in, and also downloads the newest copy from the repository, so
+// a change merged here reaches everyone without a new release. Raise "revision" with every
+// change: the app only switches to a downloaded copy whose revision is higher than its own.
+// To try changes, put your copy next to the app; it's used instead of the others.
+{
+  "format": 1,
+  "revision": 1,
+
+  // Minecraft versions in the version menu on the Overview tab, newest first. "Check for
+  // updates" looks for mod builds for the version picked.
+  "game_versions": ["26.3", "26.2", "26.1.2", "26.1.1", "26.1", "1.21.11", "1.21.10", "1.21.8", "1.21.7", "1.21.5"],
+  // Picked until the user chooses another; the feature keys below come from it.
+  "default_game_version": "26.1.2",
+
+  // Where each mod keeps its config, relative to the config folder (first file found wins).
+  //   dir:  the mod keeps one JSON file per feature in that folder; every file in it is loaded.
+  //   id:   the mod id inside its jar (fabric.mod.json), used to find the installed version.
+  //   slug: the Modrinth project, used by "Check for updates".
+  //   curseforge: the CurseForge project id, for mods published there too.
+  // Hypixel SkyBlock mods that aren't listed here are found automatically; their settings can
+  // be browsed and edited, but they aren't compared with other mods.
+  "mods": {
+    "NoFrills": {"files": ["NoFrills/Configuration.json", "Configuration.json"], "id": "nofrills", "slug": "nofrills"},
+    "SkyHanni": {"files": ["skyhanni/config.json", "config.json"], "id": "skyhanni", "slug": "skyhanni"},
+    "Skyblocker": {"files": ["skyblocker.json", "skyblocker_optimized.json"], "id": "skyblocker", "slug": "skyblocker-liap", "curseforge": 936169},
+    "AaronsMod": {"files": ["aaron-mod.json"], "id": "aaron-mod", "slug": "aaron-mod"},
+    "SkyBlockAddons": {"files": ["skyblockaddons/configurations.json", "configurations.json"], "id": "skyblockaddons", "slug": "skyblockaddons-unofficial"},
+    "SkyOcean": {"files": ["skyocean/config.jsonc", "skyocean_config.json", "skyocean.json"], "id": "skyocean", "slug": "skyocean", "curseforge": 1353380},
+    "Firmament": {"dir": "firmament", "files": ["firmament.json"], "id": "firmament", "slug": "firmament"},
+    "Odin": {"files": ["odin/odin-config.json", "odin-config.json"], "id": "odin", "slug": "odin"},
+    "SBO": {"files": ["sbo/config.jsonc", "SBO/config.jsonc", "config.jsonc"], "id": "sbo", "slug": "skyblock-overhaul"}
+  },
+
+  // The feature areas shown on the Priorities tab, in order.
+  "areas": ["Dungeons", "Kuudra", "Slayers", "Farming", "Mining", "Foraging", "Hunting", "Fishing", "Events", "Rift", "GUI/HUD", "Inventory", "Misc"],
+
+  // Features that more than one mod provides, with each mod's switch for it.
+  //  * A switch is a dotted config key. A list means several switches that all follow together.
+  //  * A key starting with * matches by its ending, for mods whose files nest settings
+  //    differently between versions: "*spadeGuess" matches "spadeGuess" and "burrows.spadeGuess".
+  //  * null means the mod offers the feature but has no single on/off switch; it still competes.
+  //  * A mod only competes if one of its switches is actually in the user's config, so unknown
+  //    keys are harmless.
+  //  * An object means the mod renamed the switch between Minecraft versions: each key is a
+  //    version or a range ("1.21.5-1.21.10") and gives the name used there; "other" covers the
+  //    rest. The name for the version picked is tried first, then the others.
+  //  * Order matters: an area's default owner is the first mod listed for it, and if the owner
+  //    doesn't offer a feature, the first listed mod that does keeps it.
+  "features": [
+    // ── Dungeons ──
+    {"area": "Dungeons", "name": "Dungeon map", "mods": {
+      "Odin": "Dungeon Map.enabled",
+      "Skyblocker": "dungeons.dungeonMap.enableMap",
+      "SkyBlockAddons": "*DUNGEONS_MAP_DISPLAY.value"
+    }},
+    {"area": "Dungeons", "name": "Terminal solvers", "mods": {
+      "Odin": "Terminal Solver.enabled",
+      "NoFrills": "terminalSolvers.enabled"
+    }},
+    {"area": "Dungeons", "name": "Puzzle solvers", "mods": {
+      "Odin": "Puzzle Solvers.enabled",
+      "Skyblocker": ["dungeons.puzzleSolvers.solveTicTacToe", "dungeons.puzzleSolvers.solveThreeWeirdos", "dungeons.puzzleSolvers.creeperSolver", "dungeons.puzzleSolvers.blazeSolver", "dungeons.puzzleSolvers.solveBoulder", "dungeons.puzzleSolvers.solveIceFill", "dungeons.puzzleSolvers.solveSilverfish", "dungeons.puzzleSolvers.solveTrivia", "dungeons.puzzleSolvers.solveTeleportMaze"]
+    }},
+    {"area": "Dungeons", "name": "Starred mob highlight", "mods": {
+      "Odin": "Highlight.enabled",
+      "Skyblocker": "dungeons.starredMobGlow",
+      "NoFrills": "starredMobHighlight.enabled",
+      "SkyHanni": "dungeon.objectHighlighter.starred.highlight"
+    }},
+    {"area": "Dungeons", "name": "Livid solver", "mods": {
+      "Odin": "Livid Solver.enabled",
+      "Skyblocker": "dungeons.livid.enableLividColorGlow",
+      "NoFrills": "lividSolver.enabled",
+      "SkyHanni": "dungeon.lividFinder.enabled"
+    }},
+    {"area": "Dungeons", "name": "Spirit leap menu", "mods": {
+      "Odin": "Leap Menu.enabled",
+      "Skyblocker": "dungeons.leapOverlay.enableLeapOverlay",
+      "NoFrills": "leapOverlay.enabled",
+      "SkyHanni": "dungeon.spiritLeapOverlay.enabled"
+    }},
+    {"area": "Dungeons", "name": "Croesus chest helper", "mods": {
+      "Odin": "Croesus.enabled",
+      "Skyblocker": "dungeons.croesusHelper",
+      "NoFrills": "croesusSolver.enabled",
+      "SkyHanni": "dungeon.chest.croesusOverlay"
+    }},
+    {"area": "Dungeons", "name": "Blood camp helper", "mods": {
+      "Odin": "Blood Camp.enabled",
+      "Skyblocker": "dungeons.bloodCampHelper",
+      "SkyHanni": "dungeon.bloodCampTimer"
+    }},
+    {"area": "Dungeons", "name": "Wither door / key highlight", "mods": {
+      "Odin": "Door Highlight.enabled",
+      "Skyblocker": "dungeons.highlightDoorKeys",
+      "NoFrills": "witherKeyHighlight.enabled"
+    }},
+    {"area": "Dungeons", "name": "Secret chime", "mods": {
+      "NoFrills": "secretChime.enabled",
+      "SkyHanni": "dungeon.secretChime.enabled"
+    }},
+    {"area": "Dungeons", "name": "Wither dragon timers", "mods": {
+      "Odin": "Wither Dragons.enabled",
+      "NoFrills": "witherDragons.enabled",
+      "AaronsMod": ["skyblock.m7.dragonSpawnTimers", "skyblock.m7.dragonSpawnNotifications"]
+    }},
+    {"area": "Dungeons", "name": "Terracotta timer", "mods": {
+      "Odin": "Terracotta Timer.enabled",
+      "NoFrills": "terracottaTimer.enabled"
+    }},
+    {"area": "Dungeons", "name": "Melody message", "mods": {
+      "Odin": "Melody Message.enabled",
+      "NoFrills": "melodyMessage.enabled"
+    }},
+    {"area": "Dungeons", "name": "Mimic message", "mods": {
+      "Odin": "Mimic.enabled",
+      "NoFrills": "mimicMessage.enabled"
+    }},
+    {"area": "Dungeons", "name": "Auto requeue", "mods": {
+      "Odin": "Dungeon Queue.enabled",
+      "NoFrills": "autoRequeue.enabled"
+    }},
+    // ── Kuudra ──
+    {"area": "Kuudra", "name": "Supply waypoints", "mods": {
+      "Odin": "Supply Helper.enabled",
+      "Skyblocker": "crimsonIsle.kuudra.supplyWaypoints",
+      "NoFrills": "supplyHighlight.enabled"
+    }},
+    {"area": "Kuudra", "name": "Pearl waypoints", "mods": {
+      "Odin": "Pearl Waypoints.enabled",
+      "Skyblocker": "crimsonIsle.kuudra.pearlWaypoints"
+    }},
+    {"area": "Kuudra", "name": "Ballista build helper", "mods": {
+      "Odin": "Build Helper.enabled",
+      "Skyblocker": "crimsonIsle.kuudra.ballistaBuildWaypoints",
+      "NoFrills": "buildPileHighlight.enabled"
+    }},
+    {"area": "Kuudra", "name": "Kuudra highlight", "mods": {
+      "Odin": "Kuudra Info.enabled",
+      "Skyblocker": "crimsonIsle.kuudra.kuudraGlow",
+      "NoFrills": "kuudraHitbox.enabled"
+    }},
+    {"area": "Kuudra", "name": "Fresh tools timer", "mods": {
+      "Odin": "Fresh Tools.enabled",
+      "NoFrills": "freshTimer.enabled"
+    }},
+    {"area": "Kuudra", "name": "Fuel / drop-off waypoints", "mods": {
+      "Skyblocker": "crimsonIsle.kuudra.fuelWaypoints",
+      "NoFrills": "dropOffHighlight.enabled"
+    }},
+    {"area": "Kuudra", "name": "Vesuvius solver", "mods": {
+      "Odin": "Vesuvius.enabled",
+      "NoFrills": "vesuviusSolver.enabled"
+    }},
+    // ── Slayers ──
+    {"area": "Slayers", "name": "Boss spawn alert", "mods": {
+      "Skyblocker": "slayers.bossSpawnAlert",
+      "NoFrills": "spawnAlert.enabled"
+    }},
+    {"area": "Slayers", "name": "Miniboss spawn alert", "mods": {
+      "Skyblocker": "slayers.miniBossSpawnAlert",
+      "NoFrills": "slayerMinibossAlert.enabled"
+    }},
+    {"area": "Slayers", "name": "Boss highlight", "mods": {
+      "NoFrills": "bossHighlight.enabled",
+      "SkyOcean": "*slayer.highlightOwnBoss"
+    }},
+    {"area": "Slayers", "name": "Miniboss highlight", "mods": {
+      "NoFrills": "slayerMinibossHighlight.enabled",
+      "SkyOcean": "*slayer.highlightMini"
+    }},
+    {"area": "Slayers", "name": "Voidgloom beacon", "mods": {
+      "Skyblocker": "slayers.endermanSlayer.highlightBeacons",
+      "SkyHanni": "slayer.endermen.beacon.highlightBeacon",
+      "NoFrills": "beaconTracer.enabled"
+    }},
+    {"area": "Slayers", "name": "Nukekubi heads", "mods": {
+      "Skyblocker": "slayers.endermanSlayer.highlightNukekubiHeads",
+      "SkyHanni": "slayer.endermen.highlightNukekebi"
+    }},
+    {"area": "Slayers", "name": "Blaze attunement", "mods": {
+      "Skyblocker": "slayers.blazeSlayer.attunementHighlights",
+      "SkyOcean": "*slayer.enableBlazeHighlight"
+    }},
+    {"area": "Slayers", "name": "Riftstalker steak alert", "mods": {
+      "Skyblocker": "slayers.vampireSlayer.enableSteakStakeIndicator",
+      "SkyHanni": "slayer.vampire.ownBoss.steakAlert"
+    }},
+    {"area": "Slayers", "name": "Boss kill timer", "mods": {
+      "Skyblocker": "slayers.slainTime",
+      "NoFrills": "killTimer.enabled"
+    }},
+    // ── Farming ──
+    {"area": "Farming", "name": "Pest finder", "mods": {
+      "SkyHanni": ["garden.pests.pestFinder.showDisplay", "garden.pests.pestFinder.showPlotInWorld"],
+      "Skyblocker": {"1.21.5-1.21.8": "farming.garden.pestHighlighter", "other": "farming.pestHighlighter.enabled"},
+      "SkyOcean": "*garden.deskPestHighlight"
+    }},
+    {"area": "Farming", "name": "Visitor helper", "mods": {
+      "SkyHanni": "garden.visitors.shoppingList.enabled",
+      "Skyblocker": {"1.21.5-1.21.8": "farming.visitorHelper.visitorHelper", "other": "farming.visitorHelper.enabled"}
+    }},
+    {"area": "Farming", "name": "Glowing mushrooms", "mods": {
+      "SkyHanni": "misc.glowingMushroomHighlighter.enabled",
+      "Skyblocker": "otherLocations.barn.enableGlowingMushroomHelper",
+      "NoFrills": "shroomHighlight.enabled"
+    }},
+    // ── Mining ──
+    {"area": "Mining", "name": "Metal detector solver", "mods": {
+      "SkyHanni": "mining.metalDetector.metalDetectorSolver",
+      "Skyblocker": "mining.crystalHollows.metalDetectorHelper"
+    }},
+    {"area": "Mining", "name": "Fossil solver", "mods": {
+      "SkyHanni": "mining.fossilExcavator.solver.enabled",
+      "Skyblocker": "mining.glacite.fossilSolver"
+    }},
+    {"area": "Mining", "name": "Corpse finder", "mods": {
+      "Skyblocker": "mining.glacite.enableCorpseFinder",
+      "NoFrills": "corpseHighlight.enabled",
+      "SkyOcean": "*mineshaft.corpseWaypoint"
+    }},
+    {"area": "Mining", "name": "Corpse profit tracker", "mods": {
+      "SkyHanni": "mining.glaciteMineshaft.corpseTracker.enabled",
+      "Skyblocker": "mining.glacite.enableCorpseProfitTracker"
+    }},
+    {"area": "Mining", "name": "Commission highlight", "mods": {
+      "SkyHanni": "mining.highlightCommissionMobs",
+      "Skyblocker": "mining.commissionHighlight",
+      "NoFrills": "commissionHighlight.enabled"
+    }},
+    {"area": "Mining", "name": "Puzzler solver", "mods": {
+      "Skyblocker": "mining.dwarvenMines.solvePuzzler",
+      "SkyOcean": "*mining.puzzlerSolver"
+    }},
+    {"area": "Mining", "name": "Fetchur solver", "mods": {
+      "Skyblocker": "mining.dwarvenMines.solveFetchur",
+      "SkyOcean": "*mining.fetchurHelper",
+      "SkyBlockAddons": "*FETCHUR_TODAY.value"
+    }},
+    {"area": "Mining", "name": "Mineshaft announce", "mods": {
+      "NoFrills": "shaftAnnounce.enabled",
+      "SkyOcean": "*mineshaft.shaftAnnouncement"
+    }},
+    {"area": "Mining", "name": "Ender node highlight", "mods": {
+      "Skyblocker": "otherLocations.end.enableEnderNodeHelper",
+      "NoFrills": "endNodeHighlight.enabled"
+    }},
+    // ── Foraging ──
+    {"area": "Foraging", "name": "Moonglade beacon solver", "mods": {
+      "SkyHanni": {"1.21.5-1.21.10": "foraging.moongladeBeacon.enabled", "other": "foraging.foragingBeacon.enabled"},
+      "Skyblocker": {"1.21.5-1.21.11": "foraging.galatea.enableTunerSolver", "other": "foraging.moongladeMarsh.enableTunerSolver"},
+      "NoFrills": "beaconTuningSolver.enabled"
+    }},
+    {"area": "Foraging", "name": "Mute phantoms", "mods": {
+      "SkyHanni": "foraging.mutePhantoms",
+      "SkyOcean": "*galatea.muteThePhantoms"
+    }},
+    // ── Hunting ──
+    {"area": "Hunting", "name": "Shard tracker", "mods": {
+      "SkyHanni": "hunting.shardTracker.enabled",
+      "NoFrills": "shardTracker.enabled"
+    }},
+    {"area": "Hunting", "name": "Lasso alert", "mods": {
+      "SkyHanni": "hunting.lassoDisplay",
+      "NoFrills": "lassoAlert.enabled"
+    }},
+    {"area": "Hunting", "name": "Invisibug highlight", "mods": {
+      "Skyblocker": "hunting.moongladeMobs.highlightInvisibug",
+      "NoFrills": "invisibugHighlight.enabled"
+    }},
+    // ── Fishing ──
+    {"area": "Fishing", "name": "Bobber timer", "mods": {
+      "SkyHanni": "fishing.bobberTimer.enabled",
+      "SkyOcean": "*fishing.bobberTime",
+      "SBO": "*bobberOverlay"
+    }},
+    {"area": "Fishing", "name": "Hide other players' bobbers", "mods": {
+      "Skyblocker": "helpers.fishing.hideOtherPlayersRods",
+      "SkyOcean": "*fishing.hideOtherBobbers"
+    }},
+    {"area": "Fishing", "name": "Lava replacement", "mods": {
+      "SkyHanni": "fishing.lavaReplacement.enabled",
+      "SkyOcean": "*fishing.lavaReplacement"
+    }},
+    {"area": "Fishing", "name": "Fishing hook display", "mods": {
+      "SkyHanni": "fishing.fishingHookDisplay.enabled",
+      "Skyblocker": "helpers.fishing.enableFishingHelper"
+    }},
+    // ── Events ──
+    {"area": "Events", "name": "Diana burrow guess", "mods": {
+      "SBO": {"1.21.5-1.21.10": "*dianaBurrowGuess", "other": "*spadeGuess"},
+      "SkyHanni": "event.diana.guess",
+      "Skyblocker": "helpers.mythologicalRitual.enableMythologicalRitualHelper",
+      "Firmament": "diana.ancestral-spade",
+      "NoFrills": "dianaSolver.enabled"
+    }},
+    {"area": "Events", "name": "Diana arrow guess", "mods": {
+      "SBO": "*arrowGuess",
+      "SkyHanni": "event.diana.guessFromArrow"
+    }},
+    {"area": "Events", "name": "Nearby burrow detection", "mods": {
+      "SBO": {"1.21.5-1.21.10": "*dianaBurrowDetect", "other": "*closeBurrowDetection"},
+      "SkyHanni": "event.diana.burrowsNearbyDetection"
+    }},
+    {"area": "Events", "name": "Nearest warp hint", "mods": {
+      "SBO": "*showTitleWhenWarpAvailable",
+      "SkyHanni": "event.diana.burrowNearestWarp"
+    }},
+    {"area": "Events", "name": "Rare mob sharing", "mods": {
+      "SBO": "*shareRareMob",
+      "SkyHanni": {"1.21.7": "event.diana.inquisitorSharing.enabled", "other": "event.diana.rareMobsSharing.enabled"}
+    }},
+    {"area": "Events", "name": "Rare mob highlight", "mods": {
+      "SBO": "*HighlightRareMobs",
+      "SkyHanni": {"1.21.7": "event.diana.highlightInquisitors", "other": "event.diana.highlightRareMobs"}
+    }},
+    {"area": "Events", "name": "Mute bugged spade sounds", "mods": {
+      "SBO": "*muteBuggedSpadeSounds",
+      "SkyHanni": "event.diana.muteBuggedSpade"
+    }},
+    {"area": "Events", "name": "Chocolate egg finder", "mods": {
+      "SkyHanni": "event.hoppityEggs.waypoints.enabled",
+      "Skyblocker": "helpers.chocolateFactory.enableEggFinder",
+      "NoFrills": "hoppitySolver.enabled"
+    }},
+    {"area": "Events", "name": "Chocolate factory helper", "mods": {
+      "SkyHanni": "inventory.chocolateFactory.enabled",
+      "Skyblocker": "helpers.chocolateFactory.enableChocolateFactoryHelper"
+    }},
+    {"area": "Events", "name": "Time tower reminder", "mods": {
+      "SkyHanni": "inventory.chocolateFactory.timeTowerReminder",
+      "Skyblocker": "helpers.chocolateFactory.enableTimeTowerReminder"
+    }},
+    // ── Rift ──
+    {"area": "Rift", "name": "Enigma soul waypoints", "mods": {
+      "SkyHanni": "rift.enigmaSoulWaypoints.enabled",
+      "Skyblocker": "otherLocations.rift.enigmaSoulWaypoints"
+    }},
+    // ── GUI/HUD ──
+    {"area": "GUI/HUD", "name": "Custom tab list", "mods": {
+      "SkyHanni": "gui.compactTabList.enabled",
+      "Skyblocker": "uiAndVisuals.tabHud.tabHudEnabled",
+      "SkyBlockAddons": "*COMPACT_TAB_LIST.value"
+    }},
+    {"area": "GUI/HUD", "name": "TPS display", "mods": {
+      "SkyHanni": "gui.tpsDisplay",
+      "AaronsMod": "uiAndVisuals.tpsHud.enableTpsHud"
+    }},
+    {"area": "GUI/HUD", "name": "Health / mana bars", "mods": {
+      "Skyblocker": "uiAndVisuals.bars.enableBars",
+      "Odin": "Player Display.enabled",
+      "SkyBlockAddons": ["*HEALTH_BAR.value", "*MANA_BAR.value"]
+    }},
+    {"area": "GUI/HUD", "name": "Item ability cooldowns", "mods": {
+      "SkyHanni": "inventory.itemAbilities.itemAbilityCooldown",
+      "Skyblocker": "uiAndVisuals.itemCooldown.enableItemCooldowns",
+      "SkyBlockAddons": "*SHOW_ITEM_COOLDOWNS.value"
+    }},
+    {"area": "GUI/HUD", "name": "Quiver display", "mods": {
+      "SkyHanni": "combat.quiverConfig.quiverDisplay.enabled",
+      "Odin": "Quiver Display.enabled"
+    }},
+    {"area": "GUI/HUD", "name": "Held item position", "mods": {
+      "NoFrills": "viewmodel.enabled",
+      "AaronsMod": "itemModel.enableItemModelCustomization"
+    }},
+    // ── Inventory ──
+    {"area": "Inventory", "name": "Inventory buttons", "mods": {
+      "Firmament": null,
+      "NoFrills": "inventoryButtons.enabled",
+      "SkyOcean": "*inventory.inventoryButtons"
+    }},
+    {"area": "Inventory", "name": "Keep cursor position", "mods": {
+      "Firmament": "save-cursor-position.enable",
+      "Odin": "No Cursor Reset.enabled",
+      "NoFrills": "noCursorReset.enabled",
+      "AaronsMod": "refinements.input.dontResetCursorPosition",
+      "SkyBlockAddons": "*DONT_RESET_CURSOR_INVENTORY.value"
+    }},
+    {"area": "Inventory", "name": "Anvil helper", "mods": {
+      "SkyHanni": "inventory.anvilCombineHelper",
+      "Skyblocker": "helpers.enableAnvilHelper",
+      "NoFrills": "anvilHelper.enabled",
+      "SkyOcean": "*misc.anvilHelper"
+    }},
+    {"area": "Inventory", "name": "Experiment solvers", "mods": {
+      "Skyblocker": ["helpers.experiments.enableChronomatronSolver", "helpers.experiments.enableSuperpairsSolver", "helpers.experiments.enableUltrasequencerSolver"],
+      "SkyHanni": "inventory.experimentationTable.superpairs.highlightPairs",
+      "NoFrills": "experimentSolver.enabled"
+    }},
+    {"area": "Inventory", "name": "Wardrobe overlay", "mods": {
+      "SkyHanni": "inventory.customWardrobe.enabled",
+      "Skyblocker": "helpers.enableWardrobeHelper"
+    }},
+    {"area": "Inventory", "name": "Price tooltips", "mods": {
+      "Skyblocker": ["general.itemTooltip.enableLowestBIN", "general.itemTooltip.enableAvgBIN", "general.itemTooltip.enableBazaarPrice"],
+      "NoFrills": "priceTooltips.enabled",
+      "SkyBlockAddons": "*ITEM_PRICES_IN_TOOLTIP.value"
+    }},
+    // ── Misc ──
+    {"area": "Misc", "name": "Etherwarp overlay", "mods": {
+      "Odin": "Etherwarp.enabled",
+      "Firmament": "etherwarp-overlay.etherwarp-overlay",
+      "NoFrills": "etherwarpOverlay.enabled",
+      "Skyblocker": "uiAndVisuals.teleportOverlay.enableTeleportOverlays"
+    }},
+    {"area": "Misc", "name": "Auto sprint", "mods": {
+      "Odin": "Auto Sprint.enabled",
+      "NoFrills": "autoSprint.enabled"
+    }},
+    {"area": "Misc", "name": "Wardrobe keybinds", "mods": {
+      "Odin": "Wardrobe Keybinds.enabled",
+      "NoFrills": "wardrobeKeybinds.enabled"
+    }},
+    {"area": "Misc", "name": "Loadout keybinds", "mods": {
+      "Odin": "Loadout Keybinds.enabled",
+      "NoFrills": "loadoutKeybinds.enabled"
+    }},
+    {"area": "Misc", "name": "Command keybinds", "mods": {
+      "Odin": "Command Keybinds.enabled",
+      "NoFrills": "customKeybinds.enabled"
+    }},
+    {"area": "Misc", "name": "Party chat commands", "mods": {
+      "Odin": "Chat Commands.enabled",
+      "NoFrills": "partyCommands.enabled"
+    }},
+    {"area": "Misc", "name": "Chat waypoints", "mods": {
+      "Skyblocker": "uiAndVisuals.waypoints.enableChatWaypoints",
+      "NoFrills": "chatWaypoints.enabled"
+    }},
+    {"area": "Misc", "name": "Hide lightning", "mods": {
+      "AaronsMod": "uiAndVisuals.world.hideLightning",
+      "SkyOcean": {"1.21.5-1.21.11": "*misc.hideLightning", "other": "*environmental.hideLightning"}
+    }}
+  ],
+
+  // Settings nothing else overlaps with, but that should be held at a fixed value.
+  "preferred": [
+    {"mod": "Firmament", "key": "inventory-buttons-config.hover-text", "value": true},
+    {"mod": "Firmament", "key": "inventory-buttons-config.only-inv", "value": false},
+    {"mod": "Skyblocker", "key": "quickNav.enableQuickNav", "value": true}
+  ],
+
+  // Exact menu names where the tidied-up config key isn't right: {"Mod": {"dotted.key": "Name"}}.
+  "labels": {}
+}

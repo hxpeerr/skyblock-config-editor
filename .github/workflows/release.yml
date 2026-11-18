@@ -1,16 +1,19 @@
-# Builds the portable Windows .exe on GitHub's Windows machines and checks that it starts.
+# Builds the app (the Rust version in rust/) for Windows, macOS and Linux and checks it.
 #
-# - A version tag (v3.1.0, ...) also publishes it as a GitHub Release. Publish a release on
-#   GitHub with a new tag, or push the tag with git. The tag must match __version__.
-# - Pull requests that change the app or its packaging get the same build and check; the
-#   exe is attached to the run so it can be tried before merging.
-name: Windows build & release
+# - A version tag (v4.0.0, ...) also publishes the builds as a GitHub Release. Publish a release on
+#   GitHub with a new tag, or push the tag with git. The tag must match the version in
+#   rust/Cargo.toml (and __version__ in skyblock_config_manager.py, which must be the same).
+# - Pull requests that change the app or its packaging get the same tests and builds; the builds
+#   are attached to the run so they can be tried before merging.
+name: Build & release
 
 on:
   push:
     tags: ["v*"]
   pull_request:
     paths:
+      - rust/**
+      - features.jsonc
       - skyblock_config_manager.py
       - packaging/**
       - .github/workflows/release.yml
@@ -20,9 +23,13 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build and test the .exe
-    runs-on: windows-latest
+  test:
+    name: Tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -31,62 +38,90 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Check the tag matches __version__
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Update Rust
+        run: rustup update stable --no-self-update && rustup default stable
+
+      - name: Check the versions (and the tag) match
         shell: python
         run: |
-          import os, re, sys
-          source = open("skyblock_config_manager.py", encoding="utf-8").read()
-          version = re.search(r'^__version__ = "(.+?)"', source, re.M).group(1)
-          tag = os.environ["GITHUB_REF_NAME"]
-          if tag != "v" + version:
-              print(f'::error::Tag {tag} does not match __version__ = "{version}" in skyblock_config_manager.py')
-              sys.exit(1)
+          import os, re, sys, tomllib
+          py = re.search(r'^__version__ = "(.+?)"', open("skyblock_config_manager.py", encoding="utf-8").read(), re.M).group(1)
+          rs = tomllib.load(open("rust/Cargo.toml", "rb"))["package"]["version"]
+          errors = []
+          if py != rs:
+              errors.append(f"skyblock_config_manager.py is {py} but rust/Cargo.toml is {rs}; make them the same")
+          tag = os.environ.get("GITHUB_REF_NAME", "")
+          if os.environ.get("GITHUB_REF", "").startswith("refs/tags/") and tag != "v" + rs:
+              errors.append(f"Tag {tag} doesn't match version {rs}: tag the release v{rs}")
+          for e in errors:
+              print(f"::error::{e}")
+          sys.exit(1 if errors else 0)
 
-      # PyInstaller's ready-made bootloader (the small program at the front of the .exe that unpacks
-      # and starts the app) is the same in every program built with it, malware included, so
-      # antivirus engines often flag it on sight. Building PyInstaller from source with
-      # PYINSTALLER_COMPILE_BOOTLOADER compiles a bootloader of our own here (with the runner's
-      # Visual Studio C compiler) instead.
-      - name: Install PyInstaller, compiling its bootloader from source
-        env:
-          PYINSTALLER_COMPILE_BOOTLOADER: "1"
-        run: python -m pip install --no-binary pyinstaller "pyinstaller==6.22.3"
+      - name: Check features.jsonc matches the Python tables
+        run: python rust/tools/export_features.py --check
 
-      - name: Check the bootloader was compiled here, not the ready-made one
-        shell: python
+      - name: Unit tests
+        working-directory: rust
+        run: cargo test --no-default-features
+
+      - name: Compare with the Python version
         run: |
-          import hashlib, pathlib, subprocess, sys, tarfile, tempfile
-          import PyInstaller
-          ours = (pathlib.Path(PyInstaller.__file__).parent / "bootloader" / "Windows-64bit-intel" / "runw.exe").read_bytes()
-          with tempfile.TemporaryDirectory() as tmp:     # the ready-made one ships in the source package
-              subprocess.run([sys.executable, "-m", "pip", "download", "--quiet", "--no-binary", ":all:",
-                              "--no-deps", "pyinstaller==" + PyInstaller.__version__, "-d", tmp], check=True)
-              with tarfile.open(next(pathlib.Path(tmp).glob("pyinstaller-*.tar.gz"))) as t:
-                  member = next(m for m in t.getmembers()
-                                if m.name.endswith("/bootloader/Windows-64bit-intel/runw.exe"))
-                  stock = t.extractfile(member).read()
-          print("bootloader compiled here:", hashlib.sha256(ours).hexdigest())
-          print("ready-made bootloader:   ", hashlib.sha256(stock).hexdigest())
-          if ours == stock:
-              print("::error::PyInstaller still has its ready-made bootloader; compiling it from source didn't happen.")
-              sys.exit(1)
+          cargo build --manifest-path rust/Cargo.toml --no-default-features --bin scm-dump
+          python rust/tools/parity.py rust/target/debug/scm-dump
 
-      - name: Build the .exe
-        run: python -m PyInstaller --noconfirm --clean packaging/SkyBlockConfigManager.spec
+  build:
+    name: Build (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: macOS
+            os: macos-latest
+          - name: Linux
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Update Rust
+        run: rustup update stable --no-self-update && rustup default stable
+
+      - name: Install the Linux build libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -q && sudo apt-get install -y -q libx11-dev libxkbcommon-dev libwayland-dev
+
+      - name: Build (Windows, Linux)
+        if: runner.os != 'macOS'
+        working-directory: rust
+        run: cargo build --release --bin SkyblockConfigManager
+
+      - name: Build (macOS, one app for Apple and Intel chips)
+        if: runner.os == 'macOS'
+        working-directory: rust
+        run: |
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          cargo build --release --bin SkyblockConfigManager --target aarch64-apple-darwin
+          cargo build --release --bin SkyblockConfigManager --target x86_64-apple-darwin
+          mkdir -p target/release
+          lipo -create -output target/release/SkyblockConfigManager \
+            target/aarch64-apple-darwin/release/SkyblockConfigManager target/x86_64-apple-darwin/release/SkyblockConfigManager
 
       - name: Check the .exe starts and loads a config folder
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          # A folder laid out like .minecraft: the exe next to a config folder with one mod config.
+          # A folder laid out like .minecraft: the app next to a config folder with one mod config.
           $dir = Join-Path $env:RUNNER_TEMP "smoke"
           New-Item -ItemType Directory -Force -Path (Join-Path $dir "config") | Out-Null
-          Copy-Item dist/SkyBlockConfigManager.exe $dir
+          Copy-Item rust/target/release/SkyblockConfigManager.exe $dir
           Set-Content -Path (Join-Path $dir "config/skyblocker.json") -Value '{"quickNav": {"enableQuickNav": true}}'
-          $exe = Start-Process -FilePath (Join-Path $dir "SkyBlockConfigManager.exe") -WorkingDirectory $dir -PassThru
+          $exe = Start-Process -FilePath (Join-Path $dir "SkyblockConfigManager.exe") -WorkingDirectory $dir -PassThru
           $null = $exe.Handle                      # keeps the exit code readable later
 
-          # Once it has loaded a folder, the app saves its own settings (config_dir) beside the exe.
+          # Once it has loaded a folder, the app saves its own settings (config_dir) beside itself.
           $settings = Join-Path $dir "skyblock_config_manager.settings.json"
           $deadline = (Get-Date).AddSeconds(120)
           while (-not (Test-Path $settings) -and -not $exe.HasExited -and (Get-Date) -lt $deadline) {
@@ -94,62 +129,95 @@ jobs:
           }
           Start-Sleep -Seconds 3                   # it must still be running a moment later
           try {
-            if ($exe.HasExited) { throw "The exe closed by itself (exit code $($exe.ExitCode))." }
-            if (-not (Test-Path $settings)) { throw "The exe didn't load the test config folder within 2 minutes." }
+            if ($exe.HasExited) { throw "The app closed by itself (exit code $($exe.ExitCode))." }
+            if (-not (Test-Path $settings)) { throw "The app didn't load the test config folder within 2 minutes." }
             $loaded = (Get-Content $settings -Raw | ConvertFrom-Json).config_dir
-            if ($loaded -ne (Join-Path $dir "config")) { throw "The exe loaded '$loaded' instead of the test config folder." }
-            $window = Get-Process -Name SkyBlockConfigManager -ErrorAction SilentlyContinue |
-              Where-Object MainWindowTitle | Select-Object -First 1 -ExpandProperty MainWindowTitle
-            Write-Host "OK: the exe started and loaded $loaded (window title: '$window')."
+            if ($loaded -ne (Join-Path $dir "config")) { throw "The app loaded '$loaded' instead of the test config folder." }
+            $window = (Get-Process -Id $exe.Id).MainWindowTitle
+            Write-Host "OK: the app started and loaded $loaded (window title: '$window')."
           } finally {
-            # The one-file exe runs as two processes; stop both.
-            Get-Process -Name SkyBlockConfigManager -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+            Stop-Process -Id $exe.Id -Force -ErrorAction SilentlyContinue
           }
 
-      - name: Zip it and write the release notes
-        shell: python
+      - name: Package
+        shell: bash
         run: |
-          import hashlib, platform, zipfile
-          import PyInstaller
-          exe = "dist/SkyBlockConfigManager.exe"
-          with zipfile.ZipFile("dist/SkyBlockConfigManager.zip", "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-              z.write(exe, "SkyBlockConfigManager.exe")
-          sha256 = hashlib.sha256(open(exe, "rb").read()).hexdigest()
-          notes = open("packaging/release_notes.md", encoding="utf-8").read()
-          notes = (notes.replace("{sha256}", sha256).replace("{python}", platform.python_version())
-                        .replace("{pyinstaller}", PyInstaller.__version__))
-          open("dist/release_notes.md", "w", encoding="utf-8").write(notes)
-          print("SHA-256 of SkyBlockConfigManager.exe:", sha256)
+          set -euo pipefail
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' rust/Cargo.toml | head -1)
+          mkdir -p dist
+          case "$RUNNER_OS" in
+            Windows)
+              cp rust/target/release/SkyblockConfigManager.exe dist/
+              (cd dist && 7z a -tzip -mx=9 SkyblockConfigManager.zip SkyblockConfigManager.exe > /dev/null)
+              ;;
+            macOS)
+              app=dist/SkyblockConfigManager.app
+              mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+              cp rust/target/release/SkyblockConfigManager "$app/Contents/MacOS/"
+              sed "s/{version}/$version/g" packaging/Info.plist > "$app/Contents/Info.plist"
+              # The app icon, made from packaging/icon.ico; without it the app just has the default icon.
+              ( set -e
+                mkdir -p icon.iconset
+                sips -s format png packaging/icon.ico --out icon.png > /dev/null
+                for s in 16 32 128 256 512; do
+                  sips -z $s $s icon.png --out icon.iconset/icon_${s}x${s}.png > /dev/null
+                  sips -z $((s * 2)) $((s * 2)) icon.png --out icon.iconset/icon_${s}x${s}@2x.png > /dev/null
+                done
+                iconutil -c icns icon.iconset -o "$app/Contents/Resources/icon.icns"
+              ) || echo "::warning::Couldn't make the macOS app icon"
+              codesign --force --deep --sign - "$app"    # ad-hoc: Apple chips won't run unsigned code
+              (cd dist && ditto -c -k --keepParent SkyblockConfigManager.app SkyblockConfigManager-macOS.zip && rm -rf SkyblockConfigManager.app)
+              ;;
+            Linux)
+              cp rust/target/release/SkyblockConfigManager dist/
+              (cd dist && zip -9 -q SkyblockConfigManager-Linux.zip SkyblockConfigManager && rm SkyblockConfigManager)
+              ;;
+          esac
+          ls -la dist
 
       - uses: actions/upload-artifact@v7
         with:
-          name: SkyBlockConfigManager
-          path: |
-            dist/SkyBlockConfigManager.exe
-            dist/SkyBlockConfigManager.zip
-            dist/release_notes.md
+          name: SkyblockConfigManager-${{ matrix.name }}
+          path: dist/*
           if-no-files-found: error
 
   release:
     name: Publish the GitHub Release
-    needs: build
+    needs: [test, build]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
+
       - uses: actions/download-artifact@v8
         with:
-          name: SkyBlockConfigManager
           path: dist
+          merge-multiple: true
+
+      - name: Write the release notes
+        run: |
+          rustup update stable --no-self-update > /dev/null
+          python3 - <<'PY'
+          import hashlib, subprocess
+          files = ["SkyblockConfigManager.exe", "SkyblockConfigManager.zip",
+                   "SkyblockConfigManager-macOS.zip", "SkyblockConfigManager-Linux.zip"]
+          sums = "\n".join(f"- `{f}`: `{hashlib.sha256(open('dist/' + f, 'rb').read()).hexdigest()}`" for f in files)
+          rust = " ".join(subprocess.run(["rustc", "--version"], capture_output=True, text=True).stdout.split()[:2])
+          notes = open("packaging/release_notes.md", encoding="utf-8").read()
+          notes = notes.replace("{checksums}", sums).replace("{rust}", rust.replace("rustc", "Rust"))
+          open("dist/release_notes.md", "w", encoding="utf-8").write(notes)
+          print(sums)
+          PY
 
       - name: Create the release, or add the files to one published by hand
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          files=(dist/SkyBlockConfigManager.exe dist/SkyBlockConfigManager.zip)
+          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-macOS.zip dist/SkyblockConfigManager-Linux.zip)
           if body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
             # Published by hand on GitHub: attach the files, and fill in the notes if it has none.
             gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
