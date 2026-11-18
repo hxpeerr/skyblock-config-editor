@@ -7,7 +7,9 @@ Running several Hypixel Skyblock mods at once usually means duplicate features c
 * **Preview every change:** Nothing changes on your computer until you look over the list of current and recommended settings.
 * **Safe saving:** Original files are backed up before saving, and the app will never overwrite a file if the game changed it while the app was open.
 * **Edit any setting:** Search, filter, and change any setting from the supported mods, not just the shared ones.
-* **Update checker:** Shows which version of each mod you have installed and checks Modrinth for newer versions.
+* **Update checker:** Shows which version of each mod you have installed and checks Modrinth and CurseForge for newer versions.
+* **Setting names that adjust to your game version:** Uses the right setting names for whichever Minecraft version you pick, so shared features still populate even if a mod renamed them in an update.
+* **Automatic support for new mods:** Finds your other installed Hypixel SkyBlock mods, their config files, and their settings on its own, even if they aren't supported yet, so you can browse and edit them.
 
 ## Download
 
@@ -35,9 +37,9 @@ The app looks for these mods inside your `.minecraft/config` folder:
 | [SkyOcean](https://modrinth.com/mod/skyocean) | `skyocean/config.jsonc` | 15 |
 | [Firmament](https://modrinth.com/mod/firmament) | `firmament/` (one file per feature) | 4 |
 | [Odin](https://modrinth.com/mod/odin) | `odin/odin-config.json` | 29 |
-| [Skyblock Overhaul (SBO)](https://modrinth.com/mod/skyblock-overhaul) | `SBO/config.jsonc` | 8 |
+| [Skyblock Overhaul (SBO)](https://modrinth.com/mod/skyblock-overhaul) | `sbo/config.jsonc` | 8 |
 
-Settings are based on each mod's Fabric version for Minecraft 26.1.2. Versions from 1.21.5 to 26.3 work too: just pick yours on the Overview tab. If a mod uses a different name for a setting in your version, the app simply skips comparing that feature for that mod. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
+Settings are based on each mod's Fabric version for Minecraft 26.1.2. Versions from 1.21.5 to 26.3 work too: just pick yours on the Overview tab, and the app uses the setting names each mod had in that version. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
 
 Here are the 13 parts of the game and examples of the shared features they include:
 
@@ -63,22 +65,19 @@ Using a mod that isn't on the list? [Open an issue](../../issues/new) to ask for
 
 * **Mod name and link:** A link to the mod's Modrinth, CurseForge, or GitHub page.
 
+Until it's added, the app still finds other Hypixel SkyBlock mods on its own and shows their settings on the **Unique** tab, but it can't compare their features with your other mods.
+
 ## How to Use It
 
 1. **Close Minecraft:** The game saves its settings when it closes, which would undo any changes you make here.
 2. **Open the app:** It looks for your `config` folder on its own by checking the folder you used last time, the folder the app is in, or your normal `.minecraft` folder. If it can't find it, click **Browse…** and pick it yourself.
-3. **Check the Overview tab:** See which mods were found, how many settings overlap, and how many don't match your choices yet. Pick your **Minecraft version** and click **Check for updates** to see if Modrinth has newer versions for your game.
+3. **Check the Overview tab:** See which mods were found, how many settings overlap, and how many don't match your choices yet. Pick your **Minecraft version** and click **Check for updates** to see if Modrinth or CurseForge has newer versions for your game.
 4. **Pick your Priorities:** For each area, choose a **Prioritized mod**. That mod's features will stay on, and duplicate features in your other mods will be turned off. To make an exception for a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
 5. **View or edit settings:** The **Shared** tab lists every overlapping setting and highlights any that don't match your choices. The **Unique** tab lists everything else. In both tabs, you can double-click a `true`/`false` setting to flip it, or double-click any other setting to type a new value.
 6. **Apply your choices:** Click **Resolve conflicts** to apply all recommended changes at once, or **Apply area** to update just one section. Nothing is saved to your files yet.
 7. **Save and play:** Press `Ctrl+S` or click **Save changes** to update your files, then start Minecraft.
 
 If the main mod you picked for an area doesn't have a certain feature, the app keeps that feature on in the first mod on the list that does have it. The app remembers your choices for next time.
-
-## Planned Features
-
-* **Setting names that adjust to your game version:** Uses the right setting names for whichever Minecraft version you pick, so shared features still populate even if a mod renamed them in an update.
-* **Automatic support for new mods:** Finds all of your installed  mods, their config files, and their settings on its own, even if it isn't supported yet.
 
 ## Keeping Your Configs Safe
 
