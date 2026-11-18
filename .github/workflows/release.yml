@@ -232,10 +232,11 @@ jobs:
 
       - name: Write the release notes
         run: |
+          cp skyblock_config_manager.py dist/
           rustup update stable --no-self-update > /dev/null
           python3 - <<'PY'
           import hashlib, subprocess
-          files = ["SkyblockConfigManager.exe", "SkyblockConfigManager.zip", "SkyblockConfigManager-Linux.zip"]
+          files = ["SkyblockConfigManager.exe", "SkyblockConfigManager.zip", "SkyblockConfigManager-Linux.zip", "skyblock_config_manager.py"]
           sums = "\n".join(f"- `{f}`: `{hashlib.sha256(open('dist/' + f, 'rb').read()).hexdigest()}`" for f in files)
           sums += "\n- `SkyblockConfigManager-macOS.zip`: added when the macOS build finishes"
           rust = " ".join(subprocess.run(["rustc", "--version"], capture_output=True, text=True).stdout.split()[:2])
@@ -250,7 +251,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-Linux.zip)
+          files=(dist/SkyblockConfigManager.exe dist/SkyblockConfigManager.zip dist/SkyblockConfigManager-Linux.zip dist/skyblock_config_manager.py)
           if body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
             gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
             if [ -z "$body" ]; then
