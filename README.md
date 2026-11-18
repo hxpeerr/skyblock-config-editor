@@ -1,17 +1,17 @@
 # SkyBlock Config Manager
 
-Using several Fabric SkyBlock mods at once usually means duplicate features crowding your screen—two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
+Running several Fabric SkyBlock mods at once usually means duplicate features crowding your screen: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
 
 * **83 shared features:** Covers 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
 * **You pick which mod does what:** Choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
-* **Preview every change:** Nothing changes on your computer until you review the list of current and recommended settings.
+* **Preview every change:** Nothing changes on your computer until you look over the list of current and recommended settings.
 * **Safe saving:** Original files are backed up before saving, and the app will never overwrite a file if the game changed it while the app was open.
 * **Edit any setting:** Search, filter, and change any setting from the supported mods, not just the shared ones.
 * **Update checker:** Shows which version of each mod you have installed and checks Modrinth for newer versions.
 
 ## Download
 
-* **Windows:** Download `SkyBlockConfigManager.exe` from the [latest release](../../releases/latest) for 64-bit Windows 10 or 11. Everything is in one file with nothing to install. The first time you open it, Windows may show a "Windows protected your PC" pop-up—click **More info**, then **Run anyway**.
+* **Windows:** Download `SkyBlockConfigManager.exe` from the [latest release](../../releases/latest) for 64-bit Windows 10 or 11. Everything is in one file with nothing to install. The first time you open it, Windows might show a "Windows protected your PC" pop-up. Just click **More info**, then **Run anyway**.
 * **macOS, Linux, or Windows with Python:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. It only uses built-in Python tools, so you don't need to install anything extra.
 
 ```bash
@@ -36,9 +36,9 @@ The app looks for these mods inside your `.minecraft/config` folder:
 | [Odin](https://modrinth.com/mod/odin) | `odin/odin-config.json` | 29 |
 | [Skyblock Overhaul (SBO)](https://modrinth.com/mod/skyblock-overhaul) | `SBO/config.jsonc` | 8 |
 
-Settings are based on each mod's Fabric version for Minecraft 26.1.2, and versions from 1.21.5 to 26.3 work too—just pick your version on the Overview tab. If a mod uses a different name for a setting in your version, the app simply skips comparing that feature for that mod. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
+Settings are based on each mod's Fabric version for Minecraft 26.1.2. Versions from 1.21.5 to 26.3 work too: just pick yours on the Overview tab. If a mod uses a different name for a setting in your version, the app simply skips comparing that feature for that mod. A mod only shows up if its config file is found, and a feature is only compared when at least two of your mods have it.
 
-Here are the 13 areas of the game and examples of the shared features they include:
+Here are the 13 parts of the game and examples of the shared features they include:
 
 | Area | Features | Examples |
 |---|---:|---|
@@ -65,8 +65,8 @@ Using a Fabric SkyBlock mod that isn't on the list? [Open an issue](../../issues
 ## How to Use It
 
 1. **Close Minecraft:** The game saves its settings when it closes, which would undo any changes you make here.
-2. **Open the app:** It looks for your `config` folder on its own—checking the folder you used last time, the folder the app is in, or your normal `.minecraft` folder. If it can't find it, click **Browse…** and pick it yourself.
-3. **Check the Overview tab:** See which mods were found, how many settings are shared across your mods, and how many don't match your choices yet. Pick your **Minecraft version** and click **Check for updates** to see if Modrinth has newer versions for your game.
+2. **Open the app:** It looks for your `config` folder on its own by checking the folder you used last time, the folder the app is in, or your normal `.minecraft` folder. If it can't find it, click **Browse…** and pick it yourself.
+3. **Check the Overview tab:** See which mods were found, how many settings overlap, and how many don't match your choices yet. Pick your **Minecraft version** and click **Check for updates** to see if Modrinth has newer versions for your game.
 4. **Pick your Priorities:** For each area, choose a **Prioritized mod**. That mod's features will stay on, and duplicate features in your other mods will be turned off. To make an exception for a single feature, pick another mod (or **Off in every mod**) in its **Use** column.
 5. **View or edit settings:** The **Shared** tab lists every overlapping setting and highlights any that don't match your choices. The **Unique** tab lists everything else. In both tabs, you can double-click a `true`/`false` setting to flip it, or double-click any other setting to type a new value.
 6. **Apply your choices:** Click **Resolve conflicts** to apply all recommended changes at once, or **Apply area** to update just one section. Nothing is saved to your files yet.
@@ -76,8 +76,8 @@ If the main mod you picked for an area doesn't have a certain feature, the app k
 
 ## Planned Features
 
-* **Version-specific setting names:** Uses the right setting names for whichever Minecraft version you pick, so shared features still populate even if a mod renamed them in an update.
-* **Automatic mod detection:** Finds all of your installed SkyBlock mods, their config files, and their settings on its own, even if it isn't supported yet.
+* **Setting names that adjust to your game version:** Uses the right setting names for whichever Minecraft version you pick, so shared features still match up even if a mod renamed them in an update.
+* **Automatic support for new mods:** Finds all of your installed SkyBlock mods, their config files, and their settings on its own, even if a mod isn't on the supported list yet.
 
 ## Keeping Your Configs Safe
 
