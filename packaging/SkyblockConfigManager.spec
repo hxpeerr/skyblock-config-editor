@@ -1,8 +1,8 @@
 # PyInstaller recipe for the portable Windows build: one .exe, no Python needed to run it.
 #
-#     pyinstaller --noconfirm --clean packaging/SkyBlockConfigManager.spec
+#     pyinstaller --noconfirm --clean packaging/SkyblockConfigManager.spec
 #
-# (or double-click packaging/build_exe.bat). Output: dist/SkyBlockConfigManager.exe
+# (or double-click packaging/build_exe.bat). Output: dist/SkyblockConfigManager.exe
 import os
 import re
 
@@ -12,7 +12,7 @@ from PyInstaller.utils.win32.versioninfo import (FixedFileInfo, StringFileInfo, 
 HERE = SPECPATH
 SCRIPT = os.path.join(os.path.dirname(HERE), "skyblock_config_manager.py")
 ICON = os.path.join(HERE, "icon.ico")
-NAME = "SkyBlockConfigManager"
+NAME = "SkyblockConfigManager"
 
 with open(SCRIPT, encoding="utf-8") as f:
     VERSION = re.search(r'^__version__ = "(\d+(?:\.\d+){0,3})"', f.read(), re.M).group(1)

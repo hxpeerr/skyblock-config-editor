@@ -12,7 +12,7 @@ Running several Hypixel Skyblock mods at once usually crowds your screen with du
 
 ## Download
 
-* **Windows:** Download `SkyBlockConfigManager.exe` from the [latest release](../../releases/latest), or the `.zip` if your browser blocks the .exe. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
+* **Windows:** Download `SkyblockConfigManager.exe` from the [latest release](../../releases/latest), or the `.zip` if your browser blocks the .exe. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
 * **macOS or Linux:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. On Debian or Ubuntu, install Tkinter first with `sudo apt install python3-tk`.
 
 ```bash

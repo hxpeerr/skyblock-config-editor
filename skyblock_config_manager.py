@@ -9,7 +9,7 @@ keeps it enabled.
     python skyblock_config_manager.py
 
 Python 3.8+, standard library only. Also builds into a portable Windows .exe that needs no
-Python installed: run packaging/build_exe.bat (recipe in packaging/SkyBlockConfigManager.spec).
+Python installed: run packaging/build_exe.bat (recipe in packaging/SkyblockConfigManager.spec).
 """
 from __future__ import annotations
 
