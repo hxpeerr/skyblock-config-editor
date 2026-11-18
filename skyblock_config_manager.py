@@ -13,7 +13,7 @@ Python installed: run packaging/build_exe.bat (recipe in packaging/SkyBlockConfi
 """
 from __future__ import annotations
 
-__version__ = "3.1.0"
+__version__ = "3.2.0"
 
 import hashlib
 import json
@@ -91,7 +91,8 @@ FEATURES = [
     # ── Dungeons ──
     ("Dungeons", "Dungeon map", {
         "Odin": "Dungeon Map.enabled",
-        "Skyblocker": "dungeons.dungeonMap.enableMap"}),
+        "Skyblocker": "dungeons.dungeonMap.enableMap",
+        "SkyBlockAddons": "*DUNGEONS_MAP_DISPLAY.value"}),
     ("Dungeons", "Terminal solvers", {
         "Odin": "Terminal Solver.enabled",
         "NoFrills": "terminalSolvers.enabled"}),
@@ -238,7 +239,8 @@ FEATURES = [
         "SkyOcean": "*mining.puzzlerSolver"}),
     ("Mining", "Fetchur solver", {
         "Skyblocker": "mining.dwarvenMines.solveFetchur",
-        "SkyOcean": "*mining.fetchurHelper"}),
+        "SkyOcean": "*mining.fetchurHelper",
+        "SkyBlockAddons": "*FETCHUR_TODAY.value"}),
     ("Mining", "Mineshaft announce", {
         "NoFrills": "shaftAnnounce.enabled",
         "SkyOcean": "*mineshaft.shaftAnnouncement"}),
@@ -319,16 +321,19 @@ FEATURES = [
     # ── GUI/HUD ──
     ("GUI/HUD", "Custom tab list", {
         "SkyHanni": "gui.compactTabList.enabled",
-        "Skyblocker": "uiAndVisuals.tabHud.tabHudEnabled"}),
+        "Skyblocker": "uiAndVisuals.tabHud.tabHudEnabled",
+        "SkyBlockAddons": "*COMPACT_TAB_LIST.value"}),
     ("GUI/HUD", "TPS display", {
         "SkyHanni": "gui.tpsDisplay",
         "AaronsMod": "uiAndVisuals.tpsHud.enableTpsHud"}),
     ("GUI/HUD", "Health / mana bars", {
         "Skyblocker": "uiAndVisuals.bars.enableBars",
-        "Odin": "Player Display.enabled"}),
+        "Odin": "Player Display.enabled",
+        "SkyBlockAddons": ["*HEALTH_BAR.value", "*MANA_BAR.value"]}),
     ("GUI/HUD", "Item ability cooldowns", {
         "SkyHanni": "inventory.itemAbilities.itemAbilityCooldown",
-        "Skyblocker": "uiAndVisuals.itemCooldown.enableItemCooldowns"}),
+        "Skyblocker": "uiAndVisuals.itemCooldown.enableItemCooldowns",
+        "SkyBlockAddons": "*SHOW_ITEM_COOLDOWNS.value"}),
     ("GUI/HUD", "Quiver display", {
         "SkyHanni": "combat.quiverConfig.quiverDisplay.enabled",
         "Odin": "Quiver Display.enabled"}),
@@ -344,7 +349,8 @@ FEATURES = [
         "Firmament": "save-cursor-position.enable",
         "Odin": "No Cursor Reset.enabled",
         "NoFrills": "noCursorReset.enabled",
-        "AaronsMod": "refinements.input.dontResetCursorPosition"}),
+        "AaronsMod": "refinements.input.dontResetCursorPosition",
+        "SkyBlockAddons": "*DONT_RESET_CURSOR_INVENTORY.value"}),
     ("Inventory", "Anvil helper", {
         "SkyHanni": "inventory.anvilCombineHelper",
         "Skyblocker": "helpers.enableAnvilHelper",
@@ -362,7 +368,8 @@ FEATURES = [
     ("Inventory", "Price tooltips", {
         "Skyblocker": ["general.itemTooltip.enableLowestBIN", "general.itemTooltip.enableAvgBIN",
                        "general.itemTooltip.enableBazaarPrice"],
-        "NoFrills": "priceTooltips.enabled"}),
+        "NoFrills": "priceTooltips.enabled",
+        "SkyBlockAddons": "*ITEM_PRICES_IN_TOOLTIP.value"}),
     # ── Misc ──
     ("Misc", "Etherwarp overlay", {
         "Odin": "Etherwarp.enabled",
