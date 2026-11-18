@@ -216,10 +216,15 @@ impl Workspace {
         }
     }
 
-    /// Switches to another mod list. The folder is loaded again, since the list says where configs are.
-    pub fn use_feature_set(&mut self, set: Arc<FeatureSet>) -> Result<(), String> {
+    /// Switches to another mod list without loading anything; call `load` next.
+    pub fn set_feature_set(&mut self, set: Arc<FeatureSet>) {
         self.features = features_of(&set);
         self.set = set;
+    }
+
+    /// Switches to another mod list. The folder is loaded again, since the list says where configs are.
+    pub fn use_feature_set(&mut self, set: Arc<FeatureSet>) -> Result<(), String> {
+        self.set_feature_set(set);
         match self.folder.clone() {
             Some(folder) => self.load(&folder),
             None => Ok(()),
