@@ -1,6 +1,6 @@
-# SkyBlock Config Manager
+# Skyblock Config Manager
 
-Running several Hypixel Skyblock mods at once usually means duplicate features crowding your screen: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. SkyBlock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
+Running several Hypixel Skyblock mods at once usually means duplicate features crowding your screen: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. Skyblock Config Manager reads your mod config files, finds the features that more than one mod has, and keeps each one turned on in only the mod you choose.
 
 * **83 shared features:** Covers 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
 * **You pick which mod does what:** Choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
