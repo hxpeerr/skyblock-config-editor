@@ -9,11 +9,14 @@ Running several Hypixel Skyblock mods at once usually crowds your screen with du
 * **Update checker:** Checks Modrinth and CurseForge for newer versions of your mods.
 * **Setting names that adjust to your game version:** Uses the right setting names for whichever Minecraft version you pick, so shared features still populate even if a mod renamed them in an update.
 * **Automatic support for new mods:** Finds your other SkyBlock mods and their settings on its own, even if they aren't supported yet.
+* **Mod list updates:** New mods and renamed settings are downloaded on their own, so they work without a new release. You can turn this off on the Overview tab.
 
 ## Download
 
 * **Windows:** Download `SkyblockConfigManager.exe` from the [latest release](../../releases/latest), or the `.zip` if your browser blocks the .exe. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
-* **macOS or Linux:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. On Debian or Ubuntu, install Tkinter first with `sudo apt install python3-tk`.
+* **macOS:** Download `SkyblockConfigManager-macOS.zip`, unzip it, and open the app. It isn't signed by Apple, so the first time, right-click it and choose **Open**. If macOS still won't open it, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+* **Linux:** Download `SkyblockConfigManager-Linux.zip`, unzip it, and run `./SkyblockConfigManager`.
+* **Python:** `skyblock_config_manager.py` runs anywhere with Python 3.8 or newer. On Debian or Ubuntu, install Tkinter first with `sudo apt install python3-tk`.
 
 ```bash
 python3 skyblock_config_manager.py
@@ -59,5 +62,5 @@ The first time a file is saved, the original is copied next to it as `<name>.bak
 * **A mod says "not found":** Make sure you opened the right `config` folder.
 * **Every mod says "not installed":** The app reads mod versions from the `mods` folder next to your `config` folder.
 * **A file wasn't saved:** Minecraft was probably still open. Close it, click **Reload**, and make your changes again.
-* **Your antivirus flags the .exe:** This is a false positive that's common for Python apps packaged with PyInstaller. Since 3.4.0, Microsoft Defender and most antivirus programs don't flag it. You can also use the `.py` file instead.
+* **Your antivirus flags the .exe:** It's a false positive. The .exe is built by GitHub from the source code in this repository, and each release lists its SHA-256 so you can check that you have the same file. You can also use the `.py` file instead.
 * **Something else went wrong:** The **Activity** log on the Overview tab has the details. Include them when you [open an issue](../../issues/new).

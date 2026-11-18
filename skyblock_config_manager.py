@@ -8,12 +8,13 @@ keeps it enabled.
 
     python skyblock_config_manager.py
 
-Python 3.8+, standard library only. Also builds into a portable Windows .exe that needs no
-Python installed: run packaging/build_exe.bat (recipe in packaging/SkyblockConfigManager.spec).
+Python 3.8+, standard library only. The apps on the releases page (Windows, macOS, Linux) are
+built from the Rust version in rust/, which works the same way and reads the same tables
+(exported to features.jsonc by rust/tools/export_features.py).
 """
 from __future__ import annotations
 
-__version__ = "3.4.0"
+__version__ = "4.0.0"
 
 import hashlib
 import json

@@ -99,10 +99,11 @@ def write(path, data, style, rng):
 
 def make_jar(path, meta, bundled=(), mtime=None):
     path.parent.mkdir(parents=True, exist_ok=True)
+    stamp = (2026, 1, 1, 0, 0, 0)          # fixed, so each jar's SHA-1 is the same on every run
     with zipfile.ZipFile(path, "w") as z:
-        z.writestr("fabric.mod.json", json.dumps(meta))
+        z.writestr(zipfile.ZipInfo("fabric.mod.json", stamp), json.dumps(meta))
         for b in bundled:
-            z.writestr(f"META-INF/jars/{b}", b"jar")
+            z.writestr(zipfile.ZipInfo(f"META-INF/jars/{b}", stamp), b"jar")
     if mtime:
         os.utime(path, (mtime, mtime))
 

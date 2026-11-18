@@ -44,9 +44,8 @@ pub fn atomic_write(path: &Path, text: &str) -> io::Result<()> {
 pub fn copy_with_times(src: &Path, dst: &Path) -> io::Result<()> {
     fs::copy(src, dst)?;
     let m = fs::metadata(src)?;
-    let atime = filetime::FileTime::from_last_access_time(&m);
-    let mtime = filetime::FileTime::from_last_modification_time(&m);
-    filetime::set_file_times(dst, atime, mtime)
+    let times = fs::FileTimes::new().set_accessed(m.accessed()?).set_modified(m.modified()?);
+    fs::OpenOptions::new().write(true).open(dst)?.set_times(times)
 }
 
 /// File names of a folder's entries, sorted the way the Python version sorted paths.
