@@ -10,7 +10,6 @@ Running several Fabric SkyBlock mods at once usually means duplicate features cr
 * **Safe saving:** Original files are backed up before saving, and the app will never overwrite a file if the game changed it while the app was open.
 * **Edit any setting:** Search, filter, and change any setting from the supported mods, not just the shared ones.
 * **Update checker:** Shows which version of each mod you have installed and checks Modrinth for newer versions.
-* **Nothing to install:** Runs as a single `.exe` file on Windows, or one Python file on any computer.
 
 ## Download
 
@@ -67,6 +66,8 @@ Using a Fabric SkyBlock mod that isn't listed above? [Open an issue](../../issue
 * **Config file:** Where the mod saves its settings inside your `config` folder, like `examplemod/config.json`.
 * **Shared features:** Any features it has in common with the supported mods, like a dungeon map or a Diana burrow guesser, if you know them.
 
+You can also add a mod yourself: the lists at the top of `skyblock_config_manager.py` explain how. Then run your edited `.py` file, or build your own `.exe` by double-clicking `packaging\build_exe.bat` (this needs Python 3.8 or newer).
+
 ## How to Use It
 
 1. **Close Minecraft:** The game saves its settings when it closes, which would undo any changes you make here.
@@ -84,46 +85,8 @@ If the main mod you picked for an area doesn't have a certain feature, the app k
 * **Automatic backups:** The first time a file is saved after you open the app, a backup copy of the original is saved right next to it as `<name>.bak_<date>_<time>`. To undo your changes, delete the updated file and remove `.bak_<date>_<time>` from the backup's name.
 * **No overwriting while the game is open:** If a file was changed on your computer after you loaded it (usually because Minecraft was still running), the app won't save over it. Close the game, click **Reload**, and make your changes again.
 * **Note awareness:** Notes written inside `.jsonc` files can't be kept when saving, so the app warns you which files have them and asks before saving.
-* **Safe file writing:** Changes are written to a temporary file first so a computer crash won't leave you with a broken, half-saved file. The original spacing and line layout of each file are kept intact.
-* **Unsaved change warnings:** If you try to reload or close the app before saving your changes, it will ask you first.
-
-## Where the App Saves Your Choices
-
-The app remembers your `config` folder and the mods you picked for each area:
-
-* **Windows `.exe`:** Saves them in `skyblock_config_manager.settings.json` in the same folder as the `.exe`, so you can move the app around without losing your setup. If that folder is locked (like inside `Program Files`), it saves them in your Windows user folder instead.
-* **Python script:** Saves them in `~/.skyblock_config_manager.json` in your home folder.
-
-## Changing What the App Compares
-
-Everything the app looks for is listed at the top of `skyblock_config_manager.py`:
-
-* **`MODS`:** Lists where each mod keeps its config files, its mod ID (used to find its `.jar` file), and its Modrinth page name (used by **Check for updates**).
-* **`AREAS`:** The list of categories shown in the Priorities tab, in order.
-* **`FEATURES`:** Lists every shared feature and the setting name each mod uses to turn it on or off:
-
-  ```python
-  ("Events", "Diana burrow guess", {
-      "SBO": "*spadeGuess",
-      "SkyHanni": "event.diana.guess",
-      "Skyblocker": "helpers.mythologicalRitual.enableMythologicalRitualHelper",
-      "Firmament": "diana.ancestral-spade",
-      "NoFrills": "dianaSolver.enabled"}),
-  ```
-
-  A setting name uses dots to show where it sits inside the file. A list of names means several settings turn on and off together. Putting a `*` at the start matches the end of a setting name, which helps when a mod moves its settings around in an update (`*spadeGuess` matches both `spadeGuess` and `burrows.spadeGuess`). Using `None` means the mod has the feature but no single on/off switch for it. The order of mods matters: the first mod listed is the fallback choice for that feature.
-* **`PREFERRED`:** Settings you want to keep at a specific value even though no other mod shares them.
-* **`LABELS`:** Clearer names for settings whose original names in the file are hard to read.
-
-`GAME_VERSION` and `LOADER` tell **Check for updates** which Minecraft version and mod loader to look for. If you use the `.exe`, you will need to rebuild it after editing the Python file for your changes to show up.
-
-## Building the `.exe` Yourself
-
-On Windows, double-click `packaging\build_exe.bat`. It installs PyInstaller and creates `dist\SkyBlockConfigManager.exe` using `packaging\SkyBlockConfigManager.spec`. You need Python 3.8 or newer to build the `.exe`, but once it's built, the `.exe` runs on its own without Python.
 
 ## Troubleshooting
 
 * **A mod says "not found" on the Overview tab:** Its config file isn't where the app expects it. Make sure you opened the right `config` folder, or add the file's location to `MODS` in the script.
 * **Every mod says "not installed":** The app checks mod versions by looking at the `.jar` files in the `mods` folder right next to your `config` folder.
-* **"It was changed on disk after loading":** Minecraft (or another program) changed the file while you had the app open. Close Minecraft, click **Reload**, and make your changes again.
-* **`No module named 'tkinter'` (Linux):** Install Tkinter for your Linux version—for example, `sudo apt install python3-tk` on Debian or Ubuntu.
