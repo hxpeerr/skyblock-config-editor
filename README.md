@@ -14,7 +14,7 @@ Running several Fabric SkyBlock mods at once usually means duplicate features cr
 ## Download
 
 * **Windows:** Download `SkyBlockConfigManager.exe` from the [latest release](../../releases/latest) for 64-bit Windows 10 or 11. Everything is in one file with nothing to install. The first time you open it, Windows may show a "Windows protected your PC" pop-up—click **More info**, then **Run anyway**.
-* **macOS, Linux, or Windows with Python:** Download `skyblock_config_manager.py` and run it with Python 3.8 or newer. It uses built-in Python tools, so you don't need to install any extra packages.
+* **macOS, Linux, or Windows with Python:** Download `skyblock_config_manager.py` from the [latest release](../../releases/latest) and run it with Python 3.8 or newer. It uses built-in Python tools, so you don't need to install any extra packages.
 
 ```bash
 python3 skyblock_config_manager.py
