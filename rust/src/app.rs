@@ -621,9 +621,10 @@ impl App {
         self.download = Some(Arc::clone(&progress));
         self.install_error = None;
         let tmp = selfupdate::download_path(&exe);
+        let version = release.version().to_string();
         let (tx, ctx) = (self.tx.clone(), self.ctx.clone());
         std::thread::spawn(move || {
-            let result = selfupdate::download(&asset, &tmp, &progress).and_then(|()| selfupdate::install(&tmp, &exe));
+            let result = selfupdate::download(&asset, &tmp, &progress).and_then(|()| selfupdate::install(&tmp, &exe, &version));
             if result.is_err() {
                 let _ = std::fs::remove_file(&tmp);
             }

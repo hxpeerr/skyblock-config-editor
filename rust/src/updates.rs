@@ -9,6 +9,7 @@ use indexmap::IndexMap;
 use regex::Regex;
 use serde_json::{json, Value};
 use sha1::{Digest, Sha1};
+use ureq::tls::{RootCerts, TlsConfig};
 
 use crate::features::FeatureSet;
 use crate::fsutil::{stamp, Stamp};
@@ -30,12 +31,17 @@ pub fn features_url() -> String {
     base("SCM_FEATURES_URL", FEATURES_URL)
 }
 
-pub(crate) fn agent() -> ureq::Agent {
+pub(crate) fn agent_with(timeout: Duration) -> ureq::Agent {
     ureq::Agent::config_builder()
-        .timeout_global(Some(Duration::from_secs(15)))
+        .timeout_global(Some(timeout))
         .user_agent(format!("skyblock-config-manager/{}", crate::VERSION))
+        .tls_config(TlsConfig::builder().root_certs(RootCerts::PlatformVerifier).build())
         .build()
         .into()
+}
+
+pub(crate) fn agent() -> ureq::Agent {
+    agent_with(Duration::from_secs(15))
 }
 
 #[derive(Debug)]

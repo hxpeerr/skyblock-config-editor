@@ -3,5 +3,9 @@
 mod app;
 
 fn main() -> eframe::Result {
+    if std::env::args().nth(1).as_deref() == Some("--version") {
+        println!("{}", scm::VERSION);
+        return Ok(());
+    }
     app::run()
 }
