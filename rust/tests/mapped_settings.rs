@@ -86,9 +86,16 @@ fn write_configs(set: &FeatureSet, root: &Path) -> Vec<String> {
             write(&root.join(&spec.files[0]), Value::Array(modules.into_values().map(Value::Object).collect()));
         } else {
             let mut tree = Map::new();
-            for key in &keys {
-                if let Err(e) = put(&mut tree, &segments(key)) {
-                    problems.push(format!("{name}: {e}"));
+            if keys.iter().any(|key| put(&mut tree, &segments(key)).is_err()) {
+                tree = Map::new();
+                for key in &keys {
+                    let path = match key.strip_prefix('*') {
+                        Some(tail) => vec!["features", tail],
+                        None => vec![key.as_str()],
+                    };
+                    if let Err(e) = put(&mut tree, &path) {
+                        problems.push(format!("{name}: {e}"));
+                    }
                 }
             }
             write(&root.join(&spec.files[0]), Value::Object(tree));

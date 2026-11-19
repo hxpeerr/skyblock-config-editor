@@ -1,0 +1,13 @@
+chat.chatColors	bool
+chat.compactChat	bool
+chat.messagesToClean	strings
+chat.modifyHypixelCommands	bool
+items.cooldowns	bool
+items.itembars	bool
+notifications.enableNotificationsWidget	bool
+overlays.coldOverlay	int
+overlays.movableHotbar	bool
+overlays.windOverlay	bool
+render.showOwnTag	bool
+screens.equipment	bool
+screens.equipmentShowSetsOnClick	bool

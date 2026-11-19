@@ -2,7 +2,7 @@
 
 Running several Hypixel Skyblock mods at once usually crowds your screen with duplicates: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. Skyblock Config Manager reads your mod settings, finds the features that overlap, and keeps each one turned on in only the mod you choose.
 
-* **213 shared features** across 16 parts of the game, from Dungeons and Kuudra to the Auction House, Bazaar and item tooltips.
+* **247 shared features** in 23 mods, across 16 parts of the game, from Dungeons and Kuudra to the Auction House, Bazaar and item tooltips.
 * **You pick which mod does what:** choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
 * **Safe saving:** nothing changes until you click **Save changes**, and your original files are backed up first.
 * **Edit any setting** from your SkyBlock mods, not just the shared ones. Debug settings are locked.
@@ -49,6 +49,17 @@ To update the app, open the **App updates** tab. It shows the latest release on 
 | [Noba](https://modrinth.com/mod/noba) | `noba/config.json` |
 | [Custom Scoreboard](https://modrinth.com/mod/skyblock-custom-scoreboard) | `customscoreboard/config.jsonc` |
 | [Catharsis](https://modrinth.com/mod/catharsis) | `catharsis/pack_configs.json` |
+| [Devonian](https://modrinth.com/mod/devonian) | `devonianConfig.json` |
+| [Stella](https://modrinth.com/mod/stella) | `stella/settings.json` |
+| [Feesh](https://modrinth.com/mod/feesh) | `feesh/config.jsonc` |
+| [SkyBlock Enhancements](https://modrinth.com/mod/skyblock-enhancements) | `skyblock_enhancements.json` |
+| [Skyblock Enhanced Storage](https://modrinth.com/mod/skyblock-enhanced-storage) | `enhanced_storage.json` |
+| [SkyCubed](https://modrinth.com/mod/skycubed) | `skycubed/config.jsonc` |
+| [BtrBz](https://modrinth.com/mod/btrbz) | `btrbz.json` |
+| [Bazaar Utils](https://modrinth.com/mod/bazaar-utils) | `bazaarutils.json` |
+| [Modern Warp Menu](https://modrinth.com/mod/modern-warp-menu) | `modernwarpmenu.json` |
+| [Secret Routes](https://modrinth.com/mod/secret-routes-mod) | `SecretRoutes/xyz.yourboykyle.secretroutes.config.json` |
+| [Scatha-Pro](https://modrinth.com/mod/scatha-pro) | `scathapro/configV2.json` |
 
 These are the Fabric versions of each mod, for Minecraft 1.21.5 to 26.3. Config files are read from your `.minecraft/config` folder.
 
