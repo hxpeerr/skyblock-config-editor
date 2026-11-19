@@ -52,7 +52,7 @@ To update the app, open the **App updates** tab. It shows the latest release on 
 
 These are the Fabric versions of each mod, for Minecraft 1.21.5 to 26.3. Config files are read from your `.minecraft/config` folder.
 
-Using a mod that isn't on the list? [Open an issue](../../issues/new) with a link to its Modrinth, CurseForge, or GitHub page.
+Using a mod that isn't supported? [Open an issue](../../issues/new) with a link to its Modrinth, CurseForge, or GitHub page.
 
 ## Backups
 
