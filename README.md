@@ -2,7 +2,7 @@
 
 Running several Hypixel Skyblock mods at once usually crowds your screen with duplicates: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. Skyblock Config Manager reads your mod settings, finds the features that overlap, and keeps each one turned on in only the mod you choose.
 
-* **84 shared features** across 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
+* **213 shared features** across 16 parts of the game, from Dungeons and Kuudra to the Auction House, Bazaar and item tooltips.
 * **You pick which mod does what:** choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
 * **Safe saving:** nothing changes until you click **Save changes**, and your original files are backed up first.
 * **Edit any setting** from your SkyBlock mods, not just the shared ones. Debug settings are locked.

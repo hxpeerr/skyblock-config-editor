@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "revision": 2,
+  "revision": 3,
   "game_versions": ["26.3", "26.2", "26.1.2", "26.1.1", "26.1", "1.21.11", "1.21.10", "1.21.8", "1.21.7", "1.21.5"],
   "default_game_version": "26.1.2",
   "mods": {
@@ -17,7 +17,7 @@
     "CustomScoreboard": {"files": ["customscoreboard/config.jsonc"], "id": "customscoreboard", "slug": "skyblock-custom-scoreboard"},
     "Catharsis": {"files": ["catharsis/pack_configs.json"], "id": "catharsis", "slug": "catharsis"}
   },
-  "areas": ["Dungeons", "Kuudra", "Slayers", "Farming", "Mining", "Foraging", "Hunting", "Fishing", "Events", "Rift", "GUI/HUD", "Inventory", "Misc"],
+  "areas": ["Dungeons", "Kuudra", "Slayers", "Farming", "Mining", "Foraging", "Hunting", "Fishing", "Events", "Rift", "GUI/HUD", "Inventory", "Tooltips", "Auction House", "Bazaar", "Misc"],
   "features": [
     {"area": "Dungeons", "name": "Dungeon map", "mods": {
       "Odin": "Dungeon Map.enabled",
@@ -26,11 +26,12 @@
     }},
     {"area": "Dungeons", "name": "Terminal solvers", "mods": {
       "Odin": "Terminal Solver.enabled",
-      "NoFrills": "terminalSolvers.enabled"
+      "NoFrills": "terminalSolvers.enabled",
+      "Skyblocker": ["dungeons.terminals.solveColor", "dungeons.terminals.solveOrder", "dungeons.terminals.solveStartsWith", "dungeons.terminals.solveSameColor"]
     }},
     {"area": "Dungeons", "name": "Puzzle solvers", "mods": {
       "Odin": "Puzzle Solvers.enabled",
-      "Skyblocker": ["dungeons.puzzleSolvers.solveTicTacToe", "dungeons.puzzleSolvers.solveThreeWeirdos", "dungeons.puzzleSolvers.creeperSolver", "dungeons.puzzleSolvers.blazeSolver", "dungeons.puzzleSolvers.solveBoulder", "dungeons.puzzleSolvers.solveIceFill", "dungeons.puzzleSolvers.solveSilverfish", "dungeons.puzzleSolvers.solveTrivia", "dungeons.puzzleSolvers.solveTeleportMaze"]
+      "Skyblocker": ["dungeons.puzzleSolvers.solveTicTacToe", "dungeons.puzzleSolvers.solveThreeWeirdos", "dungeons.puzzleSolvers.creeperSolver", "dungeons.puzzleSolvers.blazeSolver", "dungeons.puzzleSolvers.solveBoulder", "dungeons.puzzleSolvers.solveIceFill", "dungeons.puzzleSolvers.solveSilverfish", "dungeons.puzzleSolvers.solveTrivia", "dungeons.puzzleSolvers.solveTeleportMaze", "dungeons.puzzleSolvers.waterboardOneFlow"]
     }},
     {"area": "Dungeons", "name": "Starred mob highlight", "mods": {
       "Odin": "Highlight.enabled",
@@ -63,12 +64,13 @@
     }},
     {"area": "Dungeons", "name": "Wither door / key highlight", "mods": {
       "Odin": "Door Highlight.enabled",
-      "Skyblocker": "dungeons.highlightDoorKeys",
+      "Skyblocker": ["dungeons.doorHighlight.enableDoorHighlight", "dungeons.highlightDoorKeys"],
       "NoFrills": "witherKeyHighlight.enabled"
     }},
     {"area": "Dungeons", "name": "Secret chime", "mods": {
       "NoFrills": "secretChime.enabled",
-      "SkyHanni": "dungeon.secretChime.enabled"
+      "SkyHanni": "dungeon.secretChime.enabled",
+      "Odin": "Secret Clicked.enabled"
     }},
     {"area": "Dungeons", "name": "Wither dragon timers", "mods": {
       "Odin": "Wither Dragons.enabled",
@@ -85,11 +87,87 @@
     }},
     {"area": "Dungeons", "name": "Mimic message", "mods": {
       "Odin": "Mimic.enabled",
-      "NoFrills": "mimicMessage.enabled"
+      "NoFrills": "mimicMessage.enabled",
+      "Skyblocker": "dungeons.mimicMessage.sendMimicMessage"
     }},
     {"area": "Dungeons", "name": "Auto requeue", "mods": {
       "Odin": "Dungeon Queue.enabled",
       "NoFrills": "autoRequeue.enabled"
+    }},
+    {"area": "Dungeons", "name": "Dungeon chest value", "mods": {
+      "NoFrills": "dungeonChestValue.enabled",
+      "Skyblocker": "dungeons.dungeonChestProfit.enableProfitCalculator",
+      "SkyHanni": "combat.instanceChestProfit.enabled",
+      "SkyBlockAddons": "*DUNGEON_PROFIT_OVERLAY.value"
+    }},
+    {"area": "Dungeons", "name": "Device solvers", "mods": {
+      "NoFrills": "deviceSolvers.enabled",
+      "Odin": ["Simon Says.enabled", "Arrows Device.enabled", "Arrow Align.enabled"],
+      "Skyblocker": ["dungeons.devices.solveSimonSays", "dungeons.devices.solveLightsOn", "dungeons.devices.solveArrowAlign", "dungeons.devices.solveTargetPractice"]
+    }},
+    {"area": "Dungeons", "name": "Duplicate class alert", "mods": {
+      "NoFrills": "dupeClassAlert.enabled",
+      "Noba": "dungeons.dupeClassAlert.enabled"
+    }},
+    {"area": "Dungeons", "name": "Leap announce", "mods": {
+      "NoFrills": "leapMessage.enabled",
+      "Odin": "Leap Menu.settings.Leap Announce",
+      "Skyblocker": "dungeons.leapOverlay.enableLeapMessage"
+    }},
+    {"area": "Dungeons", "name": "King relic helper", "mods": {
+      "NoFrills": "relicHighlight.enabled",
+      "Odin": "King Relic.enabled"
+    }},
+    {"area": "Dungeons", "name": "Terminal waypoints", "mods": {
+      "Odin": "Terminals Status.enabled",
+      "Skyblocker": ["dungeons.terminalHud.enableTerminalHud", "dungeons.goldor.enableGoldorWaypoints"],
+      "SkyHanni": "dungeon.terminalWaypoints"
+    }},
+    {"area": "Dungeons", "name": "Party finder player stats", "mods": {
+      "Odin": "Better Party Finder.enabled",
+      "AaronsMod": "skyblock.dungeons.dungeonFinderPlayerStats"
+    }},
+    {"area": "Dungeons", "name": "Dragon health display", "mods": {
+      "AaronsMod": "skyblock.m7.dragonHealthDisplay",
+      "NoFrills": "witherDragons.health",
+      "Odin": "Wither Dragons.settings.Dragon Health"
+    }},
+    {"area": "Dungeons", "name": "Dragon statue boxes", "mods": {
+      "AaronsMod": "skyblock.m7.dragonBoundingBoxes",
+      "Odin": "Wither Dragons.settings.Dragon Boxes"
+    }},
+    {"area": "Dungeons", "name": "Teammate nametags", "mods": {
+      "NoFrills": "classNametags.enabled",
+      "SkyBlockAddons": "*SHOW_DUNGEON_TEAMMATE_NAME_OVERLAY.value"
+    }},
+    {"area": "Dungeons", "name": "Hide dungeon boss messages", "mods": {
+      "SkyBlockAddons": "*DISABLE_BOSS_MESSAGES.value",
+      "SkyHanni": "chat.dungeonBossMessages"
+    }},
+    {"area": "Dungeons", "name": "Fire freeze timer", "mods": {
+      "SkyBlockAddons": "*FIRE_FREEZE_TIMER.value",
+      "Skyblocker": "dungeons.theProfessor.fireFreezeStaffTimer",
+      "SkyHanni": "inventory.itemAbilities.fireFreeze.freezeTimer"
+    }},
+    {"area": "Dungeons", "name": "Hide Soulweaver skulls", "mods": {
+      "Skyblocker": "dungeons.hideSoulweaverSkulls",
+      "NoFrills": "noRender.soulweaverSkulls",
+      "SkyBlockAddons": "*HIDE_HAUNTED_SKULLS.value",
+      "SkyHanni": "dungeon.objectHider.hideSoulweaverSkulls"
+    }},
+    {"area": "Dungeons", "name": "Dungeon score display", "mods": {
+      "Skyblocker": "dungeons.dungeonScore.enableScoreHUD",
+      "NoFrills": "scoreCalculator.enabled",
+      "Odin": "Map Info.enabled"
+    }},
+    {"area": "Dungeons", "name": "270 and 300 score alerts", "mods": {
+      "Skyblocker": ["dungeons.dungeonScore.enableDungeonScore270Message", "dungeons.dungeonScore.enableDungeonScore270Title", "dungeons.dungeonScore.enableDungeonScore300Message", "dungeons.dungeonScore.enableDungeonScore300Title"],
+      "NoFrills": ["scoreCalculator.sendMsg270", "scoreCalculator.showTitle270", "scoreCalculator.sendMsg300", "scoreCalculator.showTitle300"],
+      "Odin": "Map Info.settings.300 Score Alert"
+    }},
+    {"area": "Dungeons", "name": "Player secrets tracker", "mods": {
+      "Skyblocker": "dungeons.playerSecretsTracker",
+      "Odin": "Secrets Counter.enabled"
     }},
     {"area": "Kuudra", "name": "Supply waypoints", "mods": {
       "Odin": "Supply Helper.enabled",
@@ -122,6 +200,18 @@
       "Odin": "Vesuvius.enabled",
       "NoFrills": "vesuviusSolver.enabled"
     }},
+    {"area": "Kuudra", "name": "Pre spot alert", "mods": {
+      "NoFrills": "preMessage.enabled",
+      "Odin": "Pre-Spot Alert.enabled"
+    }},
+    {"area": "Kuudra", "name": "Crate priority", "mods": {
+      "NoFrills": "cratePriority.enabled",
+      "Odin": "Pre-Spot Alert.settings.Show Crate Priority"
+    }},
+    {"area": "Kuudra", "name": "Clean perk menu", "mods": {
+      "NoFrills": "shopCleaner.enabled",
+      "Odin": "Remove Perks.enabled"
+    }},
     {"area": "Slayers", "name": "Boss spawn alert", "mods": {
       "Skyblocker": "slayers.bossSpawnAlert",
       "NoFrills": "spawnAlert.enabled",
@@ -138,7 +228,8 @@
     }},
     {"area": "Slayers", "name": "Miniboss highlight", "mods": {
       "NoFrills": "slayerMinibossHighlight.enabled",
-      "SkyOcean": "*slayer.highlightMini"
+      "SkyOcean": "*slayer.highlightMini",
+      "SkyHanni": "slayer.slayerMinibossHighlight"
     }},
     {"area": "Slayers", "name": "Voidgloom beacon", "mods": {
       "Skyblocker": "slayers.endermanSlayer.highlightBeacons",
@@ -158,12 +249,46 @@
     }},
     {"area": "Slayers", "name": "Riftstalker steak alert", "mods": {
       "Skyblocker": "slayers.vampireSlayer.enableSteakStakeIndicator",
-      "SkyHanni": "slayer.vampire.ownBoss.steakAlert"
+      "SkyHanni": ["slayer.vampire.boss.steakAlert", "slayer.vampire.ownBoss.steakAlert"]
     }},
     {"area": "Slayers", "name": "Boss kill timer", "mods": {
       "Skyblocker": "slayers.slainTime",
       "NoFrills": "killTimer.enabled",
       "Noba": ["slayers.killTime.enabled", "slayers.bossKillTime"]
+    }},
+    {"area": "Slayers", "name": "Fire pillar display", "mods": {
+      "NoFrills": "pillarAlert.enabled",
+      "SkyHanni": "slayer.blazes.firePillarDisplay"
+    }},
+    {"area": "Slayers", "name": "Blood Ichor highlight", "mods": {
+      "NoFrills": "chaliceHighlight.enabled",
+      "SkyHanni": "slayer.vampire.bloodIchor.highlight"
+    }},
+    {"area": "Slayers", "name": "Boss soon alert", "mods": {
+      "SkyBlockAddons": "*BOSS_APPROACH_ALERT.value",
+      "Noba": "slayers.alerts.bossSoon"
+    }},
+    {"area": "Slayers", "name": "Hide Sven pup nametags", "mods": {
+      "SkyBlockAddons": "*HIDE_SVEN_PUP_NAMETAGS.value",
+      "Noba": "slayers.sven.hidePupNametags",
+      "Skyblocker": "slayers.wolfSlayer.hideSvenPupNametag"
+    }},
+    {"area": "Slayers", "name": "Yang glyph alert", "mods": {
+      "Skyblocker": "slayers.endermanSlayer.enableYangGlyphsNotification",
+      "Noba": "slayers.voidgloom.yangGlyphAlert",
+      "SkyHanni": "slayer.endermen.beacon.showWarning"
+    }},
+    {"area": "Slayers", "name": "Voidgloom laser timer", "mods": {
+      "Skyblocker": "slayers.endermanSlayer.lazerTimer",
+      "SkyHanni": "combat.damageIndicator.enderSlayer.laserPhaseTimer"
+    }},
+    {"area": "Slayers", "name": "Mania indicator", "mods": {
+      "Skyblocker": "slayers.vampireSlayer.enableManiaIndicator",
+      "SkyHanni": "combat.damageIndicator.vampireSlayer.maniaCircles"
+    }},
+    {"area": "Slayers", "name": "Blood effigy waypoints", "mods": {
+      "Skyblocker": "slayers.vampireSlayer.enableEffigyWaypoints",
+      "SkyHanni": "rift.area.stillgoreChateau.bloodEffigies.enabled"
     }},
     {"area": "Farming", "name": "Pest finder", "mods": {
       "SkyHanni": ["garden.pests.pestFinder.showDisplay", "garden.pests.pestFinder.showPlotInWorld"],
@@ -179,9 +304,38 @@
       "Skyblocker": "otherLocations.barn.enableGlowingMushroomHelper",
       "NoFrills": "shroomHighlight.enabled"
     }},
+    {"area": "Farming", "name": "Mouse lock", "mods": {
+      "NoFrills": "mouseLock.enabled",
+      "Skyblocker": "farming.mouseLock.lockMouseTool"
+    }},
+    {"area": "Farming", "name": "Vacuum pest guess", "mods": {
+      "NoFrills": "vacuumSolver.enabled",
+      "SkyHanni": "garden.pests.pestWaypoint.enabled"
+    }},
+    {"area": "Farming", "name": "Phantomleaf solver", "mods": {
+      "NoFrills": "phantomleafSolver.enabled",
+      "SkyHanni": "garden.greenhouse.phantomleafSolver"
+    }},
+    {"area": "Farming", "name": "Greenhouse water levels", "mods": {
+      "NoFrills": "wateringHelper.betterVisibility",
+      "SkyHanni": "garden.greenhouse.highlightWaterStatus"
+    }},
+    {"area": "Farming", "name": "Mute composter", "mods": {
+      "Firmament": "composter.no-more-noises",
+      "NoFrills": "soundBlocker.composter"
+    }},
+    {"area": "Farming", "name": "Jacob contest timer", "mods": {
+      "SkyBlockAddons": "*FARM_EVENT_TIMER.value",
+      "SkyHanni": "garden.jacobContest.nextContest.display"
+    }},
+    {"area": "Farming", "name": "Stereo Harmony helper", "mods": {
+      "Skyblocker": "farming.pestHighlighter.enableStereoHarmonyHelperForContest",
+      "SkyHanni": "garden.pests.stereoHarmony.displayEnabled"
+    }},
     {"area": "Mining", "name": "Metal detector solver", "mods": {
       "SkyHanni": "mining.metalDetector.metalDetectorSolver",
-      "Skyblocker": "mining.crystalHollows.metalDetectorHelper"
+      "Skyblocker": "mining.crystalHollows.metalDetectorHelper",
+      "SkyOcean": "*mining.metalDetectorSolver"
     }},
     {"area": "Mining", "name": "Fossil solver", "mods": {
       "SkyHanni": "mining.fossilExcavator.solver.enabled",
@@ -198,9 +352,10 @@
       "Skyblocker": "mining.glacite.enableCorpseProfitTracker"
     }},
     {"area": "Mining", "name": "Commission highlight", "mods": {
-      "SkyHanni": "mining.highlightCommissionMobs",
       "Skyblocker": "mining.commissionHighlight",
-      "NoFrills": "commissionHighlight.enabled"
+      "NoFrills": "commissionHighlight.enabled",
+      "Firmament": "commissions.highlight-completed",
+      "SkyOcean": "*mining.modifyCommissions"
     }},
     {"area": "Mining", "name": "Puzzler solver", "mods": {
       "Skyblocker": "mining.dwarvenMines.solvePuzzler",
@@ -219,6 +374,40 @@
       "Skyblocker": "otherLocations.end.enableEnderNodeHelper",
       "NoFrills": "endNodeHighlight.enabled"
     }},
+    {"area": "Mining", "name": "Pickaxe ability alert", "mods": {
+      "NoFrills": "abilityAlert.enabled",
+      "Firmament": "pickaxe-info.ability-cooldown-toast"
+    }},
+    {"area": "Mining", "name": "Worm spawn alert", "mods": {
+      "NoFrills": "scathaMining.alert",
+      "Noba": "mining.wormAlert.enabled",
+      "SkyOcean": "*scatha.wormAnnouncer"
+    }},
+    {"area": "Mining", "name": "Drill fuel bar", "mods": {
+      "Firmament": "pickaxe-info.fuel-bar",
+      "SkyBlockAddons": "*DRILL_FUEL_BAR.value",
+      "Skyblocker": "mining.enableDrillFuel"
+    }},
+    {"area": "Mining", "name": "HOTM level as stack size", "mods": {
+      "SkyOcean": "*mining.hotmStackSize",
+      "SkyHanni": "mining.hotm.levelStackSize"
+    }},
+    {"area": "Mining", "name": "Worm cooldown", "mods": {
+      "NoFrills": "scathaMining.cooldown",
+      "SkyOcean": "*scatha.wormCooldown"
+    }},
+    {"area": "Mining", "name": "Cold overlay", "mods": {
+      "Skyblocker": "mining.glacite.coldOverlay",
+      "SkyHanni": "mining.coldOverlay.enabled"
+    }},
+    {"area": "Mining", "name": "Auto share corpses", "mods": {
+      "Skyblocker": "mining.glacite.autoShareCorpses",
+      "Noba": "mining.glaciteMineshaft.autoShareCorpses"
+    }},
+    {"area": "Mining", "name": "Treasure chest highlight", "mods": {
+      "Skyblocker": "mining.crystalHollows.chestHighlighter",
+      "SkyHanni": "mining.powderChestTimer.highlightChests"
+    }},
     {"area": "Foraging", "name": "Moonglade beacon solver", "mods": {
       "SkyHanni": {"1.21.5-1.21.10": "foraging.moongladeBeacon.enabled", "other": "foraging.foragingBeacon.enabled"},
       "Skyblocker": {"1.21.5-1.21.11": "foraging.galatea.enableTunerSolver", "other": "foraging.moongladeMarsh.enableTunerSolver"},
@@ -228,6 +417,23 @@
     {"area": "Foraging", "name": "Mute phantoms", "mods": {
       "SkyHanni": "foraging.mutePhantoms",
       "SkyOcean": "*galatea.muteThePhantoms"
+    }},
+    {"area": "Foraging", "name": "Mute fusion machine", "mods": {
+      "Noba": "galatea.muteFusionMachine",
+      "SkyHanni": "foraging.muteFusionMachine"
+    }},
+    {"area": "Foraging", "name": "HOTF level as stack size", "mods": {
+      "SkyOcean": "*foraging.hotfStackSize",
+      "SkyHanni": "foraging.hotf.levelStackSize"
+    }},
+    {"area": "Foraging", "name": "Hide tree break blocks", "mods": {
+      "Noba": "galatea.hideFloatingBlocks",
+      "SkyHanni": "foraging.trees.cleanView.hideTreeBlocks",
+      "NoFrills": "noRender.treeBits"
+    }},
+    {"area": "Foraging", "name": "Mute tree breaking", "mods": {
+      "Noba": "galatea.muteTreeChopping",
+      "SkyHanni": "foraging.trees.muteBreaking"
     }},
     {"area": "Hunting", "name": "Shard tracker", "mods": {
       "SkyHanni": "hunting.shardTracker.enabled",
@@ -240,7 +446,17 @@
     {"area": "Hunting", "name": "Invisibug highlight", "mods": {
       "Skyblocker": "hunting.moongladeMobs.highlightInvisibug",
       "NoFrills": "invisibugHighlight.enabled",
-      "Noba": "hunting.mobHighlight.invisibug"
+      "Noba": "hunting.mobHighlight.invisibug",
+      "SkyHanni": "hunting.mobHighlight.invisibug.enabled"
+    }},
+    {"area": "Hunting", "name": "Trevor the Trapper helper", "mods": {
+      "SkyBlockAddons": "*TREVOR_THE_TRAPPER_FEATURES.value",
+      "SkyHanni": "misc.trevorTheTrapper.solver",
+      "Skyblocker": "otherLocations.barn.enablePeltAnimalHighlighter"
+    }},
+    {"area": "Hunting", "name": "Hideon highlight", "mods": {
+      "Noba": "hunting.mobHighlight.hideon",
+      "Skyblocker": ["hunting.moongladeMobs.highlightHideonleaf", "hunting.torrhusMobs.highlightHideonsun", "hunting.forestBiome.highlightHideonfloor"]
     }},
     {"area": "Fishing", "name": "Bobber timer", "mods": {
       "SkyHanni": "fishing.bobberTimer.enabled",
@@ -262,6 +478,37 @@
       "Skyblocker": "helpers.fishing.enableFishingHelper",
       "Noba": "fishing.catchTimerHudElement"
     }},
+    {"area": "Fishing", "name": "Rare sea creature alert", "mods": {
+      "NoFrills": "rareAnnounce.enabled",
+      "Noba": "fishing.seaCreatureAlert.enabled",
+      "SkyHanni": "fishing.rareCatches.alertOwnCatches",
+      "SkyBlockAddons": "*LEGENDARY_SEA_CREATURE_WARNING.value"
+    }},
+    {"area": "Fishing", "name": "Hotspot radar guesser", "mods": {
+      "NoFrills": "radarSolver.enabled",
+      "SkyHanni": "fishing.guessHotspotRadar"
+    }},
+    {"area": "Fishing", "name": "Trophy fish counter", "mods": {
+      "SkyHanni": "fishing.trophyFishing.chatMessages.enabled",
+      "Noba": "fishing.trophy.modifyChatMessages",
+      "SkyOcean": "*fishing.enableTrophyNumbers"
+    }},
+    {"area": "Fishing", "name": "Bait display", "mods": {
+      "SkyBlockAddons": "*REMAINING_BAITS_DISPLAY.value",
+      "SkyHanni": "fishing.fishingBaitDisplay.enabled"
+    }},
+    {"area": "Fishing", "name": "Rare sea creature party message", "mods": {
+      "Noba": "fishing.announceSeaCreatures.enabled",
+      "SkyHanni": "fishing.rareCatches.announceRareInParty"
+    }},
+    {"area": "Fishing", "name": "Thunder spark highlight", "mods": {
+      "Noba": "fishing.highlightThunderSparks.enabled",
+      "SkyHanni": "fishing.thunderSpark.highlight"
+    }},
+    {"area": "Fishing", "name": "Compact double hook messages", "mods": {
+      "Noba": "fishing.catchMessages.compactDoubleHook",
+      "SkyHanni": "fishing.compactDoubleHook"
+    }},
     {"area": "Events", "name": "Diana burrow guess", "mods": {
       "SBO": {"1.21.5-1.21.10": "*dianaBurrowGuess", "other": "*spadeGuess"},
       "SkyHanni": "event.diana.guess",
@@ -275,7 +522,8 @@
     }},
     {"area": "Events", "name": "Nearby burrow detection", "mods": {
       "SBO": {"1.21.5-1.21.10": "*dianaBurrowDetect", "other": "*closeBurrowDetection"},
-      "SkyHanni": "event.diana.burrowsNearbyDetection"
+      "SkyHanni": "event.diana.burrowsNearbyDetection",
+      "Firmament": "diana.nearby-waypoints"
     }},
     {"area": "Events", "name": "Nearest warp hint", "mods": {
       "SBO": "*showTitleWhenWarpAvailable",
@@ -307,9 +555,25 @@
       "SkyHanni": "inventory.chocolateFactory.timeTowerReminder",
       "Skyblocker": "helpers.chocolateFactory.enableTimeTowerReminder"
     }},
+    {"area": "Events", "name": "Spooky chest highlight", "mods": {
+      "NoFrills": "spookyChests.enabled",
+      "SkyHanni": "event.spooky.spookyChests.enabled"
+    }},
+    {"area": "Events", "name": "Century raffle tasks", "mods": {
+      "Skyblocker": "helpers.centuryRaffle.enableRaffleTaskHighlight",
+      "SkyHanni": "event.anniversaryCelebration400.highlightDailyTasks"
+    }},
     {"area": "Rift", "name": "Enigma soul waypoints", "mods": {
       "SkyHanni": "rift.enigmaSoulWaypoints.enabled",
       "Skyblocker": "otherLocations.rift.enigmaSoulWaypoints"
+    }},
+    {"area": "Rift", "name": "Ubik cube reminder", "mods": {
+      "Noba": "rift.splitStealAlert",
+      "SkyHanni": "rift.area.mountaintop.ubikReminder"
+    }},
+    {"area": "Rift", "name": "Blobbercyst highlight", "mods": {
+      "Skyblocker": "otherLocations.rift.blobbercystGlow",
+      "SkyHanni": "rift.area.colosseum.highlightBlobbercysts"
     }},
     {"area": "GUI/HUD", "name": "Custom tab list", "mods": {
       "SkyHanni": "gui.compactTabList.enabled",
@@ -342,6 +606,56 @@
       "NoFrills": "viewmodel.enabled",
       "AaronsMod": "itemModel.enableItemModelCustomization"
     }},
+    {"area": "GUI/HUD", "name": "Skill progress display", "mods": {
+      "NoFrills": "skillTracker.enabled",
+      "SkyHanni": "skillProgress.enabled",
+      "SkyBlockAddons": "*SKILL_DISPLAY.value"
+    }},
+    {"area": "GUI/HUD", "name": "Hide potion effects HUD", "mods": {
+      "Firmament": "fixes.hide-potion-effects-hud",
+      "Skyblocker": "uiAndVisuals.hideStatusEffectOverlay",
+      "NoFrills": "noRender.effectDisplay",
+      "SkyBlockAddons": "*HIDE_EFFECTS_HUD.value"
+    }},
+    {"area": "GUI/HUD", "name": "FPS display", "mods": {
+      "Firmament": "hud.fps-count",
+      "AaronsMod": "uiAndVisuals.fpsHud.enableFpsHud"
+    }},
+    {"area": "GUI/HUD", "name": "Ping display", "mods": {
+      "Firmament": "hud.ping-count",
+      "AaronsMod": "uiAndVisuals.pingHud.enablePingHud"
+    }},
+    {"area": "GUI/HUD", "name": "Pet info display", "mods": {
+      "Firmament": "pets.pet-overlay",
+      "SkyBlockAddons": "*PET_DISPLAY.value",
+      "SkyHanni": "misc.pets.display.general.enabled"
+    }},
+    {"area": "GUI/HUD", "name": "Hide fire overlay", "mods": {
+      "AaronsMod": "uiAndVisuals.overlays.hideFireOverlay",
+      "NoFrills": "noRender.fireOverlay",
+      "Odin": "Render Optimizer.settings.Hide Fire Overlay",
+      "SkyHanni": "misc.hideFireOverlay"
+    }},
+    {"area": "GUI/HUD", "name": "Item pickup log", "mods": {
+      "SkyBlockAddons": "*ITEM_PICKUP_LOG.value",
+      "Noba": "inventory.itemPickupLog.enabled",
+      "SkyHanni": "inventory.itemPickupLog.enabled",
+      "SBO": "*pickuplogOverlay"
+    }},
+    {"area": "GUI/HUD", "name": "Hide food bar", "mods": {
+      "NoFrills": "noRender.foodBar",
+      "Odin": "Player Display.settings.Hide Food",
+      "SkyBlockAddons": "*HIDE_FOOD_ARMOR_BAR.value"
+    }},
+    {"area": "GUI/HUD", "name": "Deployable display", "mods": {
+      "SkyBlockAddons": "*DEPLOYABLE_STATUS_DISPLAY.value",
+      "SkyHanni": "combat.deployable.enabled"
+    }},
+    {"area": "GUI/HUD", "name": "Legion display", "mods": {
+      "SBO": "*legionOverlay",
+      "Noba": "uiAndVisuals.legionDisplay.enabled",
+      "SkyHanni": "gui.legionBobbinOverlay.enabled"
+    }},
     {"area": "Inventory", "name": "Inventory buttons", "mods": {
       "Firmament": null,
       "NoFrills": "inventoryButtons.enabled",
@@ -369,10 +683,141 @@
       "SkyHanni": "inventory.customWardrobe.enabled",
       "Skyblocker": "helpers.enableWardrobeHelper"
     }},
-    {"area": "Inventory", "name": "Price tooltips", "mods": {
+    {"area": "Inventory", "name": "Item rarity background", "mods": {
+      "Skyblocker": "general.itemInfoDisplay.itemRarityBackgrounds",
+      "Firmament": "item-rarity-cosmetics.background",
+      "Noba": "inventory.itemRarityHighlight.enabled"
+    }},
+    {"area": "Inventory", "name": "Accessories helper", "mods": {
+      "Skyblocker": "general.itemTooltip.enableAccessoriesHelper",
+      "SkyOcean": "*inventory.accessoriesHelper"
+    }},
+    {"area": "Inventory", "name": "Old master stars", "mods": {
+      "AaronsMod": "skyblock.dungeons.oldMasterStars",
+      "SkyOcean": "*misc.revertMasterStars"
+    }},
+    {"area": "Inventory", "name": "No highlight on menu glass panes", "mods": {
+      "Noba": "uiAndVisuals.dontHighlightGlassPanes",
+      "Firmament": "fixes.hide-slot-highlights"
+    }},
+    {"area": "Inventory", "name": "Slot binding", "mods": {
+      "NoFrills": "slotBinding.enabled",
+      "Odin": "Slot Binds.enabled"
+    }},
+    {"area": "Inventory", "name": "Middle click fix", "mods": {
+      "NoFrills": "middleClickFix.enabled",
+      "SkyHanni": "inventory.middleClickFix"
+    }},
+    {"area": "Inventory", "name": "Active pet highlight", "mods": {
+      "NoFrills": "activePetHighlight.enabled",
+      "Noba": "inventory.highlightActivePet.enabled",
+      "Firmament": "pets.highlight-pet"
+    }},
+    {"area": "Inventory", "name": "Hide recipe book", "mods": {
+      "Firmament": "fixes.hide-recipe-book",
+      "NoFrills": "noRender.recipeBook"
+    }},
+    {"area": "Inventory", "name": "Backpack preview", "mods": {
+      "SkyOcean": "*lore_modifiers.enableStoragePreview",
+      "SkyBlockAddons": "*SHOW_BACKPACK_PREVIEW.value"
+    }},
+    {"area": "Inventory", "name": "Slot locking", "mods": {
+      "NoFrills": "slotLocking.enabled",
+      "SkyBlockAddons": "*LOCK_SLOTS.value"
+    }},
+    {"area": "Inventory", "name": "Equipment in inventory", "mods": {
+      "Skyblocker": "uiAndVisuals.showEquipmentInInventory",
+      "SkyBlockAddons": "*EQUIPMENTS_IN_INVENTORY.value"
+    }},
+    {"area": "Inventory", "name": "Chest value", "mods": {
+      "Skyblocker": "uiAndVisuals.chestValue.enableChestValue",
+      "SkyHanni": "inventory.chestValueConfig.enabled"
+    }},
+    {"area": "Tooltips", "name": "Price tooltips", "mods": {
       "Skyblocker": ["general.itemTooltip.enableLowestBIN", "general.itemTooltip.enableAvgBIN", "general.itemTooltip.enableBazaarPrice"],
-      "NoFrills": "priceTooltips.enabled",
-      "SkyBlockAddons": "*ITEM_PRICES_IN_TOOLTIP.value"
+      "NoFrills": ["priceTooltips.auction", "priceTooltips.bazaar"],
+      "SkyBlockAddons": "*ITEM_PRICES_IN_TOOLTIP.value",
+      "Firmament": "price-data.enable-always"
+    }},
+    {"area": "Tooltips", "name": "NPC sell price", "mods": {
+      "Skyblocker": "general.itemTooltip.enableNPCPrice",
+      "NoFrills": "priceTooltips.npc"
+    }},
+    {"area": "Tooltips", "name": "Motes price", "mods": {
+      "Skyblocker": "general.itemTooltip.enableMotesPrice",
+      "SkyHanni": "rift.motes.showPrice",
+      "NoFrills": "priceTooltips.mote"
+    }},
+    {"area": "Tooltips", "name": "Estimated item value", "mods": {
+      "SkyHanni": "inventory.estimatedItemValues.enabled",
+      "Skyblocker": "general.itemTooltip.enableEstimatedItemValue"
+    }},
+    {"area": "Tooltips", "name": "Created date", "mods": {
+      "Skyblocker": "general.itemTooltip.enableObtainedDate",
+      "NoFrills": "infoTooltips.createdDate",
+      "Firmament": "lore-timers.show-creation"
+    }},
+    {"area": "Tooltips", "name": "Museum info", "mods": {
+      "Skyblocker": "general.itemTooltip.enableMuseumInfo",
+      "NoFrills": "infoTooltips.museumDonated",
+      "SkyOcean": "*lore_modifiers.museumDonation"
+    }},
+    {"area": "Tooltips", "name": "Dungeon quality", "mods": {
+      "Skyblocker": "general.itemTooltip.dungeonQuality",
+      "NoFrills": "infoTooltips.dungeonQuality",
+      "SkyBlockAddons": "*SHOW_ITEM_DUNGEON_FLOOR.value",
+      "SkyOcean": "*lore_modifiers.dungeonQuality"
+    }},
+    {"area": "Tooltips", "name": "SkyBlock item ID", "mods": {
+      "NoFrills": "infoTooltips.skyblockId",
+      "SkyBlockAddons": "*SHOW_SKYBLOCK_ITEM_ID.value",
+      "Firmament": "power-user.show-item-id"
+    }},
+    {"area": "Tooltips", "name": "Stacking enchant progress", "mods": {
+      "SkyHanni": "inventory.enchantParsing.stackingEnchantProgress",
+      "Skyblocker": "general.itemTooltip.enableStackingEnchantProgress",
+      "Noba": "inventory.enchantmentTooltips.showStackingProgress",
+      "SkyBlockAddons": "*SHOW_STACKING_ENCHANT_PROGRESS.value"
+    }},
+    {"area": "Tooltips", "name": "Enchant formatting", "mods": {
+      "SkyHanni": "inventory.enchantParsing.colorParsing",
+      "Noba": "inventory.enchantmentTooltips.modifyTooltips",
+      "SkyBlockAddons": "*ENCHANTMENT_LORE_PARSING.value",
+      "AaronsMod": "skyblock.enchantments.rainbowMaxEnchants"
+    }},
+    {"area": "Tooltips", "name": "Roman numerals as numbers", "mods": {
+      "SkyHanni": "misc.replaceRomanNumerals",
+      "SkyBlockAddons": "*REPLACE_ROMAN_NUMERALS_WITH_NUMBERS.value",
+      "Noba": "inventory.enchantmentTooltips.replaceRomanNumerals"
+    }},
+    {"area": "Tooltips", "name": "Evolving item progress", "mods": {
+      "Skyblocker": "general.itemTooltip.enableEvolvingItemProgress",
+      "SkyHanni": ["inventory.evolvingItems.timeHeldInLore", "inventory.evolvingItems.timeLeftInLore"]
+    }},
+    {"area": "Tooltips", "name": "Hide empty tooltips", "mods": {
+      "Skyblocker": "uiAndVisuals.hideEmptyTooltips",
+      "NoFrills": "noRender.emptyTooltips",
+      "SkyBlockAddons": "*DISABLE_EMPTY_GLASS_PANES.value"
+    }},
+    {"area": "Auction House", "name": "Copy underbid price", "mods": {
+      "SkyHanni": "inventory.auctions.autoCopyUnderbidPrice",
+      "Skyblocker": "helpers.enableCopyUnderbidPrice"
+    }},
+    {"area": "Auction House", "name": "Cheap auction highlight", "mods": {
+      "SkyHanni": "inventory.auctions.auctionsPriceComparison.enabled",
+      "Skyblocker": "uiAndVisuals.fancyAuctionHouse.highlightCheapBIN"
+    }},
+    {"area": "Auction House", "name": "Outbid alert", "mods": {
+      "SkyHanni": "inventory.auctions.auctionOutbid",
+      "SkyBlockAddons": "*OUTBID_ALERT_SOUND.value"
+    }},
+    {"area": "Bazaar", "name": "Order helper", "mods": {
+      "SkyHanni": "inventory.bazaar.orderHelper",
+      "Skyblocker": "helpers.bazaar.enableBazaarHelper"
+    }},
+    {"area": "Bazaar", "name": "Re-order cancelled orders", "mods": {
+      "SkyHanni": "inventory.bazaar.cancelledBuyOrderClipboard",
+      "Skyblocker": "helpers.bazaar.enableReorderHelper"
     }},
     {"area": "Misc", "name": "Etherwarp overlay", "mods": {
       "Odin": "Etherwarp.enabled",
@@ -383,11 +828,13 @@
     }},
     {"area": "Misc", "name": "Auto sprint", "mods": {
       "Odin": "Auto Sprint.enabled",
-      "NoFrills": "autoSprint.enabled"
+      "NoFrills": "autoSprint.enabled",
+      "Firmament": "fixes.auto-sprint"
     }},
     {"area": "Misc", "name": "Wardrobe keybinds", "mods": {
       "Odin": "Wardrobe Keybinds.enabled",
-      "NoFrills": "wardrobeKeybinds.enabled"
+      "NoFrills": "wardrobeKeybinds.enabled",
+      "Firmament": "wardrobe-keybinds.wardrobe-keybinds"
     }},
     {"area": "Misc", "name": "Loadout keybinds", "mods": {
       "Odin": "Loadout Keybinds.enabled",
@@ -400,17 +847,152 @@
     {"area": "Misc", "name": "Party chat commands", "mods": {
       "Odin": "Chat Commands.enabled",
       "NoFrills": "partyCommands.enabled",
-      "Noba": "chat.chatCommands.party.enabled"
+      "Noba": "chat.chatCommands.party.enabled",
+      "Firmament": "party-commands.enable",
+      "SBO": ["*warpCommand", "*allinviteCommand", "*transferCommand", "*moteCommand", "*timeCommand", "*tpsCommand"]
     }},
     {"area": "Misc", "name": "Chat waypoints", "mods": {
       "Skyblocker": "uiAndVisuals.waypoints.enableChatWaypoints",
       "NoFrills": "chatWaypoints.enabled",
-      "Noba": "uiAndVisuals.temporaryWaypoints.enabled"
+      "Noba": "uiAndVisuals.temporaryWaypoints.enabled",
+      "Odin": "Temporary Waypoints.enabled",
+      "SBO": "*patcherWaypoints"
     }},
     {"area": "Misc", "name": "Hide lightning", "mods": {
       "AaronsMod": "uiAndVisuals.world.hideLightning",
       "SkyOcean": {"1.21.5-1.21.11": "*misc.hideLightning", "other": "*environmental.hideLightning"},
-      "Noba": "uiAndVisuals.renderingTweaks.hideLightningBolt"
+      "Noba": "uiAndVisuals.renderingTweaks.hideLightningBolt",
+      "NoFrills": "noRender.lightning"
+    }},
+    {"area": "Misc", "name": "Command shortcuts", "mods": {
+      "NoFrills": "commandShortcuts.enabled",
+      "Skyblocker": "general.shortcuts.enableShortcuts"
+    }},
+    {"area": "Misc", "name": "Hide loading screen", "mods": {
+      "NoFrills": "noLoadingScreen.enabled",
+      "AaronsMod": "uiAndVisuals.world.hideWorldLoadingScreen"
+    }},
+    {"area": "Misc", "name": "No front camera view", "mods": {
+      "NoFrills": "noFrontPerspective.enabled",
+      "Noba": "uiAndVisuals.renderingTweaks.removeFrontFacingThirdPerson",
+      "Odin": "Camera.enabled"
+    }},
+    {"area": "Misc", "name": "Hide damage splash", "mods": {
+      "NoFrills": "noDamageSplash.enabled",
+      "SkyHanni": "combat.hideDamageSplash"
+    }},
+    {"area": "Misc", "name": "Copy chat", "mods": {
+      "AaronsMod": "refinements.chat.copyChatMessages",
+      "Noba": "chat.copyChat.enabled",
+      "SkyHanni": "chat.copyChat",
+      "Firmament": "copy-chat.copy-chat",
+      "SkyBlockAddons": "*CHAT_MESSAGE_COPYING.value"
+    }},
+    {"area": "Misc", "name": "Fairy soul waypoints", "mods": {
+      "Firmament": "fairy-souls.show",
+      "Skyblocker": "helpers.fairySouls.enableFairySoulsHelper"
+    }},
+    {"area": "Misc", "name": "Chat image preview", "mods": {
+      "Firmament": "chat-links.image-enabled",
+      "AaronsMod": "uiAndVisuals.imagePreview.enableImagePreview"
+    }},
+    {"area": "Misc", "name": "Hide entity fire", "mods": {
+      "SkyOcean": "*misc.hideEntityFire",
+      "NoFrills": "noRender.entityFire"
+    }},
+    {"area": "Misc", "name": "Hide implosion messages", "mods": {
+      "Noba": "chat.filters.hideImplosionDamageMessage",
+      "SBO": "*hideImplosionMSG"
+    }},
+    {"area": "Misc", "name": "Mute stereo pants", "mods": {
+      "SkyOcean": "*misc.stereoPantsMute",
+      "SkyHanni": "misc.muteStereoPants"
+    }},
+    {"area": "Misc", "name": "Hide armor", "mods": {
+      "Noba": "uiAndVisuals.hideArmor.enabled",
+      "Odin": "Player Display.settings.Hide Armor"
+    }},
+    {"area": "Misc", "name": "Guild bridge formatting", "mods": {
+      "SkyOcean": "*chat.enableBridgeFormatter",
+      "Noba": "chat.guildBridgeFormatting.enabled"
+    }},
+    {"area": "Misc", "name": "Pet drop rarity", "mods": {
+      "SkyOcean": "*scatha.replacePetMessage",
+      "SkyHanni": "chat.rareDropMessages.petRarity"
+    }},
+    {"area": "Misc", "name": "Hide Blazetekk radio messages", "mods": {
+      "SkyOcean": "*chat.hideBlazetekkMessages",
+      "Noba": "chat.filters.hideBlazetekkRadio"
+    }},
+    {"area": "Misc", "name": "Show own nametag", "mods": {
+      "SkyOcean": "*misc.showOwnNameTag",
+      "Noba": "uiAndVisuals.nametagTweaks.showOwnNametag"
+    }},
+    {"area": "Misc", "name": "Hide nametag background", "mods": {
+      "AaronsMod": "uiAndVisuals.nameTags.hideNameTagBackground",
+      "Noba": "uiAndVisuals.nametagTweaks.removeBackground"
+    }},
+    {"area": "Misc", "name": "Nametag text shadow", "mods": {
+      "AaronsMod": "uiAndVisuals.nameTags.shadowedNameTags",
+      "Noba": "uiAndVisuals.nametagTweaks.addTextShadow"
+    }},
+    {"area": "Misc", "name": "Hotbar scroll lock", "mods": {
+      "AaronsMod": "refinements.input.disableScrollLooping",
+      "NoFrills": "hotbarScrollLock.enabled"
+    }},
+    {"area": "Misc", "name": "Low arrows warning", "mods": {
+      "SkyBlockAddons": "*NO_ARROWS_LEFT_ALERT.value",
+      "Skyblocker": "general.quiverWarning.enableQuiverWarning"
+    }},
+    {"area": "Misc", "name": "Discord Rich Presence", "mods": {
+      "SkyBlockAddons": "*DISCORD_RPC.value",
+      "SkyHanni": "gui.discordRPC.enabled",
+      "Skyblocker": "misc.richPresence.enableRichPresence"
+    }},
+    {"area": "Misc", "name": "Broodmother alert", "mods": {
+      "SkyBlockAddons": "*BROOD_MOTHER_ALERT.value",
+      "SkyHanni": "combat.broodmother.alertOnSpawn"
+    }},
+    {"area": "Misc", "name": "Show chat command on hover", "mods": {
+      "NoFrills": "commandTooltip.enabled",
+      "SkyBlockAddons": "*SHOW_CLICKABLE_MESSAGES_CONTENT.value"
+    }},
+    {"area": "Misc", "name": "Hide autopet messages", "mods": {
+      "SBO": "*hideAutoPetMSG",
+      "Noba": "chat.filters.hideAutopetMessages",
+      "SkyHanni": "misc.pets.hideAutopet"
+    }},
+    {"area": "Misc", "name": "Hide sack messages", "mods": {
+      "SBO": "*hideSacksMSG",
+      "SkyHanni": "chat.hideSacksChange"
+    }},
+    {"area": "Misc", "name": "Vanquisher announce", "mods": {
+      "Noba": "crimsonIsle.announceVanquisher.enabled",
+      "SkyHanni": "crimsonIsle.vanquisherShare.enabled"
+    }},
+    {"area": "Misc", "name": "Crimson Isle miniboss timers", "mods": {
+      "Noba": "crimsonIsle.minibossTimers.enabled",
+      "SkyHanni": "crimsonIsle.minibossRespawnTimer"
+    }},
+    {"area": "Misc", "name": "Hide teleport pad messages", "mods": {
+      "SkyBlockAddons": "*DISABLE_TELEPORT_PAD_MESSAGES.value",
+      "SkyHanni": "chat.filterType.teleportPads"
+    }},
+    {"area": "Misc", "name": "Hide profile join messages", "mods": {
+      "Noba": "chat.filters.hideProfileInfo",
+      "SkyHanni": "chat.filterType.profileJoin"
+    }},
+    {"area": "Misc", "name": "Scroll peeked chat", "mods": {
+      "Noba": "chat.chatPeek.scrollable",
+      "Firmament": "fixes.peek-chat-scroll"
+    }},
+    {"area": "Misc", "name": "Calendar dates", "mods": {
+      "Skyblocker": "helpers.enableDateCalculator",
+      "NoFrills": "calendarDate.enabled"
+    }},
+    {"area": "Misc", "name": "Spider's Den relics", "mods": {
+      "Skyblocker": "otherLocations.spidersDen.relics.enableRelicsHelper",
+      "SkyHanni": "misc.spiderRelicPathfinder"
     }}
   ],
   "preferred": [

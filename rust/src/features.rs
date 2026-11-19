@@ -302,8 +302,8 @@ mod tests {
     #[test]
     fn builtin_is_valid() {
         let set = FeatureSet::builtin();
-        assert_eq!(set.features.len(), 84);
-        assert_eq!(set.areas.len(), 13);
+        assert_eq!(set.features.len(), 213);
+        assert_eq!(set.areas.len(), 16);
         assert_eq!(set.mods.len(), 12);
         assert_eq!(set.game_versions.first().map(String::as_str), Some("26.3"));
     }
