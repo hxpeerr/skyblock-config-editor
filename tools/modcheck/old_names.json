@@ -1,0 +1,6 @@
+{
+  "NoFrills": ["witherKeyHighlight.enabled"],
+  "Noba": ["slayers.bossKillTime"],
+  "SBO": ["*hideImplosionMSG", "*hideAutoPetMSG", "*hideSacksMSG"],
+  "SkyHanni": ["slayer.vampire.ownBoss.steakAlert"]
+}

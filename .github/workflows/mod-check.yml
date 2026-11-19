@@ -1,0 +1,64 @@
+name: Mod check
+
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/modcheck/**
+      - features.jsonc
+      - .github/workflows/mod-check.yml
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: mod-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check the mods
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Read every mod's settings and releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          STRICT: ${{ github.event_name == 'pull_request' && '--strict' || '' }}
+        run: python tools/modcheck/check.py --report "$RUNNER_TEMP/report.md" --json "$RUNNER_TEMP/report.json" $STRICT
+
+      - name: Show the report
+        if: always()
+        run: if [ -f "$RUNNER_TEMP/report.md" ]; then cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Open, update or close the mod check issue
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          read -r actionable title < <(python -c 'import json, sys; r = json.load(open(sys.argv[1])); print(str(r["actionable"]).lower(), r["title"])' "$RUNNER_TEMP/report.json")
+          gh api -X POST "repos/$GITHUB_REPOSITORY/labels" -f name=mod-check -f color=1d76db -f description="Opened by the daily mod check" >/dev/null 2>&1 || true
+          number=$(gh api "repos/$GITHUB_REPOSITORY/issues?labels=mod-check&state=open&per_page=1" --jq '.[0].number // empty')
+          if [ "$actionable" = true ] && [ -n "$number" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/$number" -f title="$title" -F body=@"$RUNNER_TEMP/report.md" >/dev/null
+            echo "Updated issue #$number"
+          elif [ "$actionable" = true ]; then
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues" -f title="$title" -F body=@"$RUNNER_TEMP/report.md" -f "labels[]=mod-check" --jq '"Opened issue #\(.number)"'
+          elif [ -n "$number" ]; then
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$number/comments" -f body="The mod list matches every mod again, so this is done." >/dev/null
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/$number" -f state=closed -f state_reason=completed >/dev/null
+            echo "Closed issue #$number"
+          else
+            echo "Nothing needs attention"
+          fi

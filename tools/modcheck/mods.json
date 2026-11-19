@@ -1,0 +1,18 @@
+{
+  "mods": {
+    "NoFrills": {"repo": "https://github.com/WhatYouThing/NoFrills", "kind": "nofrills"},
+    "SkyHanni": {"repo": "https://github.com/SkyHanniStudios/SkyHanni", "kind": "skyhanni"},
+    "Skyblocker": {"repo": "https://github.com/SkyblockerMod/Skyblocker", "kind": "yacl"},
+    "AaronsMod": {"repo": "https://github.com/AzureAaron/aaron-mod", "kind": "yacl"},
+    "SkyBlockAddons": {"repo": "https://github.com/Fix3dll/SkyblockAddons", "kind": "sba"},
+    "SkyOcean": {"repo": "https://github.com/meowdding/SkyOcean", "kind": "dsl"},
+    "Firmament": {"repo": "https://github.com/nea89o/Firmament", "kind": "firmament"},
+    "Odin": {"repo": "https://github.com/odtheking/Odin", "kind": "odin"},
+    "SBO": {"repo": "https://github.com/SkyblockOverhaul/SBO-Kotlin", "branch": "release", "kind": "dsl"},
+    "Noba": {"repo": "https://codeberg.org/nobaboy/NobaAddons", "kind": "noba"},
+    "CustomScoreboard": {"repo": "https://github.com/meowdding/CustomScoreboard", "kind": "dsl"},
+    "Catharsis": {"repo": "https://github.com/meowdding/catharsis", "kind": "none"}
+  },
+  "discovery": {"min_downloads": 100000, "min_stars": 50, "max_age_days": 180},
+  "ignore": {}
+}

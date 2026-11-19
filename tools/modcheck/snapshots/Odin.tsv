@@ -1,0 +1,610 @@
+Arrow Align.enabled	bool
+Arrow Align.settings.Block Wrong Clicks	bool
+Arrow Align.settings.Invert Key	bool
+Arrow Align.settings.Prevent Blocking	keybind
+Arrows Device.enabled	bool
+Arrows Device.settings.Depth check	bool
+Arrows Device.settings.Device complete alert	bool
+Arrows Device.settings.First Aim Position	color
+Arrows Device.settings.Marked Position	color
+Arrows Device.settings.Second Aim Position	color
+Arrows Device.settings.Show Aim Positions	bool
+Arrows Device.settings.Target Position	color
+Arrows Device.settings.Third Aim Position	color
+Auto Sprint.enabled	bool
+Better Party Finder.enabled	bool
+Better Party Finder.settings.Api Off Kick	bool
+Better Party Finder.settings.Auto Kick	bool
+Better Party Finder.settings.Floor	selector
+Better Party Finder.settings.Inform Kicked	bool
+Better Party Finder.settings.Kick Cache	bool
+Better Party Finder.settings.Magical Power	number
+Better Party Finder.settings.Master Mode	bool
+Better Party Finder.settings.Minimum PB	number
+Better Party Finder.settings.Minimum Secrets	number
+Better Party Finder.settings.Send Kick Line	bool
+Better Party Finder.settings.Stats display	bool
+Blessing Display.enabled	bool
+Blessing Display.settings.Life Blessing	bool
+Blessing Display.settings.Life Color	color
+Blessing Display.settings.Power Blessing	bool
+Blessing Display.settings.Power Color	color
+Blessing Display.settings.Stone Blessing	bool
+Blessing Display.settings.Stone Color	color
+Blessing Display.settings.Time Blessing	bool
+Blessing Display.settings.Time Color	color
+Blessing Display.settings.Wisdom Blessing	bool
+Blessing Display.settings.Wisdom Color	color
+Blood Camp.enabled	bool
+Blood Camp.settings.Blood Camp Assist	bool
+Blood Camp.settings.Box Size	number
+Blood Camp.settings.Final Color	color
+Blood Camp.settings.Interpolation	bool
+Blood Camp.settings.Line	bool
+Blood Camp.settings.Mob Box Offset	number
+Blood Camp.settings.Move HUD	hud
+Blood Camp.settings.Move alert	bool
+Blood Camp.settings.Offset	number
+Blood Camp.settings.Ping Offset	bool
+Blood Camp.settings.Position Color	color
+Blood Camp.settings.Spawn Color	color
+Blood Camp.settings.Tick	number
+Blood Camp.settings.Time Left	bool
+Blood Camp.settings.Watcher Bar	bool
+Breaker Display.enabled	bool
+Breaker Display.settings.Render full	bool
+Build Helper.enabled	bool
+Build Helper.settings.Hide Default Tag	bool
+Build Helper.settings.Render on Ballista	bool
+Build Helper.settings.Stun Percent	number
+Build Helper.settings.Unfinished Waypoints	bool
+Camera.enabled	bool
+Chat Commands.enabled	bool
+Chat Commands.settings.Allinvite	bool
+Chat Commands.settings.Auto Confirm	bool
+Chat Commands.settings.Boop	bool
+Chat Commands.settings.Chat Emotes	bool
+Chat Commands.settings.Co-op Commands	bool
+Chat Commands.settings.Coinflip (cf)	bool
+Chat Commands.settings.Coords (coords)	bool
+Chat Commands.settings.DT	bool
+Chat Commands.settings.Delay	number
+Chat Commands.settings.Demote	bool
+Chat Commands.settings.Dice	bool
+Chat Commands.settings.Eightball	bool
+Chat Commands.settings.FPS	bool
+Chat Commands.settings.Guild Commands	bool
+Chat Commands.settings.Holding	bool
+Chat Commands.settings.Invite	bool
+Chat Commands.settings.Kick	bool
+Chat Commands.settings.Kick Offline	bool
+Chat Commands.settings.Location	bool
+Chat Commands.settings.Odin	bool
+Chat Commands.settings.Party Commands	bool
+Chat Commands.settings.Party transfer (pt)	bool
+Chat Commands.settings.Ping	bool
+Chat Commands.settings.Private Commands	bool
+Chat Commands.settings.Promote	bool
+Chat Commands.settings.Queue instance cmds	bool
+Chat Commands.settings.Racism	bool
+Chat Commands.settings.Reinvite	bool
+Chat Commands.settings.Time	bool
+Chat Commands.settings.Tps	bool
+Chat Commands.settings.Warp	bool
+Click GUI.enabled	bool
+Click GUI.settings.API url	string
+Click GUI.settings.Chat notifications	bool
+Click GUI.settings.Click GUI Size	number
+Click GUI.settings.Color	color
+Click GUI.settings.Core loggings	bool
+Click GUI.settings.Developer Message	bool
+Click GUI.settings.Favorite Colors	map
+Click GUI.settings.First join	bool
+Click GUI.settings.Panel Data	map
+Click GUI.settings.Socket URL	string
+Command Keybinds.enabled	bool
+Command Keybinds.settings.Armor Wardrobe	keybind
+Command Keybinds.settings.Dungeon Hub	keybind
+Command Keybinds.settings.Equip Wardrobe	keybind
+Command Keybinds.settings.Loadouts	keybind
+Command Keybinds.settings.Pets	keybind
+Command Keybinds.settings.Potion Bag	keybind
+Command Keybinds.settings.Stats	keybind
+Command Keybinds.settings.Storage	keybind
+Croesus.enabled	bool
+Croesus.settings.Chest Count HUD	hud
+Croesus.settings.Chest Warning Threshold	number
+Croesus.settings.Croesus Chest HUD	hud
+Croesus.settings.Hide Claimed	bool
+Croesus.settings.Highlight Profitable	bool
+Croesus.settings.Highlight State	bool
+Croesus.settings.Include Key	bool
+Croesus.settings.Minimized	bool
+Door Highlight.enabled	bool
+Door Highlight.settings.Announce Key Spawn	bool
+Door Highlight.settings.Blood Color	color
+Door Highlight.settings.Door Highlight Color	color
+Door Highlight.settings.Openable Door Color	color
+Door Highlight.settings.Wither Color	color
+Dungeon Map.enabled	bool
+Dungeon Map.settings.Background Color	color
+Dungeon Map.settings.Background Outline	color
+Dungeon Map.settings.Blood Door	color
+Dungeon Map.settings.Blood Room	color
+Dungeon Map.settings.Champion Room	color
+Dungeon Map.settings.Disable Prediction	bool
+Dungeon Map.settings.Disable in Boss	bool
+Dungeon Map.settings.Dungeon Map	hud
+Dungeon Map.settings.Entrance Room	color
+Dungeon Map.settings.Fairy Door	color
+Dungeon Map.settings.Fairy Room	color
+Dungeon Map.settings.Normal Door	color
+Dungeon Map.settings.Normal Room	color
+Dungeon Map.settings.Own Player Head	bool
+Dungeon Map.settings.Parse map websocket	bool
+Dungeon Map.settings.Pending Room	color
+Dungeon Map.settings.Player Class Color Size	number
+Dungeon Map.settings.Player Head Scale	number
+Dungeon Map.settings.Player Name Color	color
+Dungeon Map.settings.Player Names Scaling	number
+Dungeon Map.settings.Player Pointer Scale	number
+Dungeon Map.settings.Puzzle Room	color
+Dungeon Map.settings.Room Text	selector
+Dungeon Map.settings.Text Scaling	number
+Dungeon Map.settings.Trap Room	color
+Dungeon Map.settings.Unknown Door	color
+Dungeon Map.settings.Unknown Room	color
+Dungeon Map.settings.Wither Door	color
+Dungeon Queue.enabled	bool
+Dungeon Queue.settings.Announce Kick	bool
+Dungeon Queue.settings.Auto Requeue	bool
+Dungeon Queue.settings.Disable on leave/kick	bool
+Dungeon Queue.settings.Requeue Delay	number
+Dungeon Queue.settings.Warp Cooldown	hud
+Dungeon Waypoints.enabled	bool
+Dungeon Waypoints.settings.Allow Edits	bool
+Dungeon Waypoints.settings.Allow Text Edit	bool
+Dungeon Waypoints.settings.Color	color
+Dungeon Waypoints.settings.Cycle Waypoint	keybind
+Dungeon Waypoints.settings.Depth check	bool
+Dungeon Waypoints.settings.Edit Waypoint Pack	string
+Dungeon Waypoints.settings.Editor HUD	hud
+Dungeon Waypoints.settings.Etherwarp Color	color
+Dungeon Waypoints.settings.Filled	bool
+Dungeon Waypoints.settings.Global Depth	bool
+Dungeon Waypoints.settings.None Color	color
+Dungeon Waypoints.settings.Normal Color	color
+Dungeon Waypoints.settings.Secret Color	color
+Dungeon Waypoints.settings.Selected Waypoint Packs	list
+Dungeon Waypoints.settings.Size X	number
+Dungeon Waypoints.settings.Size Y	number
+Dungeon Waypoints.settings.Size Z	number
+Dungeon Waypoints.settings.Title Scale	number
+Dungeon Waypoints.settings.Use block size	bool
+Dungeon Waypoints.settings.Waypoint Type	selector
+Etherwarp.enabled	bool
+Etherwarp.settings.Box Style	selector
+Etherwarp.settings.Custom Sounds	bool
+Etherwarp.settings.Depth	bool
+Etherwarp.settings.Fail Color	color
+Etherwarp.settings.Full Block	bool
+Etherwarp.settings.Show Guess	bool
+Etherwarp.settings.Show when failed	bool
+Etherwarp.settings.Success Color	color
+Etherwarp.settings.Use Server Position	bool
+Extra Stats.enabled	bool
+Extra Stats.settings.Show Bits	bool
+Extra Stats.settings.Show Class EXP	bool
+Extra Stats.settings.Show Combat Stats	bool
+Extra Stats.settings.Show Team Stats	selector
+Extra Stats.settings.Show Teammates	bool
+Fresh Tools.enabled	bool
+Fresh Tools.settings.Fresh timer	hud
+Fresh Tools.settings.Notify Fresh	bool
+Gyro Wand.enabled	bool
+Gyro Wand.settings.Color	color
+Gyro Wand.settings.Cooldown Color	color
+Gyro Wand.settings.Depth Check	bool
+Gyro Wand.settings.Show Cooldown	bool
+Hide Players.enabled	bool
+Hide Players.settings.Distance	number
+Hide Players.settings.Hide all	bool
+Hide Players.settings.Only in Dungeons	bool
+Highlight.enabled	bool
+Highlight.settings.Hide non-starred names	bool
+Highlight.settings.Highlight Starred Mobs	bool
+Highlight.settings.Highlight color	color
+Highlight.settings.Render Style	selector
+Highlight.settings.Teammate Class Glow	bool
+Invincibility Timer.enabled	bool
+Invincibility Timer.settings.Announce Invincibility	bool
+Invincibility Timer.settings.Cooldown Color	color
+Invincibility Timer.settings.Display As Durability	bool
+Invincibility Timer.settings.Equipped Mask	color
+Invincibility Timer.settings.Invincibility Alert	bool
+Invincibility Timer.settings.Only In Dungeons	bool
+Invincibility Timer.settings.Show	selector
+Invincibility Timer.settings.Show Bonzo Mask	bool
+Invincibility Timer.settings.Show In Boss	bool
+Invincibility Timer.settings.Show Phoenix Pet	bool
+Invincibility Timer.settings.Show Spirit Mask	bool
+Invincibility Timer.settings.Show on Item	bool
+King Relic.enabled	bool
+King Relic.settings.Relic Beacon	bool
+Kuudra Info.enabled	bool
+Kuudra Info.settings.Health Display	hud
+Kuudra Info.settings.Health Size	number
+Kuudra Info.settings.Highlight Kuudra	bool
+Kuudra Info.settings.Kuudra Color	color
+Kuudra Info.settings.Kuudra HP	bool
+Kuudra Info.settings.Use Scaled	bool
+Kuudra Tracker.enabled	bool
+Kuudra Tracker.settings.Free Chests	number
+Kuudra Tracker.settings.Kuudra Tracker HUD	hud
+Kuudra Tracker.settings.Lines	number
+Kuudra Tracker.settings.Multi Items	map
+Kuudra Tracker.settings.Paid Chests	number
+Kuudra Tracker.settings.Single Items	map
+Kuudra Tracker.settings.Total Keys	list
+Leap Menu.enabled	bool
+Leap Menu.settings.Archer	keybind
+Leap Menu.settings.Background Color	color
+Leap Menu.settings.Berserker	keybind
+Leap Menu.settings.Bottom Left	keybind
+Leap Menu.settings.Bottom Right	keybind
+Leap Menu.settings.Color Style	bool
+Leap Menu.settings.Healer	keybind
+Leap Menu.settings.Leap Announce	bool
+Leap Menu.settings.Mage	keybind
+Leap Menu.settings.Mode	selector
+Leap Menu.settings.On Key Release	bool
+Leap Menu.settings.Only Classes	bool
+Leap Menu.settings.Render Scale	number
+Leap Menu.settings.Sorting	selector
+Leap Menu.settings.Tank	keybind
+Leap Menu.settings.Top Left	keybind
+Leap Menu.settings.Top Right	keybind
+Livid Solver.enabled	bool
+Livid Solver.settings.Highlight Color	color
+Livid Solver.settings.Invulnerability Timer	hud
+Loadout Keybinds.enabled	bool
+Loadout Keybinds.settings.Loadout 1	keybind
+Loadout Keybinds.settings.Loadout 10	keybind
+Loadout Keybinds.settings.Loadout 11	keybind
+Loadout Keybinds.settings.Loadout 12	keybind
+Loadout Keybinds.settings.Loadout 2	keybind
+Loadout Keybinds.settings.Loadout 3	keybind
+Loadout Keybinds.settings.Loadout 4	keybind
+Loadout Keybinds.settings.Loadout 5	keybind
+Loadout Keybinds.settings.Loadout 6	keybind
+Loadout Keybinds.settings.Loadout 7	keybind
+Loadout Keybinds.settings.Loadout 8	keybind
+Loadout Keybinds.settings.Loadout 9	keybind
+Loadout Keybinds.settings.Next Page	keybind
+Loadout Keybinds.settings.Previous Page	keybind
+Mage Beam.enabled	bool
+Mage Beam.settings.Color	color
+Mage Beam.settings.Depth Check	bool
+Mage Beam.settings.Duration	number
+Mage Beam.settings.Hide Particles	bool
+Mage Beam.settings.Min Points	number
+Map Info.enabled	bool
+Map Info.settings.300 Score Alert	bool
+Map Info.settings.Background Color	color
+Map Info.settings.Deaths	selector
+Map Info.settings.Disable in boss	bool
+Map Info.settings.Full Hud	hud
+Map Info.settings.Highlight Portal	bool
+Map Info.settings.Include Remaining	bool
+Map Info.settings.Remaining Secrets	selector
+Map Info.settings.Room Secrets	hud
+Map Info.settings.Width	number
+Melody Message.enabled	bool
+Melody Message.settings.Melody Progress	bool
+Melody Message.settings.Melody Send Coords	bool
+Melody Message.settings.Progress GUI	hud
+Melody Message.settings.Show Player	selector
+Mimic.enabled	bool
+Mimic.settings.Send Bat Message	bool
+Mimic.settings.Send Mimic Message	bool
+Mimic.settings.Send Prince Message	bool
+Misc.enabled	bool
+Misc.settings.Auto Requeue	bool
+Misc.settings.Mana Drain	bool
+Misc.settings.Requeue Delay	number
+No Cursor Reset.enabled	bool
+No Cursor Reset.settings.Unhook Timeout	number
+Pearl Waypoints.enabled	bool
+Pearl Waypoints.settings.Dynamic Color	color
+Pearl Waypoints.settings.Dynamic Waypoints	bool
+Pearl Waypoints.settings.Hide Far Waypoints	bool
+Pearl Waypoints.settings.Preset Waypoints	bool
+Performance HUD.enabled	bool
+Performance HUD.settings.Direction	selector
+Performance HUD.settings.Name Color	color
+Performance HUD.settings.Show FPS	bool
+Performance HUD.settings.Show Ping	bool
+Performance HUD.settings.Show TPS	bool
+Performance HUD.settings.Value Color	color
+Pet Keybinds.enabled	bool
+Pet Keybinds.settings.Close If Equipped	bool
+Pet Keybinds.settings.Disable Unequip	bool
+Pet Keybinds.settings.Next Page	keybind
+Pet Keybinds.settings.Pet 1	keybind
+Pet Keybinds.settings.Pet 2	keybind
+Pet Keybinds.settings.Pet 3	keybind
+Pet Keybinds.settings.Pet 4	keybind
+Pet Keybinds.settings.Pet 5	keybind
+Pet Keybinds.settings.Pet 6	keybind
+Pet Keybinds.settings.Pet 7	keybind
+Pet Keybinds.settings.Pet 8	keybind
+Pet Keybinds.settings.Pet 9	keybind
+Pet Keybinds.settings.Previous Page	keybind
+Pet Keybinds.settings.Unequip	keybind
+Player Display.enabled	bool
+Player Display.settings.Defense Color	color
+Player Display.settings.Defense HUD	hud
+Player Display.settings.EHP HUD	hud
+Player Display.settings.EHP color	color
+Player Display.settings.Health Color	color
+Player Display.settings.Health HUD	hud
+Player Display.settings.Hide 0 Overflow	bool
+Player Display.settings.Hide Armor	bool
+Player Display.settings.Hide Defense	bool
+Player Display.settings.Hide Food	bool
+Player Display.settings.Hide Health	bool
+Player Display.settings.Hide Hearts	bool
+Player Display.settings.Hide Mana	bool
+Player Display.settings.Hide Overflow Mana	bool
+Player Display.settings.Hide Vitality	bool
+Player Display.settings.Hide XP Level	bool
+Player Display.settings.Mana Color	color
+Player Display.settings.Mana HUD	hud
+Player Display.settings.Overflow Mana Color	color
+Player Display.settings.Overflow Mana HUD	hud
+Player Display.settings.Separate Overflow Mana	bool
+Player Display.settings.Show Icons	bool
+Player Display.settings.Speed HUD	hud
+Player Display.settings.Speed color	color
+Player Display.settings.Vitality Color	color
+Player Display.settings.Vitality HUD	hud
+Player Size.enabled	bool
+Player Size.settings.Passcode	string
+Player Size.settings.Size X	number
+Player Size.settings.Size Y	number
+Player Size.settings.Size Z	number
+Player Size.settings.Use Client Size	bool
+Pre-Spot Alert.enabled	bool
+Pre-Spot Alert.settings.Advanced Mode	bool
+Pre-Spot Alert.settings.Show Crate Priority	bool
+Puzzle HUD.enabled	bool
+Puzzle HUD.settings.Puzzle HUD	hud
+Puzzle HUD.settings.Show Only Pre-Run	bool
+Puzzle HUD.settings.Show Player Names	bool
+Puzzle Solvers.enabled	bool
+Puzzle Solvers.settings.Beams Color Alpha	number
+Puzzle Solvers.settings.Beams Style	selector
+Puzzle Solvers.settings.Beams Tracer	bool
+Puzzle Solvers.settings.Blaze Solver	bool
+Puzzle Solvers.settings.Blaze Solver Line	number
+Puzzle Solvers.settings.Blaze Solver Lines Width	number
+Puzzle Solvers.settings.Blaze Solver Next Line	bool
+Puzzle Solvers.settings.Blaze Style	selector
+Puzzle Solvers.settings.Boulder Color	color
+Puzzle Solvers.settings.Boulder Solver	bool
+Puzzle Solvers.settings.Boulder Style	selector
+Puzzle Solvers.settings.Color for multiple	color
+Puzzle Solvers.settings.Color for one	color
+Puzzle Solvers.settings.Color for visited	color
+Puzzle Solvers.settings.Creeper Beams Solver	bool
+Puzzle Solvers.settings.Draft prompt	bool
+Puzzle Solvers.settings.First Color	color
+Puzzle Solvers.settings.Hide Blazes	bool
+Puzzle Solvers.settings.Ice Fill Color	color
+Puzzle Solvers.settings.Ice Fill Solver	bool
+Puzzle Solvers.settings.Maze Tracer	bool
+Puzzle Solvers.settings.Optimized Solutions	bool
+Puzzle Solvers.settings.Other Color	color
+Puzzle Solvers.settings.Puzzle Timers	bool
+Puzzle Solvers.settings.Quiz Color	color
+Puzzle Solvers.settings.Quiz Depth	bool
+Puzzle Solvers.settings.Quiz Solver	bool
+Puzzle Solvers.settings.Quiz Timer Hud	hud
+Puzzle Solvers.settings.Second Color	color
+Puzzle Solvers.settings.Send Complete	bool
+Puzzle Solvers.settings.Show All Boulder Clicks	bool
+Puzzle Solvers.settings.TP Maze Solver	bool
+Puzzle Solvers.settings.Third Color	color
+Puzzle Solvers.settings.Tracer Color	color
+Puzzle Solvers.settings.Tracer Color First	color
+Puzzle Solvers.settings.Tracer Color Second	color
+Puzzle Solvers.settings.Use Optimized Patterns	bool
+Puzzle Solvers.settings.Water Board Solver	bool
+Puzzle Solvers.settings.Water Tracer	bool
+Puzzle Solvers.settings.Weirdos Correct Color	color
+Puzzle Solvers.settings.Weirdos Solver	bool
+Puzzle Solvers.settings.Weirdos Style	selector
+Puzzle Solvers.settings.Weirdos Wrong Color	color
+Quiver Display.enabled	bool
+Quiver Display.settings.Count Color	color
+Quiver Display.settings.Quiver HUD	hud
+Quiver Display.settings.Show Name	bool
+Ragnarock.enabled	bool
+Ragnarock.settings.Announce strength	bool
+Ragnarock.settings.Cancel alert	bool
+Ragnarock.settings.Cast alert	bool
+Ragnarock.settings.Strength gained	bool
+Remove Perks.enabled	bool
+Remove Perks.settings.Show Stun	bool
+Render Optimizer.enabled	bool
+Render Optimizer.settings.Hide Archer Passive	bool
+Render Optimizer.settings.Hide Armor Stands	bool
+Render Optimizer.settings.Hide Death Animation	bool
+Render Optimizer.settings.Hide Experience Orbs	bool
+Render Optimizer.settings.Hide Explosion Particles	bool
+Render Optimizer.settings.Hide Falling Blocks	bool
+Render Optimizer.settings.Hide Fire Overlay	bool
+Render Optimizer.settings.Hide Healer Fairy	bool
+Render Optimizer.settings.Hide Lightning	bool
+Render Optimizer.settings.Hide Soul Weaver	bool
+Render Optimizer.settings.Hide Tentacle Head	bool
+Render Test.enabled	bool
+Render Test.settings.Box Count	number
+Render Test.settings.Box Levels	number
+Render Test.settings.Styled Box Style	selector
+Room Clear.enabled	bool
+Room Clear.settings.Mode	selector
+Secret Clicked.enabled	bool
+Secret Clicked.settings.Box In Boss	bool
+Secret Clicked.settings.Box color	color
+Secret Clicked.settings.Box style	selector
+Secret Clicked.settings.Chime In Boss	bool
+Secret Clicked.settings.Depth check	bool
+Secret Clicked.settings.Item Boxes	bool
+Secret Clicked.settings.Locked Color	color
+Secret Clicked.settings.Secret Boxes	bool
+Secret Clicked.settings.Secret Chime	bool
+Secret Clicked.settings.Time To Stay	number
+Secrets Counter.enabled	bool
+Simon Says.enabled	bool
+Simon Says.settings.Announce Progress	bool
+Simon Says.settings.Block Wrong Clicks	bool
+Simon Says.settings.Block Wrong on Start	bool
+Simon Says.settings.Custom Click Sounds	bool
+Simon Says.settings.First Color	color
+Simon Says.settings.Max Start Clicks	number
+Simon Says.settings.Second Color	color
+Simon Says.settings.Style	selector
+Simon Says.settings.Third Color	color
+Slot Binds.enabled	bool
+Slot Binds.settings.Bind Color	color
+Slot Binds.settings.Bind set key	keybind
+Slot Binds.settings.Line Display	selector
+Slot Binds.settings.Line Width	number
+Slot Binds.settings.Profile	selector
+Slot Binds.settings.ProfileData	map
+Spirit Bear.enabled	bool
+Splits.enabled	bool
+Splits.settings.Boss Entry Split	bool
+Splits.settings.Current Split HUD	hud
+Splits.settings.Fixed Width	bool
+Splits.settings.Location	selector
+Splits.settings.Show 0 splits	bool
+Splits.settings.Show Tick Time	bool
+Splits.settings.Splits Display HUD	hud
+Spring Boots.enabled	bool
+Spring Boots.settings.Spring Boots	hud
+Supply Helper.enabled	bool
+Supply Helper.settings.Render Area	bool
+Supply Helper.settings.Send Supply Time	bool
+Supply Helper.settings.Supplies Waypoints	bool
+Supply Helper.settings.Supply Drop Waypoints	bool
+Supply Helper.settings.Supply Waypoint Color	color
+Temporary Waypoints.enabled	bool
+Temporary Waypoints.settings.From All Chat	bool
+Temporary Waypoints.settings.From Party Chat	bool
+Temporary Waypoints.settings.Personal Waypoint	bool
+Terminal Simulator.enabled	bool
+Terminal Simulator.settings.First Click Prot	bool
+Terminal Simulator.settings.Ping	number
+Terminal Solver.enabled	bool
+Terminal Solver.settings.Background	color
+Terminal Solver.settings.Client Prediction	bool
+Terminal Solver.settings.Debug	bool
+Terminal Solver.settings.First Click Prot	number
+Terminal Solver.settings.Lag Protection Ticks	number
+Terminal Solver.settings.Melody Background	color
+Terminal Solver.settings.Melody Column	color
+Terminal Solver.settings.Melody Pointer	color
+Terminal Solver.settings.Melody Size	number
+Terminal Solver.settings.Normal Term Size	number
+Terminal Solver.settings.Numbers 1	color
+Terminal Solver.settings.Numbers 2	color
+Terminal Solver.settings.Numbers 3	color
+Terminal Solver.settings.Numbers 4	color
+Terminal Solver.settings.Numbers Text	color
+Terminal Solver.settings.Panes	color
+Terminal Solver.settings.Render type	selector
+Terminal Solver.settings.Resolve timeout	number
+Terminal Solver.settings.Roundness	number
+Terminal Solver.settings.Rubix -1	color
+Terminal Solver.settings.Rubix -2	color
+Terminal Solver.settings.Rubix 1	color
+Terminal Solver.settings.Rubix 2	color
+Terminal Solver.settings.Rubix Mode	selector
+Terminal Solver.settings.Rubix Text	color
+Terminal Solver.settings.Select	color
+Terminal Solver.settings.Server Lag	bool
+Terminal Solver.settings.Slot gap	number
+Terminal Solver.settings.Starts With	color
+Terminal Solver.settings.Stop Melody Solver	bool
+Terminal Solver.settings.Term Size	number
+Terminal Sounds.enabled	bool
+Terminal Sounds.settings.Click Sounds	bool
+Terminal Sounds.settings.Complete Sounds	bool
+Terminal Times.enabled	bool
+Terminal Times.settings.Terminal Splits	bool
+Terminal Times.settings.Terminal Times	bool
+Terminal Times.settings.Use Real Time	bool
+Terminal Titles.enabled	bool
+Terminal Titles.settings.Custom Title	string
+Terminal Titles.settings.Replace Device	bool
+Terminal Titles.settings.Replace Lever	bool
+Terminal Titles.settings.Replace Terminal	bool
+Terminal Titles.settings.Self Only	bool
+Terminal Titles.settings.Use Subtitle	bool
+Terminals Status.enabled	bool
+Terminals Status.settings.Hide Default	bool
+Terminals Status.settings.Show	selector
+Terminals Status.settings.Style	selector
+Terminals Status.settings.Term Info	hud
+Terminals Status.settings.Through Walls	bool
+Terminals Status.settings.Waypoint color	color
+Terracotta Timer.enabled	bool
+Tick Timers.enabled	bool
+Tick Timers.settings.Display Symbol	bool
+Tick Timers.settings.Display in Ticks	bool
+Tick Timers.settings.Fire Freeze Hud	hud
+Tick Timers.settings.Goldor Hud	hud
+Tick Timers.settings.Show Prefix	bool
+Tick Timers.settings.Start timer	bool
+Tick Timers.settings.Storm Lightning Hud	hud
+Tick Timers.settings.Storm PY Hud	hud
+Tick Timers.settings.Storm Pad Hud	hud
+Tick Timers.settings.Storm Tick Hud	hud
+Vesuvius.enabled	bool
+Vesuvius.settings.Croesus Chest HUD	hud
+Vesuvius.settings.Hide Claimed	bool
+Vesuvius.settings.Kuudra Pet Bonus	number
+Vesuvius.settings.Lava Leech Bonus	number
+Vesuvius.settings.Use Salvaged	bool
+Wardrobe Keybinds.enabled	bool
+Wardrobe Keybinds.settings.Disable Unequip	bool
+Wardrobe Keybinds.settings.Next Page	keybind
+Wardrobe Keybinds.settings.Previous Page	keybind
+Wardrobe Keybinds.settings.Unequip	keybind
+Wardrobe Keybinds.settings.Wardrobe 1	keybind
+Wardrobe Keybinds.settings.Wardrobe 2	keybind
+Wardrobe Keybinds.settings.Wardrobe 3	keybind
+Wardrobe Keybinds.settings.Wardrobe 4	keybind
+Wardrobe Keybinds.settings.Wardrobe 5	keybind
+Wardrobe Keybinds.settings.Wardrobe 6	keybind
+Wardrobe Keybinds.settings.Wardrobe 7	keybind
+Wardrobe Keybinds.settings.Wardrobe 8	keybind
+Wardrobe Keybinds.settings.Wardrobe 9	keybind
+Waypoints.enabled	bool
+Waypoints.settings.Show Through Walls	bool
+Waypoints.settings.Text Scale	number
+Waypoints.settings.Waypoints	list
+Wither Dragons.enabled	bool
+Wither Dragons.settings.Dragon Boxes	bool
+Wither Dragons.settings.Dragon Health	bool
+Wither Dragons.settings.Dragon Timer	bool
+Wither Dragons.settings.Dragon Timer HUD	hud
+Wither Dragons.settings.Dragon Title	bool
+Wither Dragons.settings.Send Dragon Spawned	bool
+Wither Dragons.settings.Send Dragon Time Alive	bool
+Wither Dragons.settings.Send Ice Sprayed	bool
+Wither Dragons.settings.Target Tracer	bool
+Wither Dragons.settings.Timer Style	selector
+Wither Dragons.settings.Timer Symbol	bool

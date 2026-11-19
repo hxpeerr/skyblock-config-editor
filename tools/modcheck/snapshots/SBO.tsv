@@ -1,0 +1,129 @@
+Burrows.ChainEndColor	color
+Burrows.arrowGuess	bool
+Burrows.closeBurrowDetection	bool
+Burrows.curveSpadeGuess	bool
+Burrows.highlightChainEnds	bool
+Burrows.muteBuggedSpadeSounds	bool
+Burrows.ongoingChainsDisplay	bool
+Burrows.showArrowSubGuesses	bool
+Burrows.showChainStep	bool
+Burrows.showTextOnSubGuess	bool
+Burrows.showTitleWhenChainEnds	bool
+Burrows.showTitleWhenFailure	bool
+Burrows.simpleChainsOverlayMode	bool
+Burrows.spadeGuess	bool
+Debug.alwaysInSkyblock	bool
+Debug.debugOnlyMessages	bool
+Debug.disableAutoTweaks	bool
+Debug.lootshareDisplayTest	bool
+Debug.repeatableAchie	bool
+Debug.separateAlphaData	bool
+Debug.showInternalStateWaypoints	bool
+Drops.announceCrownOfGreed	bool
+Drops.customBrainFoodMessage	strings
+Drops.customChimeraMessage	strings
+Drops.customFatefulStingerMessage	strings
+Drops.customManticoreMessage	strings
+Drops.customShimmeringWoolMessage	strings
+Drops.hiltDropMessage	bool
+Drops.lootAnnouncerChat	bool
+Drops.lootAnnouncerParty	bool
+Drops.lootAnnouncerScreen	bool
+Drops.medalCaptureDelayMs	int
+Drops.medalClipDurationSeconds	int
+Drops.medalEnabled	bool
+Drops.sendSinceMessage	bool
+General.achievementsButton	bool
+General.assumeMuted	bool
+General.bobberOverlay	bool
+General.chunkCacheAboveServerOnly	bool
+General.chunkCacheAreas	strings
+General.chunkCacheHubIslandOnly	bool
+General.chunkCacheRenderHubIslandOnly	bool
+General.chunkCacheWorkEverywhere	bool
+General.disableAchievements	bool
+General.disableNewSettings	bool
+General.hubChunkCache	bool
+General.legionOverlay	bool
+General.phoenixAnnouncer	bool
+General.pickuplogOverlay	bool
+Party Commands.allinviteCommand	bool
+Party Commands.blockUser	bool
+Party Commands.carrotCommand	bool
+Party Commands.dianaPartyCommands	bool
+Party Commands.moteCommand	bool
+Party Commands.timeCommand	bool
+Party Commands.tpsCommand	bool
+Party Commands.transferCommand	bool
+Party Commands.warpCommand	bool
+Rare Mobs.HighlightRareMobs	bool
+Rare Mobs.KingMinosGlowColor	color
+Rare Mobs.ManticoreGlowColor	color
+Rare Mobs.MinosInquisitorGlowColor	color
+Rare Mobs.SphinxGlowColor	color
+Rare Mobs.announceCocoon	bool
+Rare Mobs.announceInqText	strings
+Rare Mobs.announceKingText	strings
+Rare Mobs.announceMantiText	strings
+Rare Mobs.announceSphinxText	strings
+Rare Mobs.cocoonTitle	bool
+Rare Mobs.hpAlert	double
+Rare Mobs.lootshareDisplay	bool
+Rare Mobs.lootshareMessage	bool
+Rare Mobs.lootsharePartyOverlay	bool
+Rare Mobs.lootshareText	strings
+Rare Mobs.mythosMobHp	bool
+Rare Mobs.noShurikenOverlay	bool
+Rare Mobs.rareMobTitleFadeInTime	int
+Rare Mobs.rareMobTitleFadeOutTime	int
+Rare Mobs.rareMobTitleStayTime	int
+Rare Mobs.receiveRareMob	bool
+Rare Mobs.scanWorldForRareMob	bool
+Rare Mobs.sendKillTimeMessage	bool
+Rare Mobs.shareRareMob	bool
+Rare Mobs.shareRareMobInPublicChat	bool
+Rare Mobs.soundHpAlert	double
+Rare Mobs.sphinxSolver	bool
+Themes.backgroundBlur	bool
+Trackers.afkTimeout	int
+Trackers.assumeAllLS	bool
+Trackers.combineLootLines	bool
+Trackers.excludeCoinsFromProfit	bool
+Trackers.fourEyedFish	bool
+Trackers.hideLsStats	bool
+Trackers.hideUnobtainedItems	bool
+Trackers.magicFindTracker	bool
+Trackers.resetSessionOnGameRestart	bool
+Trackers.statsTracker	bool
+Trackers.trackerBackgroundOpacity	int
+Warps.badWarpDistance	int
+Warps.dontWarpIfBurrowClose	bool
+Warps.ignoreYLevel	bool
+Warps.showTitleWhenWarpAvailable	bool
+Warps.warpDiff	int
+Warps.warpTitleAsSubtitle	bool
+Waypoints.ClosestGuessColor	color
+Waypoints.MobColor	color
+Waypoints.OptimalOrderLineColor	color
+Waypoints.OtherGuessColor	color
+Waypoints.OtherWaypointColor	color
+Waypoints.RareMobColor	color
+Waypoints.StartColor	color
+Waypoints.SubGuessColor	color
+Waypoints.TreasureColor	color
+Waypoints.beamDistance	int
+Waypoints.dianaLineWidth	int
+Waypoints.drawOptimalOrderLines	bool
+Waypoints.dynamicWaypointOpacity	bool
+Waypoints.guessAndBurrowLine	bool
+Waypoints.hideOwnCoordinateWaypoints	bool
+Waypoints.inqLine	bool
+Waypoints.lookAlike	bool
+Waypoints.patcherWaypoints	bool
+Waypoints.showBeaconBeam	bool
+Waypoints.showDistanceCutoff	int
+Waypoints.showTimesDug	bool
+Waypoints.waypointOpacity	int
+Waypoints.waypointTextOpacity	int
+Waypoints.waypointTextScale	float
+Waypoints.waypointTextShadow	bool

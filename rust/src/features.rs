@@ -302,10 +302,12 @@ mod tests {
     #[test]
     fn builtin_is_valid() {
         let set = FeatureSet::builtin();
-        assert_eq!(set.features.len(), 213);
-        assert_eq!(set.areas.len(), 16);
-        assert_eq!(set.mods.len(), 12);
-        assert_eq!(set.game_versions.first().map(String::as_str), Some("26.3"));
+        assert!(set.features.len() >= 213);
+        assert!(set.areas.len() >= 16);
+        assert!(set.mods.len() >= 12);
+        assert!(set.game_versions.contains(&set.default_game_version));
+        let order: Vec<_> = set.game_versions.iter().map(|v| crate::versions::vtuple(v)).collect();
+        assert!(order.windows(2).all(|w| w[0] > w[1]), "game_versions must go from newest to oldest");
     }
 
     #[test]
