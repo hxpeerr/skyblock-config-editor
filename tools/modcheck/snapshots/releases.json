@@ -1,0 +1,41 @@
+{
+  "AaronsMod": {
+    "modrinth": "3.1.1+26.2"
+  },
+  "Catharsis": {
+    "modrinth": "1.0.0-beta.22"
+  },
+  "CustomScoreboard": {
+    "modrinth": "1.13.2"
+  },
+  "Firmament": {
+    "modrinth": "44.3.0+mc26.1"
+  },
+  "NoFrills": {
+    "modrinth": "0.4.17"
+  },
+  "Noba": {
+    "modrinth": "1.4.0+26.3",
+    "github": "1.4.0"
+  },
+  "Odin": {
+    "modrinth": "0.4.1"
+  },
+  "SBO": {
+    "modrinth": "0.7.2-beta.3-26.3"
+  },
+  "SkyBlockAddons": {
+    "modrinth": "2.5.3"
+  },
+  "SkyHanni": {
+    "modrinth": "9.5.0"
+  },
+  "SkyOcean": {
+    "modrinth": "1.18.2",
+    "curseforge": "1.8.1-1.21.5"
+  },
+  "Skyblocker": {
+    "modrinth": "v6.11.0+26.2",
+    "curseforge": "6.11.0+26.2"
+  }
+}
