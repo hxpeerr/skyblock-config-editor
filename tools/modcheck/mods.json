@@ -14,5 +14,7 @@
     "Catharsis": {"repo": "https://github.com/meowdding/catharsis", "kind": "none"}
   },
   "discovery": {"min_downloads": 100000, "min_stars": 50, "max_age_days": 180},
-  "ignore": {}
+  "ignore": {
+    "github:swofty-developments/hypixelrecreation": "a Hypixel server remake, not a client mod"
+  }
 }

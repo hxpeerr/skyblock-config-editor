@@ -134,7 +134,36 @@ def describe(e):
     return str(e)[:200]
 
 
-def clone(name, spec):
+MC_SUFFIX = re.compile(r"[-_](?:mc-?)?(?:1\.\d{2}|\d{2}\.\d+)(?:\.(?:\d+|x))*$")
+
+
+def version_core(v):
+    return MC_SUFFIX.sub("", (v or "").strip().lower().removeprefix("v").split("+")[0])
+
+
+def tags_of(repo):
+    tags = [line.split("refs/tags/")[-1] for line in run(["git", "ls-remote", "--tags", "--refs", repo], 120).splitlines()]
+    return [t for t in tags if re.search(r"\d+\.\d+", t)]
+
+
+def release_ref(spec, slug):
+    tags = tags_of(spec["repo"])
+    if not tags:
+        return None
+    if slug:
+        try:
+            latest = modrinth_latest(slug)
+        except (urllib.error.URLError, OSError, ValueError, KeyError):
+            latest = None
+        if latest:
+            want = version_core(latest["version"])
+            same = [t for t in tags if version_core(t) == want]
+            if same:
+                return same[0]
+    return max(tags, key=vt)
+
+
+def clone(name, spec, slug=None):
     dest = WORK / "src" / name
     last = None
     for _ in range(2):
@@ -145,8 +174,7 @@ def clone(name, spec):
             cmd = ["git", "clone", "--quiet", "--depth", "1", "--filter=blob:none", "--sparse"]
             ref = spec.get("branch")
             if ref == "release":
-                latest = forge_latest(spec["repo"])
-                ref = latest["version"] if latest else None
+                ref = release_ref(spec, slug)
             if ref:
                 cmd += ["--branch", ref]
             run(cmd + [spec["repo"], str(dest)])
@@ -165,9 +193,9 @@ def source_info(dest):
     return {"commit": sha, "date": date[:10], "branch": branch}
 
 
-def read_settings(name, spec, fetch):
+def read_settings(name, spec, fetch, slug=None):
     dest = WORK / "src" / name
-    info = clone(name, spec) if fetch else (source_info(dest) if dest.is_dir() else None)
+    info = clone(name, spec, slug) if fetch else (source_info(dest) if dest.is_dir() else None)
     if info is None:
         raise RuntimeError("no downloaded source (run without --no-fetch)")
     try:
@@ -385,8 +413,7 @@ def forge_latest(url):
                     "url": rel.get("html_url", ""), "prerelease": bool(rel.get("prerelease"))}
     except (urllib.error.URLError, OSError, ValueError, KeyError):
         pass
-    tags = [line.split("refs/tags/")[-1] for line in run(["git", "ls-remote", "--tags", "--refs", url], 120).splitlines()]
-    tags = [t for t in tags if re.search(r"\d+\.\d+", t)]
+    tags = tags_of(url)
     if not tags:
         return None
     tag = max(tags, key=vt)
@@ -482,7 +509,7 @@ def release_table(features, mods, found, infos, previous):
             text = r["version"] + (f" ({r['date']})" if r.get("date") else "")
             if r.get("url"):
                 text = f"[{text}]({r['url']})"
-            if before.get(platform) and before[platform] != r["version"]:
+            if r.get("date") and before.get(platform) and before[platform] != r["version"]:
                 text += " **new**"
             cells.append(text)
         info = infos.get(name)
@@ -684,7 +711,7 @@ def main():
     settings, labels, infos, rows_by_mod, broken = {}, {}, {}, {}, []
     todo = [n for n in names if n in mods.get("mods", {})]
     with concurrent.futures.ThreadPoolExecutor(6) as pool:
-        jobs = {pool.submit(read_settings, n, mods["mods"][n], not args.no_fetch): n for n in todo}
+        jobs = {pool.submit(read_settings, n, mods["mods"][n], not args.no_fetch, features["mods"][n].get("slug")): n for n in todo}
         for job in concurrent.futures.as_completed(jobs):
             n = jobs[job]
             try:
@@ -726,7 +753,9 @@ def main():
         if found:
             saved = dict(previous)
             for n, out in found.items():
-                saved[n] = {p: out[p]["version"] for p in ("modrinth", "curseforge", "github") if out.get(p)}
+                kept = previous.get(n, {})
+                versions = {p: out[p]["version"] if out[p].get("date") else kept.get(p) for p in ("modrinth", "curseforge", "github") if out.get(p)}
+                saved[n] = {p: v for p, v in versions.items() if v}
             (SNAPSHOTS / "releases.json").write_text(json.dumps(dict(sorted(saved.items())), indent=2) + "\n", encoding="utf-8")
         print(f"Saved snapshots for {len(rows_by_mod)} mods.", file=sys.stderr)
     if args.strict and any(report.counts.get(k) for k in ("missing", "not_switch", "broken")):
