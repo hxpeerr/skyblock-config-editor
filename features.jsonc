@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "revision": 1,
+  "revision": 2,
   "game_versions": ["26.3", "26.2", "26.1.2", "26.1.1", "26.1", "1.21.11", "1.21.10", "1.21.8", "1.21.7", "1.21.5"],
   "default_game_version": "26.1.2",
   "mods": {
@@ -12,7 +12,10 @@
     "SkyOcean": {"files": ["skyocean/config.jsonc", "skyocean_config.json", "skyocean.json"], "id": "skyocean", "slug": "skyocean", "curseforge": 1353380},
     "Firmament": {"dir": "firmament", "files": ["firmament.json"], "id": "firmament", "slug": "firmament"},
     "Odin": {"files": ["odin/odin-config.json", "odin-config.json"], "id": "odin", "slug": "odin"},
-    "SBO": {"files": ["sbo/config.jsonc", "SBO/config.jsonc", "config.jsonc"], "id": "sbo", "slug": "skyblock-overhaul"}
+    "SBO": {"files": ["sbo/config.jsonc", "SBO/config.jsonc", "config.jsonc"], "id": "sbo", "slug": "skyblock-overhaul"},
+    "Noba": {"files": ["noba/config.json"], "id": "noba", "slug": "noba"},
+    "CustomScoreboard": {"files": ["customscoreboard/config.jsonc"], "id": "customscoreboard", "slug": "skyblock-custom-scoreboard"},
+    "Catharsis": {"files": ["catharsis/pack_configs.json"], "id": "catharsis", "slug": "catharsis"}
   },
   "areas": ["Dungeons", "Kuudra", "Slayers", "Farming", "Mining", "Foraging", "Hunting", "Fishing", "Events", "Rift", "GUI/HUD", "Inventory", "Misc"],
   "features": [
@@ -121,11 +124,13 @@
     }},
     {"area": "Slayers", "name": "Boss spawn alert", "mods": {
       "Skyblocker": "slayers.bossSpawnAlert",
-      "NoFrills": "spawnAlert.enabled"
+      "NoFrills": "spawnAlert.enabled",
+      "Noba": "slayers.alerts.bossSpawn"
     }},
     {"area": "Slayers", "name": "Miniboss spawn alert", "mods": {
       "Skyblocker": "slayers.miniBossSpawnAlert",
-      "NoFrills": "slayerMinibossAlert.enabled"
+      "NoFrills": "slayerMinibossAlert.enabled",
+      "Noba": "slayers.alerts.minibossSpawn"
     }},
     {"area": "Slayers", "name": "Boss highlight", "mods": {
       "NoFrills": "bossHighlight.enabled",
@@ -138,15 +143,18 @@
     {"area": "Slayers", "name": "Voidgloom beacon", "mods": {
       "Skyblocker": "slayers.endermanSlayer.highlightBeacons",
       "SkyHanni": "slayer.endermen.beacon.highlightBeacon",
-      "NoFrills": "beaconTracer.enabled"
+      "NoFrills": "beaconTracer.enabled",
+      "Noba": ["slayers.voidgloom.highlightYangGlyphs", "slayers.voidgloom.lineToGlyph"]
     }},
     {"area": "Slayers", "name": "Nukekubi heads", "mods": {
       "Skyblocker": "slayers.endermanSlayer.highlightNukekubiHeads",
-      "SkyHanni": "slayer.endermen.highlightNukekebi"
+      "SkyHanni": "slayer.endermen.highlightNukekebi",
+      "Noba": "slayers.voidgloom.highlightNukekubiFixations"
     }},
     {"area": "Slayers", "name": "Blaze attunement", "mods": {
       "Skyblocker": "slayers.blazeSlayer.attunementHighlights",
-      "SkyOcean": "*slayer.enableBlazeHighlight"
+      "SkyOcean": "*slayer.enableBlazeHighlight",
+      "Noba": "slayers.inferno.highlightHellionShield"
     }},
     {"area": "Slayers", "name": "Riftstalker steak alert", "mods": {
       "Skyblocker": "slayers.vampireSlayer.enableSteakStakeIndicator",
@@ -154,7 +162,8 @@
     }},
     {"area": "Slayers", "name": "Boss kill timer", "mods": {
       "Skyblocker": "slayers.slainTime",
-      "NoFrills": "killTimer.enabled"
+      "NoFrills": "killTimer.enabled",
+      "Noba": ["slayers.killTime.enabled", "slayers.bossKillTime"]
     }},
     {"area": "Farming", "name": "Pest finder", "mods": {
       "SkyHanni": ["garden.pests.pestFinder.showDisplay", "garden.pests.pestFinder.showPlotInWorld"],
@@ -181,7 +190,8 @@
     {"area": "Mining", "name": "Corpse finder", "mods": {
       "Skyblocker": "mining.glacite.enableCorpseFinder",
       "NoFrills": "corpseHighlight.enabled",
-      "SkyOcean": "*mineshaft.corpseWaypoint"
+      "SkyOcean": "*mineshaft.corpseWaypoint",
+      "Noba": "mining.glaciteMineshaft.corpseLocator"
     }},
     {"area": "Mining", "name": "Corpse profit tracker", "mods": {
       "SkyHanni": "mining.glaciteMineshaft.corpseTracker.enabled",
@@ -212,7 +222,8 @@
     {"area": "Foraging", "name": "Moonglade beacon solver", "mods": {
       "SkyHanni": {"1.21.5-1.21.10": "foraging.moongladeBeacon.enabled", "other": "foraging.foragingBeacon.enabled"},
       "Skyblocker": {"1.21.5-1.21.11": "foraging.galatea.enableTunerSolver", "other": "foraging.moongladeMarsh.enableTunerSolver"},
-      "NoFrills": "beaconTuningSolver.enabled"
+      "NoFrills": "beaconTuningSolver.enabled",
+      "Noba": "galatea.moongladeBeaconSolver.enabled"
     }},
     {"area": "Foraging", "name": "Mute phantoms", "mods": {
       "SkyHanni": "foraging.mutePhantoms",
@@ -228,16 +239,19 @@
     }},
     {"area": "Hunting", "name": "Invisibug highlight", "mods": {
       "Skyblocker": "hunting.moongladeMobs.highlightInvisibug",
-      "NoFrills": "invisibugHighlight.enabled"
+      "NoFrills": "invisibugHighlight.enabled",
+      "Noba": "hunting.mobHighlight.invisibug"
     }},
     {"area": "Fishing", "name": "Bobber timer", "mods": {
       "SkyHanni": "fishing.bobberTimer.enabled",
       "SkyOcean": "*fishing.bobberTime",
-      "SBO": "*bobberOverlay"
+      "SBO": "*bobberOverlay",
+      "Noba": "fishing.bobberTimer.enabled"
     }},
     {"area": "Fishing", "name": "Hide other players' bobbers", "mods": {
       "Skyblocker": "helpers.fishing.hideOtherPlayersRods",
-      "SkyOcean": "*fishing.hideOtherBobbers"
+      "SkyOcean": "*fishing.hideOtherBobbers",
+      "Noba": "fishing.hideOtherPeopleFishing"
     }},
     {"area": "Fishing", "name": "Lava replacement", "mods": {
       "SkyHanni": "fishing.lavaReplacement.enabled",
@@ -245,7 +259,8 @@
     }},
     {"area": "Fishing", "name": "Fishing hook display", "mods": {
       "SkyHanni": "fishing.fishingHookDisplay.enabled",
-      "Skyblocker": "helpers.fishing.enableFishingHelper"
+      "Skyblocker": "helpers.fishing.enableFishingHelper",
+      "Noba": "fishing.catchTimerHudElement"
     }},
     {"area": "Events", "name": "Diana burrow guess", "mods": {
       "SBO": {"1.21.5-1.21.10": "*dianaBurrowGuess", "other": "*spadeGuess"},
@@ -281,7 +296,8 @@
     {"area": "Events", "name": "Chocolate egg finder", "mods": {
       "SkyHanni": "event.hoppityEggs.waypoints.enabled",
       "Skyblocker": "helpers.chocolateFactory.enableEggFinder",
-      "NoFrills": "hoppitySolver.enabled"
+      "NoFrills": "hoppitySolver.enabled",
+      "Noba": "events.hoppity.eggGuess"
     }},
     {"area": "Events", "name": "Chocolate factory helper", "mods": {
       "SkyHanni": "inventory.chocolateFactory.enabled",
@@ -299,6 +315,10 @@
       "SkyHanni": "gui.compactTabList.enabled",
       "Skyblocker": "uiAndVisuals.tabHud.tabHudEnabled",
       "SkyBlockAddons": "*COMPACT_TAB_LIST.value"
+    }},
+    {"area": "GUI/HUD", "name": "Custom scoreboard", "mods": {
+      "SkyHanni": "gui.customScoreboard.enabled",
+      "CustomScoreboard": "enabled"
     }},
     {"area": "GUI/HUD", "name": "TPS display", "mods": {
       "SkyHanni": "gui.tpsDisplay",
@@ -358,7 +378,8 @@
       "Odin": "Etherwarp.enabled",
       "Firmament": "etherwarp-overlay.etherwarp-overlay",
       "NoFrills": "etherwarpOverlay.enabled",
-      "Skyblocker": "uiAndVisuals.teleportOverlay.enableTeleportOverlays"
+      "Skyblocker": "uiAndVisuals.teleportOverlay.enableTeleportOverlays",
+      "Noba": "uiAndVisuals.etherwarpOverlay.enabled"
     }},
     {"area": "Misc", "name": "Auto sprint", "mods": {
       "Odin": "Auto Sprint.enabled",
@@ -378,15 +399,18 @@
     }},
     {"area": "Misc", "name": "Party chat commands", "mods": {
       "Odin": "Chat Commands.enabled",
-      "NoFrills": "partyCommands.enabled"
+      "NoFrills": "partyCommands.enabled",
+      "Noba": "chat.chatCommands.party.enabled"
     }},
     {"area": "Misc", "name": "Chat waypoints", "mods": {
       "Skyblocker": "uiAndVisuals.waypoints.enableChatWaypoints",
-      "NoFrills": "chatWaypoints.enabled"
+      "NoFrills": "chatWaypoints.enabled",
+      "Noba": "uiAndVisuals.temporaryWaypoints.enabled"
     }},
     {"area": "Misc", "name": "Hide lightning", "mods": {
       "AaronsMod": "uiAndVisuals.world.hideLightning",
-      "SkyOcean": {"1.21.5-1.21.11": "*misc.hideLightning", "other": "*environmental.hideLightning"}
+      "SkyOcean": {"1.21.5-1.21.11": "*misc.hideLightning", "other": "*environmental.hideLightning"},
+      "Noba": "uiAndVisuals.renderingTweaks.hideLightningBolt"
     }}
   ],
   "preferred": [

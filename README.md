@@ -2,7 +2,7 @@
 
 Running several Hypixel Skyblock mods at once usually crowds your screen with duplicates: two dungeon maps in the corner, three Diana burrow guessers drawing lines, and multiple pest alerts going off at the same time. Skyblock Config Manager reads your mod settings, finds the features that overlap, and keeps each one turned on in only the mod you choose.
 
-* **83 shared features** across 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
+* **84 shared features** across 13 parts of the game, from Dungeons and Kuudra to Diana and the HUD.
 * **You pick which mod does what:** choose a main mod for each area, make exceptions for single features, or turn a feature off in every mod.
 * **Safe saving:** nothing changes until you click **Save changes**, and your original files are backed up first.
 * **Edit any setting** from your SkyBlock mods, not just the shared ones. Debug settings are locked.
@@ -46,6 +46,9 @@ To update the app, open the **App updates** tab. It shows the latest release on 
 | [Firmament](https://modrinth.com/mod/firmament) | `firmament/` |
 | [Odin](https://modrinth.com/mod/odin) | `odin/odin-config.json` |
 | [Skyblock Overhaul (SBO)](https://modrinth.com/mod/skyblock-overhaul) | `sbo/config.jsonc` |
+| [Noba](https://modrinth.com/mod/noba) | `noba/config.json` |
+| [Custom Scoreboard](https://modrinth.com/mod/skyblock-custom-scoreboard) | `customscoreboard/config.jsonc` |
+| [Catharsis](https://modrinth.com/mod/catharsis) | `catharsis/pack_configs.json` |
 
 These are the Fabric versions of each mod, for Minecraft 1.21.5 to 26.3. Config files are read from your `.minecraft/config` folder.
 
