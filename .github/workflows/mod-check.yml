@@ -39,7 +39,7 @@ jobs:
 
       - name: Show the report
         if: always()
-        run: if [ -f "$RUNNER_TEMP/report.md" ]; then cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"; fi
+        run: if [ -f "$RUNNER_TEMP/report.md" ]; then tee -a "$GITHUB_STEP_SUMMARY" < "$RUNNER_TEMP/report.md"; fi
 
       - name: Open, update or close the mod check issue
         if: github.event_name != 'pull_request'
