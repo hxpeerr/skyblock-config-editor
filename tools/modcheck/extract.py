@@ -421,6 +421,8 @@ def dsl(root):
         for m in re.finditer(r"\bobject\s+(\w+)\s*:\s*(CategoryKt|ConfigKt|Category|Config)\s*\(", src.code):
             args, _, end = src.args(m.end() - 1)
             ident = literal(args[0]) if args else None
+            if ident is None and args and m.group(2) in ("ConfigKt", "Config"):
+                ident = args[0]
             span = src.body(end + 1)
             if ident is None or not span:
                 continue
@@ -564,7 +566,160 @@ def sba(root):
     return rows
 
 
-KINDS = {"skyhanni": skyhanni, "yacl": yacl, "nofrills": nofrills, "firmament": firmament, "odin": odin,
+def midnight(root):
+    rows, lang = [], {}
+    for p in sorted(Path(root).rglob("en_us.json")):
+        if "lang" in p.parts and not {"build", "test"} & set(p.parts):
+            data = load_json(p)
+            if isinstance(data, dict):
+                lang.update({k: v for k, v in data.items() if isinstance(v, str)})
+    files = sources(root, "*.java") + sources(root, "*.kt")
+    for path in files:
+        src = Source(path)
+        if not re.search(r"\b(?:extends|:)\s*MidnightConfig\b", src.code):
+            continue
+        for m in re.finditer(r"@Entry\b(?:\s*\([^)]*\))?\s*(?:@\w+(?:\([^)]*\))?\s*)*(?:public\s+)?(?:static\s+)?(?:@JvmField\s+)?(?:var\s+(\w+)\s*(?::\s*([\w.<>?]+))?\s*=\s*([^\n;]+)|([\w.<>\[\], ]+?)\s+(\w+)\s*=\s*([^;]+);)", src.clean):
+            name = m.group(1) or m.group(5)
+            typ = (m.group(2) or m.group(4) or "").strip()
+            init = (m.group(3) or m.group(6) or "").strip()
+            is_bool = typ in ("boolean", "Boolean") or (not typ and init in ("true", "false"))
+            label = next((v for k, v in lang.items() if k.endswith(f".midnightconfig.{name}")), None)
+            rows.append((name, BOOL if is_bool else (typ.split("<")[0].lower() or "other"), label or humanize(name)))
+    return rows
+
+
+def serialentry(root):
+    classes, start = {}, None
+    for path in sources(root, "*.java") + sources(root, "*.kt"):
+        src = Source(path)
+        m = re.search(r"ConfigClassHandler\s*(?:\.\s*<[^>]*>\s*)?\.\s*createBuilder\(\s*(\w+)(?:\.class|::class\.java)", src.clean)
+        if m and start is None:
+            start = m.group(1)
+        for c in re.finditer(r"\b(?:class|record|object)\s+(\w+)", src.code):
+            span = src.body(c.end())
+            if span:
+                classes.setdefault(c.group(1), []).append(src.own(*span))
+    if start is None:
+        raise LookupError("ConfigClassHandler.createBuilder(...) not found")
+    java = re.compile(r"((?:@[\w.]+(?:\([^)]*\))?\s*)*)((?:(?:public|private|protected|final|transient|static)\s+)*)([\w.]+(?:<[\w.<>, ?]*>)?(?:\[\])?)\s+(\w+)\s*(?:=\s*([^;]+))?;")
+    kotlin = re.compile(r"((?:@[\w.:]+(?:\([^)]*\))?\s*)*)((?:(?:public|private|internal|lateinit|override|open)\s+)*)va[rl]\s+(\w+)\s*(?::\s*([\w.<>?, ]+?))?\s*=\s*([^\n]+)")
+    rows = []
+
+    def walk(name, prefix, depth, top):
+        if depth > 12 or name not in classes:
+            return
+        body = classes[name][0]
+        fields = [(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5)) for m in java.finditer(body)]
+        fields += [(m.group(1), m.group(2), m.group(4) or "", m.group(3), m.group(5)) for m in kotlin.finditer(body)]
+        for ann, mods, typ, field, init in fields:
+            if top and "@SerialEntry" not in ann:
+                continue
+            if not top and ("static" in mods or "transient" in mods or "@Transient" in ann or "@JvmStatic" in ann):
+                continue
+            renamed = re.search(r"@SerialEntry\(\s*(?:value\s*=\s*)?\"([^\"]+)\"", ann)
+            key = prefix + (renamed.group(1) if renamed else field)
+            typ = (typ or "").strip()
+            base = re.sub(r"<.*", "", typ or (init or "").replace("new ", "").split("(")[0]).strip().split(".")[-1].rstrip("?")
+            if typ in ("boolean", "Boolean") or (not typ and (init or "").strip() in ("true", "false")):
+                rows.append((key, BOOL, humanize(field)))
+            elif base in classes and base != name:
+                walk(base, key + ".", depth + 1, False)
+            else:
+                rows.append((key, (base or "other").lower(), humanize(field)))
+
+    walk(start, "", 0, True)
+    return rows
+
+
+def stella(root):
+    rows = []
+    elements = re.compile(r"\b(toggle|slider|stepslider|dropdown|colorpicker|keybind|textinput|multicheckbox|switch)\s*\{")
+    for path in sources(root):
+        src = Source(path)
+        for c in re.finditer(r"\bcategory\s*\(", src.code):
+            cargs, _, cend = src.args(c.end() - 1)
+            cat = literal(cargs[0]) if cargs else None
+            block = src.after(cend)
+            if not cat or not block:
+                continue
+            for sc in re.finditer(r"\bsubcategory\s*\(", src.code[block[0]:block[1]]):
+                sargs, _, send = src.args(block[0] + sc.end() - 1)
+                sub = literal(sargs[0]) if sargs else None
+                sblock = src.after(send)
+                if not sub or not sblock:
+                    continue
+                pos = positional(sargs)
+                own = literal(named(sargs, "configName") or (pos[1] if len(pos) > 1 else None))
+                if own:
+                    rows.append((f"{cat}.{sub}.{own}", BOOL, sub))
+                for e in elements.finditer(src.code, sblock[0], sblock[1]):
+                    eblock = (e.end() - 1, src.close(e.end() - 1))
+                    text = src.clean[eblock[0]:eblock[1]]
+                    ident = re.search(r"\bconfigName\s*=\s*\"([^\"]+)\"", text)
+                    label = re.search(r"\bname\s*=\s*\"((?:[^\"\\]|\\.)*)\"", text)
+                    if ident:
+                        rows.append((f"{cat}.{sub}.{ident.group(1)}", BOOL if e.group(1) in ("toggle", "switch") else e.group(1),
+                                     unescape(label.group(1)) if label else humanize(ident.group(1))))
+    return rows
+
+
+def devonian(root):
+    rows = []
+    adders = {"addSwitch": BOOL, "addSlider": "slider", "addDecimalSlider": "slider", "addColorPicker": "color", "addSelection": "selection",
+              "addKeybind": "keybind", "addTextInput": "text"}
+    for path in sources(root):
+        src = Source(path)
+        for m in re.finditer(r"\b(?:object|class)\s+\w+\s*:\s*(\w*Feature)\s*\(", src.code):
+            args, _, end = src.args(m.end() - 1)
+            pos = positional(args)
+            feature = literal(named(args, "configName") or (pos[0] if pos else None))
+            if not feature:
+                continue
+            label = literal(named(args, "displayName"))
+            rows.append((f"config.{feature}", BOOL, label or humanize(feature)))
+            span = src.body(end + 1)
+            if not span:
+                continue
+            for a in re.finditer(r"\b(addSwitch|addSlider|addDecimalSlider|addColorPicker|addSelection|addKeybind|addTextInput)\s*\(", src.code[span[0]:span[1]]):
+                aargs, _, _ = src.args(span[0] + a.end() - 1)
+                apos = positional(aargs)
+                sub = literal(named(aargs, "configName") or (apos[0] if apos else None))
+                if not sub:
+                    continue
+                name = literal(named(aargs, "displayName") or (apos[3] if len(apos) > 3 else None))
+                rows.append((f"config.{feature}${sub}", adders[a.group(1)], name or humanize(sub)))
+    return rows
+
+
+def scathapro(root):
+    classes, start = {}, None
+    for path in sources(root, "*.java"):
+        src = Source(path)
+        if re.search(r"\bclass\s+Config\s+extends\s+ObjectRootJsonFile", src.code):
+            start = "Config"
+        for c in re.finditer(r"\bclass\s+(\w+)", src.code):
+            span = src.body(c.end())
+            if span:
+                classes.setdefault(c.group(1), src.own(*span))
+    if start is None:
+        raise LookupError("class Config extends ObjectRootJsonFile not found")
+    rows = []
+
+    def walk(name, prefix, depth):
+        if depth > 12 or name not in classes:
+            return
+        for m in re.finditer(r"\b(?:root\s*\.\s*)?(addValue|addBoolean|addPrimitive\w*|addList\w*|addMap\w*)\s*\(\s*\"([^\"]+)\"\s*,\s*(?:new\s+(\w+))?", classes[name]):
+            kind, key, cls = m.groups()
+            if kind == "addValue" and cls:
+                walk(cls, f"{prefix}{key}.", depth + 1)
+            else:
+                rows.append((prefix + key, BOOL if kind == "addBoolean" else "other", humanize(key.split(".")[-1])))
+
+    walk(start, "", 0)
+    return rows
+
+
+KINDS = {"skyhanni": skyhanni, "midnight": midnight, "serialentry": serialentry, "stella": stella, "devonian": devonian, "scathapro": scathapro, "yacl": yacl, "nofrills": nofrills, "firmament": firmament, "odin": odin,
          "dsl": dsl, "noba": noba, "sba": sba, "none": lambda root: []}
 
 

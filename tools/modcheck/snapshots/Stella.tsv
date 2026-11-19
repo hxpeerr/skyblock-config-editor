@@ -1,0 +1,193 @@
+Dungeons.ADG Helper.bossWP	bool
+Dungeons.ADG Helper.bossWP.addWaypoint	keybind
+Dungeons.ADG Helper.bossWP.editing	bool
+Dungeons.ADG Helper.healerTT	bool
+Dungeons.ADG Helper.healerTT.hud	bool
+Dungeons.ADG Helper.healerTT.inTicks	bool
+Dungeons.ADG Helper.healerTT.leap	stepslider
+Dungeons.ADG Helper.healerTT.leapMessage	textinput
+Dungeons.ADG Helper.healerTT.pad	stepslider
+Dungeons.ADG Helper.healerTT.padMessage	textinput
+Dungeons.Class Colors.archerColor	colorpicker
+Dungeons.Class Colors.berzColor	colorpicker
+Dungeons.Class Colors.healerColor	colorpicker
+Dungeons.Class Colors.mageColor	colorpicker
+Dungeons.Class Colors.tankColor	colorpicker
+Dungeons.Crypt Reminder.cryptReminder	bool
+Dungeons.Crypt Reminder.cryptReminder.delay	stepslider
+Dungeons.Crypt Reminder.cryptReminder.sendParty	bool
+Dungeons.Healer Wish Alert.pleaseWish	bool
+Dungeons.Healer Wish Alert.pleaseWish.message	textinput
+Dungeons.Leap Announce.leapAnnounce	bool
+Dungeons.Leap Announce.leapAnnounce.message	textinput
+Dungeons.Room Name.roomNameChroma	bool
+Dungeons.Room Name.showRoomName	bool
+Dungeons.Score Alerts.forcePaul	bool
+Dungeons.Score Alerts.scoreAlerts	bool
+Dungeons.Score Alerts.scoreAlerts.alert270	bool
+Dungeons.Score Alerts.scoreAlerts.alert300	bool
+Dungeons.Score Alerts.scoreAlerts.alert5Crypts	bool
+Dungeons.Score Alerts.scoreAlerts.alertBatDead	bool
+Dungeons.Score Alerts.scoreAlerts.chat270	bool
+Dungeons.Score Alerts.scoreAlerts.chat300	bool
+Dungeons.Score Alerts.scoreAlerts.chat5Crypts	bool
+Dungeons.Score Alerts.scoreAlerts.chatMessage270	textinput
+Dungeons.Score Alerts.scoreAlerts.chatMessage300	textinput
+Dungeons.Score Alerts.scoreAlerts.chatMessage5Crypts	textinput
+Dungeons.Score Alerts.scoreAlerts.message270	textinput
+Dungeons.Score Alerts.scoreAlerts.message300	textinput
+Dungeons.Score Alerts.scoreAlerts.message5Crypts	textinput
+Dungeons.Score Alerts.scoreAlerts.messageBatDead	textinput
+Dungeons.Terminals.classColor	bool
+Dungeons.Terminals.hideNumber	bool
+Dungeons.Terminals.highlightTerms	bool
+Dungeons.Terminals.preset	dropdown
+Dungeons.Terminals.selectedRole	dropdown
+Dungeons.Terminals.showDevs	bool
+Dungeons.Terminals.showLevers	bool
+Dungeons.Terminals.showTermClass	bool
+Dungeons.Terminals.termColor	colorpicker
+Dungeons.Terminals.termForce	bool
+Dungeons.Terminals.termNumbers	bool
+Dungeons.Terminals.termTracker	bool
+General.Shortcuts.cosmetics	bool
+General.Shortcuts.loadMessage	bool
+General.Updates.update	bool
+General.Updates.update.stream	dropdown
+Msc..Block Overlay.blockFillColor	colorpicker
+Msc..Block Overlay.blockHighlightColor	colorpicker
+Msc..Block Overlay.fillBlockOverlay	bool
+Msc..Block Overlay.overlayEnabled	bool
+Msc..Block Overlay.overlayLineWidth	stepslider
+Msc..Health & Mana.bars	bool
+Msc..Health & Mana.bars.absorptionBar	bool
+Msc..Health & Mana.bars.absorptionColor	colorpicker
+Msc..Health & Mana.bars.defNum	bool
+Msc..Health & Mana.bars.defenseColor	colorpicker
+Msc..Health & Mana.bars.healthBar	bool
+Msc..Health & Mana.bars.healthColor	colorpicker
+Msc..Health & Mana.bars.hideVanillaArmor	bool
+Msc..Health & Mana.bars.hideVanillaHealth	bool
+Msc..Health & Mana.bars.hideVanillaHunger	bool
+Msc..Health & Mana.bars.hpChange	bool
+Msc..Health & Mana.bars.hpNum	bool
+Msc..Health & Mana.bars.manaBar	bool
+Msc..Health & Mana.bars.manaColor	colorpicker
+Msc..Health & Mana.bars.mpNum	bool
+Msc..Health & Mana.bars.ofMana	bool
+Msc..Health & Mana.bars.ofmColor	colorpicker
+Msc..Health & Mana.bars.overflowManaBar	bool
+Msc..Health & Mana.bars.vitalityBar	bool
+Msc..Health & Mana.bars.vitalityColor	colorpicker
+Msc..Health & Mana.bars.vitalityNum	bool
+Msc..Inventory Buttons.buttons	bool
+Msc..Inventory Buttons.buttons.hideInTerms	bool
+Msc..Inventory Buttons.buttons.invOnly	bool
+Msc..Pet Display.autopetMessages	bool
+Msc..Pet Display.hidePet	bool
+Msc..Pet Display.petDisplay	bool
+Msc..Profile Viewer.profileViewer	bool
+Msc..Profile Viewer.profileViewer.overflow	bool
+Msc..Profile Viewer.profileViewer.pv	bool
+Msc..Profile Viewer.profileViewer.showRarity	bool
+Msc..Slot Locking.slotLocking	bool
+Msc..Slot Locking.slotLocking.bind	bool
+Msc..Slot Locking.slotLocking.bindColor	colorpicker
+Msc..Slot Locking.slotLocking.bindKb	keybind
+Msc..Slot Locking.slotLocking.bindLines	dropdown
+Msc..Slot Locking.slotLocking.lockColor	colorpicker
+Msc..Slot Locking.slotLocking.lockKb	keybind
+Msc..Slot Locking.slotLocking.perSlotColor	bool
+Msc..Slot Locking.slotLocking.protectKb	keybind
+Msc..Slot Locking.slotLocking.starred	bool
+Secrets.Route Recording.secretRoutes.addCustom	keybind
+Secrets.Route Recording.secretRoutes.recordingHud	bool
+Secrets.Route Recording.secretRoutes.recordingHud.minimized	bool
+Secrets.Route Rendering.secretRoutes.batColor	colorpicker
+Secrets.Route Rendering.secretRoutes.boxWidth	slider
+Secrets.Route Rendering.secretRoutes.chestColor	colorpicker
+Secrets.Route Rendering.secretRoutes.essenceColor	colorpicker
+Secrets.Route Rendering.secretRoutes.etherwarpColor	colorpicker
+Secrets.Route Rendering.secretRoutes.itemColor	colorpicker
+Secrets.Route Rendering.secretRoutes.leverColor	colorpicker
+Secrets.Route Rendering.secretRoutes.lineColor	colorpicker
+Secrets.Route Rendering.secretRoutes.lineWidth	slider
+Secrets.Route Rendering.secretRoutes.mineColor	colorpicker
+Secrets.Route Rendering.secretRoutes.pearlColor	colorpicker
+Secrets.Route Rendering.secretRoutes.showLine	bool
+Secrets.Route Rendering.secretRoutes.startColor	colorpicker
+Secrets.Route Rendering.secretRoutes.startEsp	bool
+Secrets.Route Rendering.secretRoutes.superboomColor	colorpicker
+Secrets.Route Rendering.secretRoutes.text	bool
+Secrets.Route Rendering.secretRoutes.textScale	slider
+Secrets.Routes.secretRoutes	bool
+Secrets.Routes.secretRoutes.fileName	textinput
+Secrets.Routes.secretRoutes.lastStep	keybind
+Secrets.Routes.secretRoutes.nextStep	keybind
+Secrets.Routes.secretRoutes.onlyRenderAfterClear	bool
+Secrets.Routes.secretRoutes.stopRenderAfterGreen	bool
+Secrets.Waypoints.secretWaypointColor.bat	colorpicker
+Secrets.Waypoints.secretWaypointColor.chest	colorpicker
+Secrets.Waypoints.secretWaypointColor.item	colorpicker
+Secrets.Waypoints.secretWaypointColor.lever	colorpicker
+Secrets.Waypoints.secretWaypointColor.redstonekey	colorpicker
+Secrets.Waypoints.secretWaypointColor.wither	colorpicker
+Secrets.Waypoints.secretWaypoints	bool
+Secrets.Waypoints.secretWaypoints.missingRoute	bool
+Secrets.Waypoints.secretWaypoints.text	bool
+Secrets.Waypoints.secretWaypoints.textScale	slider
+StellaNav.Behavior.checkAnchor	dropdown
+StellaNav.Behavior.hideQuestion	bool
+StellaNav.Behavior.nameAnchor	dropdown
+StellaNav.Behavior.prioMiddle	bool
+StellaNav.Behavior.puzzleCheck	bool
+StellaNav.Behavior.puzzleName	bool
+StellaNav.Behavior.puzzleSecrets	bool
+StellaNav.Behavior.replaceText	bool
+StellaNav.Behavior.roomCheck	bool
+StellaNav.Behavior.roomName	bool
+StellaNav.Behavior.roomPrediction	bool
+StellaNav.Behavior.roomSecrets	bool
+StellaNav.Behavior.secretsAnchor	dropdown
+StellaNav.Behavior.showPrince	bool
+StellaNav.Display.checkmarkScale	slider
+StellaNav.Display.mapBdColor	colorpicker
+StellaNav.Display.mapBdWidth	stepslider
+StellaNav.Display.mapBgColor	colorpicker
+StellaNav.Display.mapBorder	bool
+StellaNav.Display.mtextshadow	bool
+StellaNav.Display.nameScale	slider
+StellaNav.Display.predictionBdWidth	stepslider
+StellaNav.Display.secretScale	slider
+StellaNav.Door Colors.bloodDoorColor	colorpicker
+StellaNav.Door Colors.entranceDoorColor	colorpicker
+StellaNav.Door Colors.normalDoorColor	colorpicker
+StellaNav.Door Colors.witherDoorColor	colorpicker
+StellaNav.Extra.boxWitherDoors	bool
+StellaNav.Extra.doorLineWidth	stepslider
+StellaNav.Extra.dungeonBreakdown	bool
+StellaNav.Extra.keyColor	colorpicker
+StellaNav.Extra.noKeyColor	colorpicker
+StellaNav.Extra.separateMapInfo	bool
+StellaNav.Map.bossMapEnabled	bool
+StellaNav.Map.hideInBoss	bool
+StellaNav.Map.mapEnabled	bool
+StellaNav.Map.mapInfoUnder	bool
+StellaNav.Map.scoreMapEnabled	bool
+StellaNav.Player Icons.dontShowOwn	bool
+StellaNav.Player Icons.iconBorderColor	colorpicker
+StellaNav.Player Icons.iconBorderWidth	slider
+StellaNav.Player Icons.iconClassColors	bool
+StellaNav.Player Icons.iconScale	slider
+StellaNav.Player Icons.ownDefault	bool
+StellaNav.Player Icons.showNames	bool
+StellaNav.Player Icons.showPlayerHeads	bool
+StellaNav.Player Icons.smoothMovement	bool
+StellaNav.Room Colors.bloodRoomColor	colorpicker
+StellaNav.Room Colors.entranceRoomColor	colorpicker
+StellaNav.Room Colors.fairyRoomColor	colorpicker
+StellaNav.Room Colors.minibossRoomColor	colorpicker
+StellaNav.Room Colors.normalRoomColor	colorpicker
+StellaNav.Room Colors.puzzleRoomColor	colorpicker
+StellaNav.Room Colors.rareRoomColor	colorpicker
+StellaNav.Room Colors.trapRoomColor	colorpicker

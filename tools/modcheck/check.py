@@ -80,7 +80,8 @@ def matches(mapped, keys):
 
 
 def norm_repo(url):
-    url = (url or "").strip().lower().removesuffix("/").removesuffix(".git")
+    url = re.sub(r"/(?:tree|blob)/.*$", "", (url or "").strip().lower())
+    url = url.removesuffix("/").removesuffix(".git")
     return re.sub(r"^https?://(www\.)?", "", url)
 
 
@@ -392,7 +393,7 @@ def curseforge_lookup(name, mod, repo):
 
 
 def repo_parts(url):
-    m = re.match(r"https?://(github\.com|codeberg\.org)/([^/]+)/([^/]+?)(?:\.git)?/?$", url or "")
+    m = re.match(r"https?://(github\.com|codeberg\.org)/([^/]+)/([^/]+?)(?:\.git)?(?:/(?:tree|blob)/.*)?/?$", url or "")
     return m.groups() if m else (None, None, None)
 
 

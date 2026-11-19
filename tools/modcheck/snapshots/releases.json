@@ -2,14 +2,34 @@
   "AaronsMod": {
     "modrinth": "3.1.1+26.2"
   },
+  "BazaarUtils": {
+    "modrinth": "0.6.2-beta.4+mc26.1.2",
+    "curseforge": "0.6.2-beta.4+mc26.2"
+  },
+  "BtrBz": {
+    "modrinth": "0.15.1-alpha+26.2"
+  },
   "Catharsis": {
     "modrinth": "1.0.0-beta.22"
   },
   "CustomScoreboard": {
     "modrinth": "1.13.2"
   },
+  "Devonian": {
+    "modrinth": "1.37.9-26.2"
+  },
+  "EnhancedStorage": {
+    "modrinth": "v2.0.0-mc26.3",
+    "curseforge": "2.0.0+26.2"
+  },
+  "Feesh": {
+    "modrinth": "1.18.1"
+  },
   "Firmament": {
     "modrinth": "44.3.0+mc26.1"
+  },
+  "ModernWarpMenu": {
+    "modrinth": "0.2.4+26.2"
   },
   "NoFrills": {
     "modrinth": "0.4.17"
@@ -24,8 +44,17 @@
   "SBO": {
     "modrinth": "0.7.2-beta.3-26.3"
   },
+  "ScathaPro": {
+    "modrinth": "2.6.1"
+  },
+  "SecretRoutes": {
+    "modrinth": "1.1.1-26.3"
+  },
   "SkyBlockAddons": {
     "modrinth": "2.5.3"
+  },
+  "SkyCubed": {
+    "modrinth": "1.10.0"
   },
   "SkyHanni": {
     "modrinth": "9.5.0"
@@ -34,8 +63,15 @@
     "modrinth": "1.18.2",
     "curseforge": "1.8.1-1.21.5"
   },
+  "SkyblockEnhancements": {
+    "modrinth": "v1.2.1-mc26.2",
+    "curseforge": "1.2.1+26.2"
+  },
   "Skyblocker": {
     "modrinth": "v6.11.0+26.2",
     "curseforge": "6.11.0+26.2"
+  },
+  "Stella": {
+    "modrinth": "1.0.6"
   }
 }

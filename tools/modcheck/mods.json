@@ -11,10 +11,30 @@
     "SBO": {"repo": "https://github.com/SkyblockOverhaul/SBO-Kotlin", "branch": "release", "kind": "dsl"},
     "Noba": {"repo": "https://codeberg.org/nobaboy/NobaAddons", "kind": "noba"},
     "CustomScoreboard": {"repo": "https://github.com/meowdding/CustomScoreboard", "kind": "dsl"},
-    "Catharsis": {"repo": "https://github.com/meowdding/catharsis", "kind": "none"}
+    "Catharsis": {"repo": "https://github.com/meowdding/catharsis", "kind": "none"},
+    "Devonian": {"repo": "https://github.com/Synnerz/devonian", "kind": "devonian"},
+    "Stella": {"repo": "https://github.com/Eclipse-5214/stella", "kind": "stella"},
+    "Feesh": {"repo": "https://github.com/Sleepy-Panda/Feesh", "kind": "dsl"},
+    "SkyblockEnhancements": {"repo": "https://github.com/KdGaming0/SkyBlock-Enhancements", "kind": "midnight"},
+    "EnhancedStorage": {"repo": "https://github.com/KdGaming0/Enhanced-Storage", "kind": "midnight"},
+    "SkyCubed": {"repo": "https://github.com/ThatGravyBoat/SkyCubed", "kind": "dsl"},
+    "BtrBz": {"repo": "https://github.com/LutzLuca/BtrBz", "kind": "serialentry"},
+    "BazaarUtils": {"repo": "https://github.com/mkram17/Bazaar-Utils", "branch": "modern", "kind": "serialentry"},
+    "ModernWarpMenu": {"repo": "https://github.com/Yukkuritaku/ModernWarpMenu", "kind": "serialentry"},
+    "SecretRoutes": {"repo": "https://github.com/yourboykyle/SecretRoutes", "kind": "serialentry"},
+    "ScathaPro": {"repo": "https://github.com/NamelessJu/Scatha-Pro", "kind": "scathapro"}
   },
   "discovery": {"min_downloads": 100000, "min_stars": 50, "max_age_days": 180},
   "ignore": {
-    "github:swofty-developments/hypixelrecreation": "a Hypixel server remake, not a client mod"
+    "github:swofty-developments/hypixelrecreation": "a Hypixel server remake, not a client mod",
+    "modrinth:better-hypixel-chat": "chat styling with no settings",
+    "modrinth:detexturify": "removes the forced texture pack, which no supported mod does",
+    "modrinth:enhanced-skyrecipes": "a recipe viewer whose settings only apply to its own item list",
+    "modrinth:marketguard": "bid and price protection, which no supported mod has",
+    "modrinth:packcore": "a modpack helper; its settings are backups and update notices",
+    "modrinth:ping-offset-miner": "saves its settings in a .properties file the app can't read",
+    "modrinth:scamscreener": "scam warnings, which no supported mod has",
+    "modrinth:skyblock-item-list": "an item and recipe viewer whose settings only apply to itself",
+    "modrinth:skyblock-profile-viewer": "a profile viewer with no on/off settings"
   }
 }

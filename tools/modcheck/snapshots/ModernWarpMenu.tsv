@@ -1,0 +1,17 @@
+debug.alwaysShowJerryIsland	bool
+debug.debugModeEnabled	bool
+debug.drawBorders	bool
+debug.showDebugOverlay	bool
+debug.skipSkyBlockCheck	bool
+general.addWarpCommandToChatHistory	bool
+general.enableUpdateNotification	bool
+general.hideUnobtainableWarps	bool
+general.hideWarpLabelForIslandsWithOneWarp	bool
+general.hideWarpLabelsUntilIslandHovered	bool
+general.showIslandLabels	bool
+general.showJerryIsland	bool
+general.showRegularWarpMenuButton	bool
+general.suggestWarpMenuOnWarpCommand	bool
+general.useHypixelAPI	bool
+general.warpMenuEnabled	bool
+settingsVersion	int
