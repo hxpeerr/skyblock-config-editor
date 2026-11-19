@@ -1,5 +1,4 @@
-## 4.1.3
+## 4.1.4
 
-- 129 more shared features, found by comparing every supported mod's settings, plus new Auction House, Bazaar and Tooltips areas.
-- Firmament's item prices now count as price tooltips, so they no longer show up next to another mod's.
-- Fixed a few mappings that pointed at renamed settings or grouped two different features together.
+- 11 more supported mods: Devonian, Stella, Feesh, SkyBlock Enhancements, Skyblock Enhanced Storage, SkyCubed, BtrBz, Bazaar Utils, Modern Warp Menu, Secret Routes and Scatha-Pro.
+- 247 shared features, up from 213.
