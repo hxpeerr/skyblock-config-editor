@@ -108,6 +108,10 @@ jobs:
           got=$("$exe" --version)
           echo "The app says it's version $got"
           [ "$got" = "$want" ] || { echo "::error::The app says it's version '$got' instead of $want"; exit 1; }
+          if [ "${GITHUB_REF_TYPE:-}" = tag ] && [ "$GITHUB_REF_NAME" != "v$want" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match version $want, so nothing is added to the release: tag the release v$want"
+            exit 1
+          fi
 
       - name: Check the Linux app runs on older Linux versions
         if: runner.os == 'Linux'
@@ -199,6 +203,10 @@ jobs:
           got=$("$exe" --version)
           echo "The app says it's version $got"
           [ "$got" = "$want" ] || { echo "::error::The app says it's version '$got' instead of $want"; exit 1; }
+          if [ "${GITHUB_REF_TYPE:-}" = tag ] && [ "$GITHUB_REF_NAME" != "v$want" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match version $want, so nothing is added to the release: tag the release v$want"
+            exit 1
+          fi
 
       - name: Package
         run: |
