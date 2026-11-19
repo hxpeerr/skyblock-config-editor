@@ -1,4 +1,5 @@
-## 4.1.2
+## 4.1.3
 
-- Added support for Noba, Custom Scoreboard and Catharsis.
-- New shared feature: Custom scoreboard, for SkyHanni and Custom Scoreboard.
+- 129 more shared features, found by comparing every supported mod's settings, plus new Auction House, Bazaar and Tooltips areas.
+- Firmament's item prices now count as price tooltips, so they no longer show up next to another mod's.
+- Fixed a few mappings that pointed at renamed settings or grouped two different features together.
