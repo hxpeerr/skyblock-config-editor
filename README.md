@@ -20,8 +20,6 @@ Get these from the [latest release](../../releases/latest):
 | macOS 10.13 or newer | `SkyblockConfigManager-macOS.zip` | Unzip it, right-click the app and choose **Open**. If macOS still won't open it, click **Open Anyway** in **System Settings → Privacy & Security**. |
 | Linux | `SkyblockConfigManager-Linux.zip` | Unzip it and run `./SkyblockConfigManager`. |
 
-*Do note that only the exe has been tested on Windows 11. I will test it on Linux at a later date; unable to test on macOS as my laptop is broken.*
-
 ## How to Use It
 
 1. **Close Minecraft:** the game saves its settings when it closes, which would undo your changes.
